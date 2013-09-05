@@ -217,42 +217,42 @@ ENDPROC(save_boot_params)
 undefined_instruction:
     bad_get_stack
     bad_save_user_regs
-    bl do_undefined_instruction
+    bl handle_undefined_instruction
 
     .align 5
 software_interrupt:
     bad_get_stack_swi
     bad_save_user_regs
-    bl do_software_interrupt
+    bl handle_software_interrupt
 
     .align 5
 prefetch_abort:
     bad_get_stack
     bad_save_user_regs
-    bl do_prefetch_abort
+    bl handle_prefetch_abort
 
     .align 5
 data_abort:
     bad_get_stack
     bad_save_user_regs
-    bl  do_data_abort
+    bl  handle_data_abort
 
     .align 5
 not_used:
     bad_get_stack
     bad_save_user_regs
-    bl do_not_used
+    bl handle_not_used
 
     .align 5
 irq:
     irq_get_stack
     irq_save_user_regs
-    bl do_irq
+    bl handle_irq
     irq_restore_user_regs
 
     .align 5
 fiq:
     fiq_get_stack
-    irq_save_user_regs              /* maybe replace with super low latency fiq_save_user_regs */
-    bl do_fiq
+    irq_save_user_regs              /* maybe replace with "super low latency" fiq_save_user_regs */
+    bl handle_fiq
     irq_restore_user_regs

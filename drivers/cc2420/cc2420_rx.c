@@ -19,6 +19,7 @@
 #include "debug.h"
 
 cc2420_packet_t cc2420_rx_buffer[CC2420_RX_BUF_SIZE];
+uint8_t cc2420_rx_frame_payload_buffer[CC2420_RX_BUF_SIZE][CC2420_MAX_DATA_LENGTH];
 volatile uint8_t rx_buffer_next;
 
 void cc2420_rx_handler(void)

@@ -244,5 +244,10 @@ extern int transceiver_pid;
  */
 extern cc2420_packet_t cc2420_rx_buffer[CC2420_RX_BUF_SIZE];
 
+/**
+ * Payload buffer, holded by payload field in ieee802154_frame_t in cc2420_packet_t.
+ */
+extern uint8_t cc2420_rx_frame_payload_buffer[CC2420_RX_BUF_SIZE][CC2420_MAX_DATA_LENGTH];
+
 
 #endif

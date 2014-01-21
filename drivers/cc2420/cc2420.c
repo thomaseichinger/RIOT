@@ -22,6 +22,10 @@ void cc2420_init(int tpid)
     uint16_t reg;
     transceiver_pid = tpid;
 
+    for (int i = 0; i < CC2420_RX_BUF_SIZE; i++) {
+        cc2420_rx_buffer[i].frame.payload = cc2420_rx_frame_payload_buffer[i];
+    }
+
     cc2420_spi_init();
     hwtimer_wait(CC2420_WAIT_TIME);
     cc2420_reset();

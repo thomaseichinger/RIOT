@@ -7,7 +7,12 @@
  */
 
 /**
- * @brief       Sniffer application for MSB-A2 and Wireshark 
+ * @ingroup     examples
+ * @{
+ *
+ * @file        main.c
+ *
+ * @brief       Sniffer application for MSB-A2 and Wireshark
  *
  * @author      Oliver Hahm <oliver.hahm@inria.fr>
  *
@@ -33,23 +38,29 @@ char radio_stack_buffer[RADIO_STACK_SIZE];
 msg_t msg_q[RCV_BUFFER_SIZE];
 transceiver_command_t tcmd;
 
-void print_packet(volatile radio_packet_t *p) { 
-	volatile uint8_t i,j,k; 
-	if(p) {
-		printf("len 0x%02x lqi 0x%02x rx_time 0x%08x", p->length, p->lqi, (int)hwtimer_now());
-		for(j=0, k=0; j <= ( (p->length) / PER_ROW ); j++) {
-			printf("\n\r");
-			for(i=0; i < PER_ROW; i++, k++) {
-				if(k >= p->length ) { 
-					printf("\n\r");
-					return; 
-				} 
-				printf("%02x ",p->data[j*PER_ROW + i]);
-			}
-		}
-	}
-	printf("\n\r");
-	return; 
+void print_packet(volatile radio_packet_t *p)
+{
+    volatile uint8_t i, j, k;
+
+    if (p) {
+        printf("len 0x%02x lqi 0x%02x rx_time 0x%08lx", p->length, p->lqi, hwtimer_now());
+
+        for (j = 0, k = 0; j <= ((p->length) / PER_ROW); j++) {
+            printf("\n\r");
+
+            for (i = 0; i < PER_ROW; i++, k++) {
+                if (k >= p->length) {
+                    printf("\n\r");
+                    return;
+                }
+
+                printf("%02x ", p->data[j * PER_ROW + i]);
+            }
+        }
+    }
+
+    printf("\n\r");
+    return;
 }
 
 void radio(void)
@@ -79,13 +90,9 @@ void radio(void)
 
 void init_transceiver(void)
 {
-    int radio_pid = thread_create(
-                        radio_stack_buffer,
-                        RADIO_STACK_SIZE,
-                        PRIORITY_MAIN - 2,
-                        CREATE_STACKTEST,
-                        radio,
-                        "radio");
+    int radio_pid = thread_create(radio_stack_buffer, RADIO_STACK_SIZE, 
+                                  PRIORITY_MAIN - 2, CREATE_STACKTEST, radio,
+                                  "radio");
 
     uint16_t transceivers = 0;
 #ifdef MODULE_CC110X
@@ -110,11 +117,11 @@ void init_transceiver(void)
     transceiver_init(transceivers);
     (void) transceiver_start();
     transceiver_register(transceivers, radio_pid);
-    
+
     msg_t mesg;
     mesg.type = SET_CHANNEL;
     mesg.content.ptr = (char *) &tcmd;
-    
+
     uint16_t c = 10;
 
     tcmd.transceivers = TRANSCEIVER_CC1100;
@@ -124,14 +131,13 @@ void init_transceiver(void)
 
     mesg.type = SET_MONITOR;
     mesg.content.ptr = (char *) &tcmd;
-    
+
     uint16_t v = 1;
 
     tcmd.transceivers = TRANSCEIVER_CC1100;
     tcmd.data = &v;
     printf("Set transceiver into monitor mode\n");
     msg_send(&mesg, transceiver_pid, 1);
-    
 }
 
 static int shell_readc(void)
@@ -155,7 +161,7 @@ int main(void)
     (void) puts("Welcome to RIOT!");
 
     shell_init(&shell, NULL, UART0_BUFSIZE, shell_readc, shell_putchar);
-
     shell_run(&shell);
+
     return 0;
 }

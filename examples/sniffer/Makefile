@@ -5,8 +5,12 @@ export PROJECT = sniffer
 export BOARD ?= msba2 
 
 # This has to be the absolute path to the RIOT base directory:
-export RIOTBASE ?= $(CURDIR)/../../RIOT
+export RIOTBASE ?= $(CURDIR)/../..
 
+# Uncomment these lines if you want to use platform support from external
+# repositories:
+#export RIOTCPU ?= $(CURDIR)/../../RIOT/thirdparty_cpu
+#export RIOTBOARD ?= $(CURDIR)/../../RIOT/thirdparty_boards
 #CFLAGS += -DSCHEDSTATISTICS
 
 # Uncomment this to enable code in RIOT that does safety checking

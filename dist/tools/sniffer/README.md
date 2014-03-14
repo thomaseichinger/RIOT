@@ -1,10 +1,6 @@
 Using Wireshark to sniff 802.15.4/Zigbee/6lowpan traffic:
 =========================================================
 
-Econotags are easy to use as 802.15.4, Zigbee, or 6lowpan sniffers. 
-
-[![wireshark capture: 6lowpan RPL traffic](./files/wireshark-t.png)](./files/wireshark.png)
-
 Software
 --------
 
@@ -16,12 +12,14 @@ Generating a .pcap
 
 The next step is to run the control python script, rftestrx2pcap.py,
 (also part of RIOT). This script will set the channel on the
-econotag and then create a .pcap with the packets received. The script
-is a modified version of malvira's script for the Redbee Ecotag (https://github.com/malvira/libmc1322x/wiki/wireshark).
+econotag and then create a .pcap with the packets received. The script is a
+modified version of [malvira's
+script](https://github.com/malvira/libmc1322x/blob/master/tools/rftestrx2pcap.py)
+for the Redbee Ecotag (https://github.com/malvira/libmc1322x/wiki/wireshark).
 
 ### Download rftestrx2pcap.py
 
-[rftestrx2pcap.py](https://github.com/OlegHahm/RIOT/tree/sniffer_applicatoin/dist/tools/sniffer/rftestrx2pcap.py)
+[rftestrx2pcap.py](rftestrx2pcap.py)
 
 ### Install dependencies
 
@@ -50,7 +48,7 @@ Dump packets to a file:
 This .pcap can then be opened in wireshark.Alternatively for live
 captures, you can pipe directly into wireshark with:
 
-    $ ~/libmc1322x/tools/rftestrx2pcap.py /dev/ttyUSB1 10 | wireshark -k -i -
+    $ ./rftestrx2pcap.py /dev/ttyUSB1 10 | wireshark -k -i -
 
 #### Windows
 

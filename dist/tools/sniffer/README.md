@@ -1,1 +1,61 @@
+Using Wireshark to sniff 802.15.4/Zigbee/6lowpan traffic:
+=========================================================
+
+Econotags are easy to use as 802.15.4, Zigbee, or 6lowpan sniffers. 
+
+[![wireshark capture: 6lowpan RPL traffic](./files/wireshark-t.png)](./files/wireshark.png)
+
+Software
+--------
+
+The application used to sniff 802.15.4 with
+[MSB-A2](http://www.mi.fu-berlin.de/inf/groups/ag-tech/projects/Z_Finished_Projects/ScatterWeb/modules/mod_MSB-A2.html) is the sniffer example in the RIOT repository.
+
+Generating a .pcap
+------------------
+
+The next step is to run the control python script, rftestrx2pcap.py,
+(also part of RIOT). This script will set the channel on the
+econotag and then create a .pcap with the packets received. The script
+is a modified version of malvira's script for the Redbee Ecotag (https://github.com/malvira/libmc1322x/wiki/wireshark).
+
+### Download rftestrx2pcap.py
+
+[rftestrx2pcap.py](https://github.com/OlegHahm/RIOT/tree/sniffer_applicatoin/dist/tools/sniffer/rftestrx2pcap.py)
+
+### Install dependencies
+
+Needs [pyserial](https://pypi.python.org/pypi/pyserial)
+
+#### Debuntu
+    apt-get install python-serial
+
+#### PIP
+    pip install pyserial
+
+### Usage
+
+    ./rftestrx2pcap.py tty chan [outfile]
+
+rftestrx2pcap.py takes the tty/com port as the first argument and the
+CC110x channel as the second (from 0 through 24). The third
+argument is an optional output file.
+
+#### Linux
+
+Dump packets to a file:
+
+    $ ./rftestrx2pcap.py /dev/ttyUSB1 10 > foo.pcap
+
+This .pcap can then be opened in wireshark.Alternatively for live
+captures, you can pipe directly into wireshark with:
+
+    $ ~/libmc1322x/tools/rftestrx2pcap.py /dev/ttyUSB1 10 | wireshark -k -i -
+
+#### Windows
+
+For windows you can use the optional third argument to output to a
+.pcap:
+
+    $ ./rftestrx2pcap.py /dev/ttyUSB1 26 foo.pcap
 

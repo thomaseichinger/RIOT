@@ -24,19 +24,31 @@
 
 void uart_init(void)
 {
-    UCA0CTL1  = UCSWRST;         /* hold UART module in reset state while we configure it */
-    UCA0CTL1 |= UCSSEL_3;        /* source UART's BRCLK from 8 MHz SMCLK  */
-    UCA0MCTL  = UCBRS_4;         /* low-frequency baud rate generation,
-                                    modulation type 4 */
-
     /*
      * NOTE : MCU pin (GPIO port) initialisation is done
      * in board.c, function z1_ports_init().
      */
+    UCA0CTL1  = UCSWRST;         /* hold UART module in reset state while we configure it */
+
+/* Add the line "#define UART_SLOW_MODE 1" to use a slower
+   (and hopefully more robust) configuration for the UART */
+#if UART_SLOW_MODE
+    UCA0CTL1 |= UCSSEL_1;        /* source UART's BRCLK from 32768 Hz ACLK  */
+    UCA0MCTL  = UCBRS_3;         /* low-frequency baud rate generation,
+                                    modulation type 3 */
+
+    /* 9600 baud is the maximum that can be sourced from a 32KiHz clock */
+    UCA0BR0   = 3;
+    UCA0BR1   = 0;
+#else
+    UCA0CTL1 |= UCSSEL_3;        /* source UART's BRCLK from 8 MHz SMCLK  */
+    UCA0MCTL  = UCBRS_4;         /* low-frequency baud rate generation,
+                                    modulation type 4 */
 
     /* 115200 baud, divided from 8 MHz == 69 */
     UCA0BR0   = 69; //BAUD_RATE_MAJOR;
     UCA0BR1   = 0;  //BAUD_RATE_MINOR;
+#endif
 
     /* remaining registers : set to default */
     UCA0CTL0  = 0x00;   /* put in asynchronous (== UART) mode, LSB first */

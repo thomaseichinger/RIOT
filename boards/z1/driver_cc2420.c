@@ -15,12 +15,12 @@
 #include "cpu.h"
 #include "irq.h"
 #include "hwtimer.h"
+#include "crash.h"
 
 #include "cc2420.h"
 
 #define ENABLE_DEBUG    (1)
 #include "debug.h"
-#include "crash.h"
 
 #define CC2420_RESETn_PIN   0x40                        /* RADIO_RESET   <-> P4.6 */
 #define CC2420_VREGEN_PIN   0x20                        /* RADIO_VREG_EN <-> P4.5 */
@@ -107,12 +107,28 @@ int cc2420_get_sfd(void)
     return CC2420_SFD;
 }
 
+#define MAX_RSSI_WAIT 1000
+
+uint8_t cc2420_get_cca(void)
+{
+    uint8_t status;
+    long c = 0;
+    do {
+        status = cc2420_txrx(NOBYTE);
+        count++;
+        if (count >= MAX_RSSI_WAIT) {
+            core_panic(0x2420, "cc2420_get_cca(): RSSI never valid!");
+        }
+    } while (!(status & CC2420_STATUS_RSSI_VALID));
+    return CC2420_GIO1;
+}
+
 void cc2420_spi_cs(void)
 {
     CC2420_CS_LOW;   /* Chip Select line is active-low */
 }
 
-#define MAX_SPI_WAIT 1000000
+#define MAX_SPI_WAIT 1000
 
 uint8_t cc2420_txrx(uint8_t data)
 {
@@ -121,7 +137,7 @@ uint8_t cc2420_txrx(uint8_t data)
     do {
         count++;
         if (count >= MAX_SPI_WAIT) {
-            core_panic(0x2420, "cc2420_txrx() SPI never ready for TX!");
+            core_panic(0x2420, "cc2420_txrx(): SPI never ready for TX!");
         }
     } while (!(IFG2 & UCB0TXIFG));
     /* Transmit data byte to CC2420, and wait for end of transmission */
@@ -131,7 +147,7 @@ uint8_t cc2420_txrx(uint8_t data)
     do {
     	count++;
         if (count >= MAX_SPI_WAIT) {
-            core_panic(0x2420, "cc2420_txrx() couldn't send byte!");
+            core_panic(0x2420, "cc2420_txrx(): couldn't send byte!");
         }
     } while(!(UCB0STAT & UCBUSY));
     /* Read the byte that CC2420 has (normally, during TX) returned */
@@ -139,7 +155,7 @@ uint8_t cc2420_txrx(uint8_t data)
     do {
     	count++;
         if (count >= MAX_SPI_WAIT) {
-            core_panic(0x2420, "cc2420_txrx() couldn't receive byte!");
+            core_panic(0x2420, "cc2420_txrx(): couldn't receive byte!");
         }
     } while(!(IFG2 & UCB0RXIFG));
     /* Return received byte */

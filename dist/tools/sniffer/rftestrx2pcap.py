@@ -28,6 +28,7 @@ SUCH DAMAGE.
 '''
 
 import sys,os,time
+from struct import pack
 import re
 import serial
 

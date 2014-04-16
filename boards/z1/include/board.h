@@ -46,9 +46,9 @@
 // LEDs ports
 #define LEDS_PxDIR P5DIR
 #define LEDS_PxOUT P5OUT
-#define LEDS_CONF_RED       0x10
-#define LEDS_CONF_BLUE      0x20
-#define LEDS_CONF_GREEN     0x40
+#define LEDS_CONF_GREEN     0x10
+#define LEDS_CONF_RED       0x20
+#define LEDS_CONF_BLUE      0x40
 
 #define LED_RED_ON         LEDS_PxOUT &=~LEDS_CONF_RED
 #define LED_RED_OFF        LEDS_PxOUT |= LEDS_CONF_RED

@@ -18,7 +18,8 @@ static void z1_ports_init(void)
 {
     /* Port 1:
      *  P1.0 is not assigned by default
-     *  P1.1 is the bootstrap-loader (BSL) TX pin -> output, special function, default to GND
+     *  P1.1 is the bootstrap-loader (BSL) TX pin -> input, special function, default to GND
+     *       THIS PIN MUST *NEVER* BE USED IN NORMAL EXECUTION, SINCE IT INTERFERES WITH UART0 !!!
      *  P1.2 receives the FIFOP interrupt from CC2420 -> input, GPIO, default to GND
      *  P1.3 receives the FIFO/GIO0 interrupt from CC2420 -> input, GPIO, default to GND
      *  P1.4 receives the CCA/GIO1 signal from CC2420 -> input, GPIO, default to GND
@@ -28,12 +29,13 @@ static void z1_ports_init(void)
      */
     P1SEL = 0x02;    /* Port1 Select: 00000010 = 0x02 */
     P1OUT = 0x20;    /* Port1 Output: 00100000 = 0x20 */
-    P1DIR = 0x02;    /* Port1 Direction: 00000010 = 0x02 */
+    P1DIR = 0x00;    /* Port1 Direction: 00000000 = 0x00 */
 
     /* Port 2:
      *  P2.0 is not assigned by default
      *  P2.1 is not assigned by default
      *  P2.2 is the bootstrap-loader (BSL) RX pin -> input, special function, default to GND
+     *       THIS PIN MUST *NEVER* BE USED IN NORMAL EXECUTION, SINCE IT INTERFERES WITH UART0 !!!
      *  P2.3 is not assigned by default
      *  P2.4 is used as an active-low output to the BSL and USB interface -> output, GPIO, default to Vcc
      *  P2.5 is connected to the active-low "user interrupt" button -> input, GPIO, default to Vcc
@@ -162,9 +164,12 @@ void msp430_init_dco(void)
 
 //    BCSCTL1 &= ~(DIVA1 + DIVA0);          /* remove divisor from ACLK again */
 
-    /* Values for 8MHz frequency */
-    DCOCTL  = 0x9a;
-    BCSCTL1 = 0x0d;
+    /* Default values for ~ 8MHz frequency, taken from Zolertia's example at:
+       http://zolertia.sourceforge.net/wiki/index.php/Mainpage:TOS_advanced
+       (example "Printf using UART port" at the bottom) */
+    DCOCTL  = 0x00;
+    BCSCTL1 = 0x8d;
+    DCOCTL  = 0x88;
 
     /* Other clock configuration */
     BCSCTL1 |= XT2OFF;    /* XT2 not connected on Z1 */

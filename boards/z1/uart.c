@@ -41,13 +41,13 @@ void uart_init(void)
     UCA0BR0   = 3;
     UCA0BR1   = 0;
 #else
-    UCA0CTL1 |= UCSSEL_3;        /* source UART's BRCLK from 8 MHz SMCLK  */
-    UCA0MCTL  = UCBRS_4;         /* low-frequency baud rate generation,
+    UCA0CTL1 |= UCSSEL_2;        /* source UART's BRCLK from 8 MHz SMCLK  */
+    UCA0MCTL  = UCBRS_3;         /* low-frequency baud rate generation,
                                     modulation type 4 */
 
     /* 115200 baud, divided from 8 MHz == 69 */
-    UCA0BR0   = 69; //BAUD_RATE_MAJOR;
-    UCA0BR1   = 0;  //BAUD_RATE_MINOR;
+    UCA0BR0   = BAUD_RATE_MAJOR;
+    UCA0BR1   = BAUD_RATE_MINOR;
 #endif
 
     /* remaining registers : set to default */
@@ -67,10 +67,17 @@ void uart_init(void)
 
 int putchar(int c)
 {
-    UCA0TXBUF = (uint8_t) c;
+    /* wait for a previous transmission to end */
     while ((UCA0STAT & UCBUSY)) {
-        __nop();
+        __asm__("nop");
     }
+    /* load TX byte buffer */
+    UCA0TXBUF = (uint8_t) c;
+    /* wait for this byte to be transmitted */
+    while ((UCA0STAT & UCBUSY)) {
+        __asm__("nop");
+    }
+
     return c;
 }
 

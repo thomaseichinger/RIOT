@@ -13,6 +13,10 @@
 #include "cpu.h"
 #include "board.h"
 #include "kernel.h"
+<<<<<<< HEAD
+=======
+#include "irq.h"
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
 #include "board_uart0.h"
 
 
@@ -28,19 +32,33 @@ void uart_init(void)
      * NOTE : MCU pin (GPIO port) initialisation is done
      * in board.c, function z1_ports_init().
      */
+<<<<<<< HEAD
     UCA0CTL1  = UCSWRST;         /* hold UART module in reset state while we configure it */
+=======
+    P3SEL |= 0x30;   // normally useless, but...
+
+    UCA0CTL1  = UCSWRST;         /* hold UART module in reset state
+                                    while we configure it */
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
 
 /* Add the line "#define UART_SLOW_MODE 1" to use a slower
    (and hopefully more robust) configuration for the UART */
 #if UART_SLOW_MODE
+<<<<<<< HEAD
     UCA0CTL1 |= UCSSEL_1;        /* source UART's BRCLK from 32768 Hz ACLK  */
     UCA0MCTL  = UCBRS_3;         /* low-frequency baud rate generation,
                                     modulation type 3 */
+=======
+    UCA0CTL1 |= UCSSEL_1;          /* source UART's BRCLK from 32768 Hz ACLK  */
+    UCA0MCTL  = UCBRS_3;           /* low-frequency baud rate generation,
+                                      modulation type 3 */
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
 
     /* 9600 baud is the maximum that can be sourced from a 32KiHz clock */
     UCA0BR0   = 3;
     UCA0BR1   = 0;
 #else
+<<<<<<< HEAD
     UCA0CTL1 |= UCSSEL_2;        /* source UART's BRCLK from 8 MHz SMCLK  */
     UCA0MCTL  = UCBRS_3;         /* low-frequency baud rate generation,
                                     modulation type 4 */
@@ -48,6 +66,15 @@ void uart_init(void)
     /* 115200 baud, divided from 8 MHz == 69 */
     UCA0BR0   = BAUD_RATE_MAJOR;
     UCA0BR1   = BAUD_RATE_MINOR;
+=======
+    UCA0CTL1 |= UCSSEL_2;          /* source UART's BRCLK from 8 MHz SMCLK  */
+    UCA0MCTL  = UCBRS1 + UCBRS0;   /* low-frequency baud rate generation,
+                                      modulation type 4 */
+
+    /* 115200 baud, divided from 8 MHz == 69 */
+    UCA0BR0   = 0x45;   //BAUD_RATE_MAJOR;
+    UCA0BR1   = 0x00;   //BAUD_RATE_MINOR;
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
 #endif
 
     /* remaining registers : set to default */
@@ -67,17 +94,33 @@ void uart_init(void)
 
 int putchar(int c)
 {
+<<<<<<< HEAD
     /* wait for a previous transmission to end */
     while ((UCA0STAT & UCBUSY)) {
+=======
+    unsigned sr = disableIRQ();
+
+    /* the LF endline character needs to be "doubled" into CR+LF */
+    if (c == '\n') {
+        putchar('\r');
+    }
+    /* wait for a previous transmission to end */
+    while ((IFG2 & UCA0TXIFG) == 0) {
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
         __asm__("nop");
     }
     /* load TX byte buffer */
     UCA0TXBUF = (uint8_t) c;
+<<<<<<< HEAD
     /* wait for this byte to be transmitted */
     while ((UCA0STAT & UCBUSY)) {
         __asm__("nop");
     }
 
+=======
+
+    restoreIRQ(sr);
+>>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
     return c;
 }
 

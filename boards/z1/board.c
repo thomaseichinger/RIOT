@@ -162,18 +162,12 @@ void msp430_init_dco(void)
 
 //    BCSCTL1 &= ~(DIVA1 + DIVA0);          /* remove divisor from ACLK again */
 
-<<<<<<< HEAD
-    /* Values for 8MHz frequency */
-    DCOCTL  = 0x9a;
-    BCSCTL1 = 0x0d;
-=======
     /* Default values for ~ 8MHz frequency, taken from Zolertia's example at:
        http://zolertia.sourceforge.net/wiki/index.php/Mainpage:TOS_advanced
        (example "Printf using UART port" at the bottom) */
     DCOCTL  = 0x00;
     BCSCTL1 = 0x8d;
     DCOCTL  = 0x88;
->>>>>>> b2f07f8e64f205eb0028362d62e88950a501b8a2
 
     /* Other clock configuration */
     BCSCTL1 |= XT2OFF;    /* XT2 not connected on Z1 */

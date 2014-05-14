@@ -19,6 +19,7 @@ static void z1_ports_init(void)
     /* Port 1:
      *  P1.0 is not assigned by default
      *  P1.1 is the bootstrap-loader (BSL) TX pin -> input, special function, default to GND
+     *       THIS PIN MUST *NEVER* BE USED IN NORMAL EXECUTION, SINCE IT INTERFERES WITH UART0 !!!
      *  P1.2 receives the FIFOP interrupt from CC2420 -> input, GPIO, default to GND
      *  P1.3 receives the FIFO/GIO0 interrupt from CC2420 -> input, GPIO, default to GND
      *  P1.4 receives the CCA/GIO1 signal from CC2420 -> input, GPIO, default to GND
@@ -33,7 +34,8 @@ static void z1_ports_init(void)
     /* Port 2:
      *  P2.0 is not assigned by default
      *  P2.1 is not assigned by default
-     *  P2.2 is the bootstrap-loader (BSL) RX pin -> output, special function, default to GND
+     *  P2.2 is the bootstrap-loader (BSL) RX pin -> input, special function, default to GND
+     *       THIS PIN MUST *NEVER* BE USED IN NORMAL EXECUTION, SINCE IT INTERFERES WITH UART0 !!!
      *  P2.3 is not assigned by default
      *  P2.4 is used as an active-low output to the BSL and USB interface -> output, GPIO, default to Vcc
      *  P2.5 is connected to the active-low "user interrupt" button -> input, GPIO, default to Vcc
@@ -42,7 +44,7 @@ static void z1_ports_init(void)
      */
     P2SEL = 0x04;    /* Port2 Select: 00000100 = 0x04 */
     P2OUT = 0xB0;    /* Port2 Output: 10110000 = 0xB0 */
-    P2DIR = 0xD4;    /* Port2 Direction: 11010100 = 0xD4 */
+    P2DIR = 0xD0;    /* Port2 Direction: 11010000 = 0xD0 */
 
     /* Port 3:
      *  P3.0 is the radio (CC2420) active-low chip select -> output, GPIO, default to Vcc
@@ -110,64 +112,64 @@ static void z1_ports_init(void)
 void msp430_init_dco(void)
 {
     /* This code taken from the FU Berlin sources and reformatted. */
-
-//    unsigned int compare, oldcapture = 0;
-//    unsigned int i;
+    unsigned int compare, oldcapture = 0;
+    unsigned int i;
 
     /* 10100100 = XT2 is off, ACLK divided by 4, RSELx=4 */
-//    BCSCTL1 = XT2OFF | DIVA_3 | RSEL2;
+    BCSCTL1 = XT2OFF | DIVA_3 | RSEL2;
 
     /* Init undivided DCO with internal resistor for MCLK and SMCLK
      * DCO = 32762Hz -> FLL = 2,4576 MHz */
-//    BCSCTL2 = 0x00;
+    BCSCTL2 = 0x00;
 
-//    BCSCTL1 |= DIVA1 + DIVA0;             /* ACLK = LFXT1CLK/8 */
+    BCSCTL1 |= DIVA1 + DIVA0;             /* ACLK = LFXT1CLK/8 */
 
-//    for (i = 0xFFFF; i > 0; i--) {        /* Delay for XTAL to settle */
-//        __nop();
-//    }
+    for (i = 0xFFFF; i > 0; i--) {        /* Delay for XTAL to settle */
+        __nop();
+    }
 
-//    CCTL2 = CCIS0 + CM0 + CAP;            /* Define CCR2, CAP, ACLK */
-//    TACTL = TASSEL1 + TACLR + MC1;        /* SMCLK, continous mode */
+    CCTL2 = CCIS0 + CM0 + CAP;            /* Define CCR2, CAP, ACLK */
+    TACTL = TASSEL1 + TACLR + MC1;        /* SMCLK, continous mode */
 
-//    while (1) {
-//        while ((CCTL2 & CCIFG) != CCIFG);   /* Wait until capture occured!*/
+    while (1) {
+        while ((CCTL2 & CCIFG) != CCIFG);   /* Wait until capture occured!*/
 
-//        CCTL2 &= ~CCIFG;                    /* Capture occured, clear flag */
-//        compare = CCR2;                     /* Get current captured SMCLK */
-//        compare = compare - oldcapture;     /* SMCLK difference */
-//        oldcapture = CCR2;                  /* Save current captured SMCLK */
+        CCTL2 &= ~CCIFG;                    /* Capture occured, clear flag */
+        compare = CCR2;                     /* Get current captured SMCLK */
+        compare = compare - oldcapture;     /* SMCLK difference */
+        oldcapture = CCR2;                  /* Save current captured SMCLK */
 
-//        if (DELTA == compare) {
-//            break;                            /* if equal, leave "while (1)" */
-//        }
-//        else if (DELTA < compare) {        /* DCO is too fast, slow it down */
-//            DCOCTL--;
+        if (DELTA == compare) {
+            break;                            /* if equal, leave "while (1)" */
+        }
+        else if (DELTA < compare) {        /* DCO is too fast, slow it down */
+            DCOCTL--;
 
-//            if (DCOCTL == 0xFF) {             /* Did DCO role under? */
-//                BCSCTL1--;
-//            }
-//        }
-//        else {                            /* -> Select next lower RSEL */
-//            DCOCTL++;
+            if (DCOCTL == 0xFF) {             /* Did DCO role under? */
+                BCSCTL1--;
+            }
+        }
+        else {                            /* -> Select next lower RSEL */
+            DCOCTL++;
 
-//            if (DCOCTL == 0x00) {             /* Did DCO role over? */
-//                BCSCTL1++;
-//            }           /* -> Select next higher RSEL  */
-//        }
-//    }
+            if (DCOCTL == 0x00) {             /* Did DCO role over? */
+                BCSCTL1++;
+            }           /* -> Select next higher RSEL  */
+        }
+    }
 
-//    CCTL2 = 0;                            /* Stop CCR2 function */
-//    TACTL = 0;                            /* Stop Timer_A */
+    CCTL2 = 0;                            /* Stop CCR2 function */
+    TACTL = 0;                            /* Stop Timer_A */
 
-//    BCSCTL1 &= ~(DIVA1 + DIVA0);          /* remove divisor from ACLK again */
+    BCSCTL1 &= ~(DIVA1 + DIVA0);          /* remove divisor from ACLK again */
 
-    /* Default values for ~ 8MHz frequency, taken from Zolertia's example at:
-       http://zolertia.sourceforge.net/wiki/index.php/Mainpage:TOS_advanced
-       (example "Printf using UART port" at the bottom) */
-    DCOCTL  = 0x00;
-    BCSCTL1 = 0x8d;
-    DCOCTL  = 0x88;
+    /*
+     * On a MSP430F2617 (as on a Z1), for a 8 MHz target frequency,
+     * we normally obtain these values:
+     *   DCOCTL == 0x9a (i.e.: DCOx == 4 && MODx == 26)
+     *                  [the MODx field is the most prone to variation]
+     *   BCSCTL1 == 0x0d (i.e.: RSELx == 13)
+     */
 
     /* Other clock configuration */
     BCSCTL1 |= XT2OFF;    /* XT2 not connected on Z1 */
@@ -180,16 +182,19 @@ void msp430_init_dco(void)
 
 void board_init(void)
 {
+    /* init CPU core */
     msp430_cpu_init();
+
     /* disable watchdog timer */
     WDTCTL     =  WDTPW + WDTHOLD;
 
+    /* init MCU pins as adequate for Z1 hardware */
     z1_ports_init();
 
     /* initializes DCO */
     msp430_init_dco();
 
-    /* initialize bsp modules */
+    /* initialize UART/USB module */
     uart_init();
 
     /* enable interrupts */

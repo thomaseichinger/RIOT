@@ -27,8 +27,8 @@ export RIOTBASE ?= $(CURDIR)/../..
 # Change this to 0 show compiler invocation lines by default:
 export QUIET ?= 1
 
-BOARD_BLACKLIST := chronos mbed_lpc1768 msb-430 msb-430h redbee-econotag \
-                   telosb wsn430-v1_3b wsn430-v1_4 pttu
+BOARD_BLACKLIST := arduino-due chronos mbed_lpc1768 msb-430 msb-430h \
+                   redbee-econotag telosb wsn430-v1_3b wsn430-v1_4 pttu z1
 # chronos: not enough RAM
 # mbed_lpc1768: see https://github.com/RIOT-OS/RIOT/issues/675
 # msb-430: see https://github.com/RIOT-OS/RIOT/issues/658
@@ -38,10 +38,10 @@ BOARD_BLACKLIST := chronos mbed_lpc1768 msb-430 msb-430h redbee-econotag \
 # wsn430-v1_3b: not enough RAM
 # wsn430-v1_4: not enough RAM
 # pttu: see https://github.com/RIOT-OS/RIOT/issues/659
+# z1: lacks RTC features
 
 # Modules to include:
 
-USEMODULE += config
 USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += posix

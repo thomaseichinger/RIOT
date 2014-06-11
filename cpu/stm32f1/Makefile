@@ -3,7 +3,6 @@ MODULE =cpu
 
 # add a list of subdirectories, that should also be build
 DIRS += periph
-DIRS += STM32F10x_StdPeriph_Lib_V3.5.0
 
 .PHONY: all $(CORTEX_COMMON)
 

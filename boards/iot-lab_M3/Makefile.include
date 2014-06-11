@@ -1,0 +1,39 @@
+## the cpu to build for
+export CPU = stm32f1
+
+# toolchain config
+export PREFIX = arm-none-eabi-
+export CC = $(PREFIX)gcc
+export AR = $(PREFIX)ar
+export CFLAGS += -DUSE_STDPERIPH_DRIVER -ggdb -g3 -std=gnu99 -O0 -Wall -Wstrict-prototypes -mcpu=cortex-m3 $(FPU_USAGE) -mlittle-endian -mthumb -mthumb-interwork -nostartfiles
+export ASFLAGS = -ggdb -g3 -mcpu=cortex-m3 $(FPU_USAGE) -mlittle-endian
+export AS = $(PREFIX)as
+export LINK = $(PREFIX)gcc
+export SIZE = $(PREFIX)size
+export OBJCOPY = $(PREFIX)objcopy
+FLASHER = $(RIOTCPU)/$(CPU)/tools/flash.sh
+DEBUGGER = $(RIOTCPU)/$(CPU)/tools/debug.sh
+TERM = miniterm.py -b 115200
+LINKFLAGS =  -DUSE_STDPERIPH_DRIVER -DUSE_STM32_DISCOVERY -g3 -ggdb -mcpu=cortex-m3 $(FPU_USAGE) -mlittle-endian -static -lgcc -mthumb -mthumb-interwork -nostartfiles -T$(RIOTCPU)/$(CPU)/stm32f1_linkerscript.ld
+
+ifeq ($(strip $(PORT)),)
+	export PORT = /dev/ttyUSB2
+endif
+export HEXFILE = $(BINDIR)/$(APPLICATION).hex
+export FFLAGS = $(HEXFILE)
+
+export ELFFILE = $(BINDIR)/$(APPLICATION).elf
+export DEBUGGER_FLAGS = $(ELFFILE)
+
+INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
+export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
+
+ifneq (,$(filter defaulttransceiver,$(USEMODULE)))
+	USEMODULE += at86rf231
+	USEMODULE += transceiver
+endif
+
+export INCLUDES
+
+#insert OFLAGS -O ihex
+export OFLAGS = -O ihex

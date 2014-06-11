@@ -8,9 +8,11 @@ export USEMODULE += cortexm_common
 export CORTEX_COMMON = $(RIOTCPU)/cortexm_common/
 
 # define the linker script to use for this CPU
-export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/stm32_flash.ld
+export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/stm32f1_linkerscript.ld
 
 # include CPU specific includes
+INCLUDES += -I$(RIOTCPU)/$(CPU)/include/components
+INCLUDES += -I$(RIOTBASE)/drivers/include/periph
 export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
 
 # explicitly tell the linker to link the syscalls and startup code.
@@ -24,8 +26,8 @@ export USEMODULE += periph
 # CPU depends on the cortex-m common module, so include it
 include $(CORTEX_COMMON)Makefile.include
 
-INCLUDES += -Iinclude
+#INCLUDES += -Iinclude
 #INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/Include
 #INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x
 #INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc
-INCLUDES += -I$(RIOTBASE)/core/include -I$(RIOTBASE)/sys/include -I$(RIOTBASE)/sys/lib
+#INCLUDES += -I$(RIOTBASE)/core/include -I$(RIOTBASE)/sys/include -I$(RIOTBASE)/sys/lib

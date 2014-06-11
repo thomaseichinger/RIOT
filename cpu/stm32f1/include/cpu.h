@@ -1,37 +1,23 @@
-/******************************************************************************
-Copyright 2009, Freie Universitaet Berlin (FUB). All rights reserved.
-
-These sources were developed at the Freie Universitaet Berlin, Computer Systems
-and Telematics group (http://cst.mi.fu-berlin.de).
--------------------------------------------------------------------------------
-This file is part of FeuerWare.
-
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-
-FeuerWare is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program.  If not, see http://www.gnu.org/licenses/ .
---------------------------------------------------------------------------------
-For further information and questions please use the web site
-	http://scatterweb.mi.fu-berlin.de
-and the mailinglist (subscription via web site)
-	scatterweb@lists.spline.inf.fu-berlin.de
-*******************************************************************************/
-
-#ifndef __CPU_H
-#define __CPU_H
+/*
+ * Copyright (C) 2013 INRIA
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser General
+ * Public License v2.1. See the file LICENSE in the top level directory for more
+ * details.
+ */
 
 /**
- * @defgroup
- * @ingroup		cpu
+ * @ingroup     cpu_stm32f1
  * @{
+ *
+ * @file        cpu.h
+ *
+ * @author      Alaeddine Weslati <alaeddine.weslati@inria.fr>
+ *
+ * @}
  */
+#ifndef __CPU_H
+#define __CPU_H
 
 #include <stdbool.h>
 #include <string.h>
@@ -107,5 +93,5 @@ __attribute__( ( always_inline ) ) static __INLINE void interrupt_return(void)
 	/* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
 }
 
-/** @} */
 #endif /* __CPU_H */
+/** @} */

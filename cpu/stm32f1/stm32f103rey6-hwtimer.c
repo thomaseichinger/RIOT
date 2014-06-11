@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2013 Freie Universität Berlin
+ * Copyright (C) 2014 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License. See the file LICENSE in the top level directory for more
+ * Public License v2.1. See the file LICENSE in the top level directory for more
  * details.
  */
 
 /**
- * @ingroup     cpu_stm32f303vg
+ * @ingroup     cpu_stm32f1
  * @{
  *
- * @file        hwtimer_arch.c
+ * @file        stm32f103rey6-hwtimer.c
  * @brief       Implementation of the kernels hwtimer interface
  *
  * The hardware timer implementation uses the Coretex build-in system timer as backend.
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Thomas Eichinger <thomas.eichinger@fu-berlin.de>
  *
  * @}
  */

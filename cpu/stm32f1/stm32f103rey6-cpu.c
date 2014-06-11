@@ -1,8 +1,24 @@
 /*
- * cpu.c
+ * Copyright (C) 2013 INRIA
+ * Copyright (C) 2014 Freie Universität Berlin
  *
- *  Created on: 07.09.2012
- *      Author: pfeiffer
+ * This file is subject to the terms and conditions of the GNU Lesser General
+ * Public License v2.1. See the file LICENSE in the top level directory for more
+ * details.
+ */
+
+/**
+ * @ingroup     cpu_stm32f1
+ * @{
+ *
+ * @file        stm32f103rey6-cpu.c
+ * @brief       Implementation of the kernel cpu functions
+ *
+ * @author      Stefan Pfeiffer
+ * @author      Alaeddine Weslati <alaeddine.weslati@inria.fr>
+ * @author      Thomas Eichinger <thomas.eichinger@fu-berlin.de>
+ *
+ * @}
  */
 #include <stdio.h>
 #include <stdint.h>

@@ -32,26 +32,11 @@
 extern void sched_task_exit(void);
 void sched_task_return(void);
 
-int inISR(void)
+void cpu_init(void)
 {
-    return (__get_IPSR() & 0xFF);
+    /* disable the watchdog timer */
+    // WDT->WDT_MR |= WDT_MR_WDDIS;
 }
-
-unsigned int disableIRQ(void)
-{
-    // FIXME PRIMASK is the old CPSR (FAULTMASK ??? BASEPRI ???)
-    //PRIMASK lesen
-    unsigned int uiPriMask = __get_PRIMASK();
-    __disable_irq();
-    return uiPriMask;
-}
-
-void restoreIRQ(unsigned oldPRIMASK)
-{
-    //PRIMASK lesen setzen
-    __set_PRIMASK(oldPRIMASK);
-}
-
 
 __attribute__((naked))
 void HardFault_Handler(void)
@@ -85,7 +70,7 @@ void WWDG_Handler(void)
     while (1);
 }
 
-int reboot(int mode)
+int reboot_arch(int mode)
 {
     (void)mode;
     while (1) {

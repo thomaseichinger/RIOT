@@ -23,7 +23,8 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-#include <leds.h>
+#include <stdint.h>
+#include "leds.h"
 
 /**
  * Assign the UART baudrate

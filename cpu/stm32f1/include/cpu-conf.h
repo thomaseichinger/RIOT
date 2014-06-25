@@ -26,6 +26,8 @@
  *
  *
  */
+#include "stm32f1.h"
+
 #define TRANSCEIVER_BUFFER_SIZE (3)
 
 #define FEUERWARE_CONF_CPU_NAME			"stm32f103rey6"

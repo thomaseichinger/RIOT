@@ -4,17 +4,17 @@ MODULE =cpu
 # add a list of subdirectories, that should also be build
 DIRS += periph
 
-.PHONY: all $(CORTEX_M3_COMMON)
+.PHONY: all $(CORTEX-M3_COMMON)
 
 
-all: $(CORTEX_M3_COMMON) $(BINDIR)$(MODULE).a
+all: $(CORTEX-M3_COMMON) $(BINDIR)$(MODULE).a
 	$(AD)for i in $(DIRS) ; do "$(MAKE)" -C $$i ; done ;
 
-$(CORTEX_M3_COMMON):
-	$(AD)$(MAKE) -C $(CORTEX_M3_COMMON)
+$(CORTEX-M3_COMMON):
+	$(AD)$(MAKE) -C $(CORTEX-M3_COMMON)
 
 include $(RIOTBASE)/Makefile.base
 
 clean::
 	$(AD)for i in $(DIRS) ; do "$(MAKE)" -C $$i clean ; done ;
-	$(AD)$(MAKE) -C $(CORTEX_M3_COMMON) clean
+	$(AD)$(MAKE) -C $(CORTEX-M3_COMMON) clean

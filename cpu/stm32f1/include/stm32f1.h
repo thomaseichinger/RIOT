@@ -27,7 +27,9 @@
 
 typedef enum {
     HARD_FAULT,
-    WATCHDOG
+    WATCHDOG,
+    BUS_FAULT,
+    USAGE_FAULT
 } panic_t;
 
 void thread_yield(void);

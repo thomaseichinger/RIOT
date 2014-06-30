@@ -40,7 +40,7 @@ int spi_transfer_byte(spi_t dev, char out, char *in)
 
     if (out != 0) {
         /* wait for empty tx buffer */
-        while ((SPI_dev->SR & SPI_I2S_FLAG_TXE) == 0);
+        while ((SPI_dev->SR & 0x2) == 0);
         /* write out data to buffer */
         SPI_dev->DR = out;
         /* increase transfered bytes counter */
@@ -49,14 +49,14 @@ int spi_transfer_byte(spi_t dev, char out, char *in)
 
     if (in != 0) {
         /* wait for not empty rx buffer */
-        while ((SPI_dev->SR & SPI_I2S_FLAG_RXNE) == 0);
+        while ((SPI_dev->SR & 0x1) == 0);
         /* read out data to in buffer */
         *in = SPI_dev->DR;
         /* increase transfered bytes counter */
         transfered++;
     }
 
-    while ((SPI_dev->SR & SPI_I2S_FLAG_BSY) == SET);
+    while ((SPI_dev->SR & 0x80) == SET);
 
     return transfered;
 }

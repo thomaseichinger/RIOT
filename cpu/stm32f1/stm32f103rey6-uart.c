@@ -28,14 +28,13 @@
   * @param  None
   * @retval None
   */
-__attribute__ ((naked)) void USART1_IRQHandler(void)
+__attribute__ ((naked)) void isr_usart1(void)
 {
     interrupt_entry();
-    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+    if((USART1->SR & 0x20) != 0)
     {
         /* Read one byte from the receive data register */
-
-        int c = USART_ReceiveData(USART1);
+        int c = (0x01ff & USART1->DR);
 #ifdef MODULE_UART0
         if (uart0_handler_pid) {
             uart0_handle_incoming(c);

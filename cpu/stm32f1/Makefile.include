@@ -13,7 +13,7 @@ export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/stm32f1_linkerscript.ld
 # include CPU specific includes
 INCLUDES += -I$(RIOTCPU)/$(CPU)/include/components
 INCLUDES += -I$(RIOTBASE)/drivers/include/periph
-INCLUDES += -I$(CORTEX_COMMON)/include
+#INCLUDES += -I$(CORTEX_COMMON)/include
 export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
 
 # explicitly tell the linker to link the syscalls and startup code.

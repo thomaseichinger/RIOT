@@ -14,10 +14,10 @@
 int fw_puts(char *astring, int length)
 {
     for (int i = 0; i < length; i++) {
-        USART_SendData(USART1, astring[i]);
+        USART1->DR = astring[i];
 
         /* Loop until the end of transmission */
-        while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) {}
+        while ( (USART1->SR & 0x40) != 1 ) {}
     }
 
     return length;

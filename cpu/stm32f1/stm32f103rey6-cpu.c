@@ -22,7 +22,7 @@
  */
 #include <stdio.h>
 #include <stdint.h>
-#include "stm32f10x_tim.h"
+// #include "stm32f10x_tim.h"
 #include "attributes.h"
 #include "kernel.h"
 #include "crash.h"
@@ -30,7 +30,7 @@
 #include "board_uart0.h"
 
 extern void sched_task_exit(void);
-void sched_task_return(void);
+NORETURN void sched_task_return(void);
 
 void cpu_init(void)
 {
@@ -39,33 +39,9 @@ void cpu_init(void)
 }
 
 __attribute__((naked))
-void HardFault_Handler(void)
+void isr_wwdg(void)
 {
-    core_panic(HARD_FAULT, "HARD FAULT");
-
-    while (1);
-}
-
-__attribute__((naked))
-void BusFault_Handler(void)
-{
-    puts("BusFault_Handler");
-
-    while (1);
-}
-
-__attribute__((naked))
-void Usage_Handler(void)
-{
-    puts("Usage FAULT");
-
-    while (1);
-}
-
-__attribute__((naked))
-void WWDG_Handler(void)
-{
-    puts("WWDG FAULT");
+    puts("WWDG HANDLER");
 
     while (1);
 }
@@ -78,7 +54,7 @@ int reboot_arch(int mode)
     }
 }
 
-void cpu_switch_context_exit(void)
+NORETURN void cpu_switch_context_exit(void)
 {
     sched_run();
     sched_task_return();
@@ -90,27 +66,27 @@ void thread_yield(void)
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;    // set PendSV Bit
 }
 
-__attribute__((naked))void PendSV_Handler(void)
-{
-    save_context();
-    /* call scheduler update fk_thread variable with pdc of next thread  */
-    asm("bl sched_run");
-    /* the thread that has higest priority and is in PENDING state */
-    restore_context();
-}
+// __attribute__((naked))void isr_pendsv(void)
+// {
+//     save_context();
+//     /* call scheduler update fk_thread variable with pdc of next thread  */
+//     asm("bl sched_run");
+//     /* the thread that has higest priority and is in PENDING state */
+//     restore_context();
+// }
 
-    __attribute__((naked))
-void SVC_Handler(void)
-{
-    /* {r0-r3,r12,LR,PC,xPSR} are saved automatically on exception entry */
-    //    asm("push   {LR}");
-    /* save exception return value */
-    SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-    //
-    //    asm("pop    {r0}"               );      /* restore exception retrun value from stack */
-    asm("bx     LR"                 );      /* load exception return value to pc causes end of exception*/
-    /* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
-}
+// __attribute__((naked))
+// void isr_svc(void)
+// {
+//     /* {r0-r3,r12,LR,PC,xPSR} are saved automatically on exception entry */
+//     //    asm("push   {LR}");
+//     /* save exception return value */
+//     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+//     //
+//     //    asm("pop    {r0}"               );      /* restore exception retrun value from stack */
+//     asm("bx     LR"                 );      /* load exception return value to pc causes end of exception*/
+//     /* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
+// }
 
 /* kernel functions */
 void ctx_switch(void)
@@ -137,7 +113,7 @@ void ctx_switch(void)
     sched_task_return();
 }
 /* call scheduler so active_thread points to the next task */
-void sched_task_return(void)
+NORETURN void sched_task_return(void)
 {
     /* switch to user mode use PSP insteat of MSP in ISR Mode*/
     CONTROL_Type mode;
@@ -153,6 +129,8 @@ void sched_task_return(void)
     asm("pop		{r4-r11}");
     asm("pop		{r0-r3,r12,lr}"); /* simulate register restor from stack */
     asm("pop		{pc}");
+
+    UNREACHABLE();
 }
 /*
  * cortex m4 knows stacks and handles register backups
@@ -202,7 +180,7 @@ char *thread_stack_init(void *task_func, void *stack_start, int stack_size)
 
     /* link register */
     stk--;
-    *stk = (unsigned int) 0x0;
+    *stk = (unsigned int) sched_task_exit;
 
     /* r12 */
     stk--;

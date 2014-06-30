@@ -2,10 +2,10 @@
 export CFLAGS += -DCOREIF_NG=1
 
 # tell the build system that the CPU depends on the Cortex-M common files
-export USEMODULE += cortexm_common
+export USEMODULE += cortex_m3_common
 
 # define path to cortex-m common module, which is needed for this CPU
-export CORTEX_COMMON = $(RIOTCPU)/cortexm_common/
+export CORTEX_M3_COMMON = $(RIOTCPU)/cortex_m3_common/
 
 # define the linker script to use for this CPU
 export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/stm32f1_linkerscript.ld
@@ -25,7 +25,7 @@ export UNDEF += $(BINDIR)cpu/startup.o
 export USEMODULE += periph
 
 # CPU depends on the cortex-m common module, so include it
-include $(CORTEX_COMMON)Makefile.include
+include $(CORTEX_M3_COMMON)Makefile.include
 
 #INCLUDES += -Iinclude
 #INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/Include

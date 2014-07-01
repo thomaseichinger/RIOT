@@ -21,6 +21,7 @@
 #include "stm32f10x.h"
 #include "cpu.h"
 #include "sched.h"
+#include "thread.h"
 #include "board_uart0.h"
 
 /**
@@ -30,7 +31,7 @@
   */
 __attribute__ ((naked)) void isr_usart1(void)
 {
-    interrupt_entry();
+    ISR_ENTER();
     if((USART1->SR & 0x20) != 0)
     {
         /* Read one byte from the receive data register */
@@ -49,5 +50,5 @@ __attribute__ ((naked)) void isr_usart1(void)
         thread_yield();
     }
 
-    interrupt_return();
+    ISR_EXIT();
 }

@@ -27,19 +27,19 @@
  * ----------------------------------------------------------------------------
  */
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
+/*OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-SEARCH_DIR(.)
+SEARCH_DIR(.)*/
 
 /* Memory Spaces Definitions */
 MEMORY
 {
-    rom (rx)    : ORIGIN = 0x08000000, LENGTH = 0x00080000 /* Flash, 512K */
-    ram (rwx)   : ORIGIN = 0x20000000, LENGTH = 0x00010000 /* ram, 64K */
+    rom (rx)        : ORIGIN = 0x08000000, LENGTH = 512K
+    ram (xrw)       : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 /* The stack size used by the application. NOTE: you need to adjust  */
-STACK_SIZE = DEFINED(STACK_SIZE) ? STACK_SIZE : 0x2000 ;
+STACK_SIZE = DEFINED(STACK_SIZE) ? STACK_SIZE : 0x800 ;
 
 /* Section Definitions */
 SECTIONS
@@ -128,12 +128,12 @@ SECTIONS
     } > ram
 
     /* stack section */
-    .stack (NOLOAD):
+    .stack (NOLOAD) :
     {
-        . = ALIGN(8);
+        . = ALIGN(4);
         _sstack = .;
         . = . + STACK_SIZE;
-        . = ALIGN(8);
+        . = ALIGN(4);
         _estack = .;
     } > ram
 

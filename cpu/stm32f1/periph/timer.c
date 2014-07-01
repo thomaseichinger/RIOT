@@ -26,6 +26,9 @@
 #include "periph_conf.h"
 #include "periph/timer.h"
 
+#define ENABLE_DEBUG (0)
+#include "debug.h"
+
 
 static inline void irq_handler(tim_t timer, TIM_TypeDef *dev);
 
@@ -294,7 +297,9 @@ void timer_reset(tim_t dev)
 __attribute__ ((naked)) void TIMER_0_ISR(void)
 {
     ISR_ENTER();
+    DEBUG("enter ISR\n");
     irq_handler(TIMER_0, TIMER_0_DEV);
+    DEBUG("leave ISR\n");
     ISR_EXIT();
 }
 #endif
@@ -311,23 +316,30 @@ __attribute__ ((naked)) void TIMER_1_ISR(void)
 static inline void irq_handler(tim_t timer, TIM_TypeDef *dev)
 {
     if (dev->SR & TIM_SR_CC1IF) {
+        DEBUG("1\n");
         dev->DIER &= ~TIM_DIER_CC1IE;
         dev->SR &= ~TIM_SR_CC1IF;
         config[timer].cb(0);
+        DEBUG("-1\n");
     }
     else if (dev->SR & TIM_SR_CC2IF) {
+        DEBUG("2\n");
         dev->DIER &= ~TIM_DIER_CC2IE;
         dev->SR &= ~TIM_SR_CC2IF;
         config[timer].cb(1);
     }
     else if (dev->SR & TIM_SR_CC3IF) {
+        DEBUG("3\n");
         dev->DIER &= ~TIM_DIER_CC3IE;
         dev->SR &= ~TIM_SR_CC3IF;
         config[timer].cb(2);
+        DEBUG("-3\n");
     }
     else if (dev->SR & TIM_SR_CC4IF) {
+        DEBUG("4\n");
         dev->DIER &= ~TIM_DIER_CC4IE;
         dev->SR &= ~TIM_SR_CC4IF;
         config[timer].cb(3);
+        DEBUG("-4\n");
     }
 }

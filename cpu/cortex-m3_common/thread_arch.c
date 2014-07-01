@@ -2,15 +2,15 @@
  * Copyright (C) 2014 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License. See the file LICENSE in the top level directory for more
+ * Public License v2.1. See the file LICENSE in the top level directory for more
  * details.
  */
 
 /**
- * @ingroup     cpu_cortex-m3
+ * @ingroup     cpu_cortexm4_common
  * @{
  *
- * @file        thread_arch.c
+ * @file
  * @brief       Implementation of the kernel's architecture dependent thread interface
  *
  * @author      Stefan Pfeiffer <stefan.pfeiffer@fu-berlin.de>
@@ -19,10 +19,11 @@
  * @}
  */
 
-#include <stdint.h>
+#include <stdio.h>
 
 #include "arch/thread_arch.h"
 #include "sched.h"
+#include "thread.h"
 #include "irq.h"
 #include "cpu.h"
 #include "kernel_internal.h"
@@ -43,11 +44,17 @@
 
 
 static void context_save(void);
-static void context_restore(void) NORETURN;
-static void enter_thread_mode(void) NORETURN;
+static void context_restore(void);
 
 /**
- * Cortex-M3 knows stacks and handles register backups, so use different stack frame layout
+ * Cortex-M knows stacks and handles register backups, so use different stack frame layout
+ *
+ * TODO: How to handle different Cortex-Ms? Code is so far valid for M3 and M4 without FPU
+ *
+ * Layout with storage of floating point registers (applicable for Cortex-M4):
+ * ------------------------------------------------------------------------------------------------------------------------------------
+ * | R0 | R1 | R2 | R3 | LR | PC | xPSR | S0 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | S12 | S13 | S14 | S15 | FPSCR |
+ * ------------------------------------------------------------------------------------------------------------------------------------
  *
  * Layout without floating point registers:
  * --------------------------------------
@@ -57,28 +64,42 @@ static void enter_thread_mode(void) NORETURN;
  */
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
-    uint32_t *stk;
-    stk = (uint32_t *)(stack_start + stack_size);
+    unsigned int *stk;
+    stk = (unsigned int *)(stack_start + stack_size);
 
     /* marker */
     stk--;
-    *stk = (uint32_t)STACK_MARKER;
+    *stk = STACK_MARKER;
+
+    /* TODO: fix FPU handling for Cortex-M4 */
+    /*
+    stk--;
+    *stk = (unsigned int) 0;
+    */
+
+    /* S0 - S15 */
+    /*
+    for (int i = 15; i >= 0; i--) {
+        stk--;
+        *stk = i;
+    }
+    */
 
     /* FIXME xPSR */
     stk--;
-    *stk = (uint32_t)0x01000200;
+    *stk = (unsigned int) 0x01000200;
 
     /* program counter */
     stk--;
-    *stk = (uint32_t)task_func;
+    *stk = (unsigned int) task_func;
 
     /* link register, jumped to when thread exits */
     stk--;
-    *stk = (uint32_t)sched_task_exit;
+    *stk = (unsigned int) sched_task_exit;
 
     /* r12 */
     stk--;
-    *stk = (uint32_t) 0;
+    *stk = (unsigned int) 0;
 
     /* r0 - r3 */
     for (int i = 3; i >= 0; i--) {
@@ -94,27 +115,29 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 
     /* lr means exception return code  */
     stk--;
-    *stk = (uint32_t)EXCEPT_RET_TASK_MODE; /* return to task-mode main stack pointer */
+    *stk = EXCEPT_RET_TASK_MODE; /* return to task-mode main stack pointer */
 
     return (char*) stk;
 }
 
 void thread_arch_stack_print(void)
 {
-    /* TODO */
+    int count = 0;
+    uint32_t *sp = (uint32_t *)sched_active_thread->sp;
+
+    printf("printing the current stack of thread %u\n", thread_getpid());
+    printf("  address:      data:\n");
+
+    do {
+        printf("  0x%08x:   0x%08x\n", (unsigned int)sp, (unsigned int)*sp);
+        sp++;
+        count++;
+    } while (*sp != STACK_MARKER);
+
+    printf("current stack size: %u byte\n", count);
 }
 
-void thread_arch_start_threading(void)
-{
-    sched_run();
-    enableIRQ();
-    enter_thread_mode();
-}
-
-/**
- * @brief Set the MCU into Thread-Mode and load the initial task from the stack and run it
- */
-void NORETURN enter_thread_mode(void)
+__attribute__((naked)) void NORETURN thread_arch_start_threading(void)
 {
     /* switch to user mode use PSP instead of MSP in ISR Mode*/
     CONTROL_Type mode;
@@ -123,44 +146,19 @@ void NORETURN enter_thread_mode(void)
     mode.b.nPRIV = 0; /* privilege */
     __set_CONTROL(mode.w);
 
-    /* load pdc->stackpointer in r0 */
-    asm("ldr    r0, =sched_active_thread" );      /* r0 = &sched_active_thread */
-    asm("ldr    r0, [r0]"           );      /* r0 = *r0 = sched_active_thread */
-    asm("ldr    sp, [r0]"           );      /* sp = r0  restore stack pointer*/
-    asm("pop    {r4}"               );      /* skip exception return */
-    asm("pop    {r4-r11}"           );
-    asm("pop    {r0-r3,r12,lr}"     );      /* get registers from stack */
-    asm("pop    {r4}"               );      /* get PC */
-    asm("pop    {r5}"               );      /* discard the xPSR entry */
-    asm("mov    pc, r4"             );      /* load PC */
+    /* enable IRQs to make sure the SVC interrupt is reachable */
+    enableIRQ();
+
+    /* trigger the SVC interrupt which will get and execute the next thread */
+    asm("svc    0x01");
 
     UNREACHABLE();
 }
 
 void thread_arch_yield(void)
 {
-    if (irq_arch_in()) {
-        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;    /* set PendSV Bit */
-    }
-    else {
-        asm("svc 0x01\n");                      /* trigger SVC interrupt, which will trigger the pendSV (needed?) */
-    }
-}
-
-/**
- * @brief SVC interrupt handler (to be discussed if this is really needed)
- */
-__attribute__((naked)) void isr_svc(void)
-{
-    SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;    /* trigger the pendsv interrupt */
-    asm("bx     LR"                 );      /* load exception return value to PC causes end of exception*/
-}
-
-__attribute__((naked)) void isr_pendsv(void)
-{
-    context_save();
-    sched_run();
-    context_restore();
+    /* trigger the PENDSV interrupt to run scheduler and schedule new thread if applicable */
+    SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
 
 __attribute__((always_inline)) static __INLINE void context_save(void)
@@ -189,6 +187,24 @@ __attribute__((always_inline)) static __INLINE void context_restore(void)
     asm("bx     r0"                 );      /* load exception return value to PC causes end of exception*/
 
     /* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
+}
 
-    UNREACHABLE();
+/**
+ * @brief The svc is used for running the scheduler and scheduling a new task during start-up or
+ *        after a thread has exited
+ */
+__attribute__((naked)) void isr_svc(void)
+{
+    sched_run();
+    context_restore();
+}
+
+/**
+ * @brief All task switching activity is carried out int the pendSV interrupt
+ */
+__attribute__((naked)) void isr_pendsv(void)
+{
+    context_save();
+    sched_run();
+    context_restore();
 }

@@ -10,14 +10,12 @@
  */
 
 #include "stm32f10x.h"
+#include "periph/uart.h"
 
 int fw_puts(char *astring, int length)
 {
     for (int i = 0; i < length; i++) {
-        USART1->DR = astring[i];
-
-        /* Loop until the end of transmission */
-        while ( (USART1->SR & 0x40) != 1 ) {}
+        uart_write_blocking(UART_0, astring[i]);
     }
 
     return length;

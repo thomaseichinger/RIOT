@@ -7,7 +7,7 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_stm32f1
  * @{
  *
  * @file        syscalls.c

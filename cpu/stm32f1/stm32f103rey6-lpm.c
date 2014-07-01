@@ -23,7 +23,7 @@
 #include "lpm.h"
 
 /* lpm is accessed before memory init and initialized separately through code */
-__attribute__((section(".noinit")))
+// __attribute__((section(".noinit")))
 static enum lpm_mode lpm;
 
 // TODO

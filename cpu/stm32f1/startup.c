@@ -81,9 +81,9 @@ void reset_handler(void)
  */
 void dummy_handler(void)
 {
+    core_panic(DUMMY_HANDLER, "DUMMY HANDLER");
     while (1) {asm ("nop");}
 }
-
 
 void isr_nmi(void)
 {

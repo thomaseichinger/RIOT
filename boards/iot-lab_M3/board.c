@@ -25,7 +25,7 @@
 
 void board_init(void)
 {
-    /* initialize core clocks via CMSIS function provided by Atmel */
+    /* initialize core clocks via CMSIS function provided by ST */
     SystemInit();
 
     /* initialize the CPU */

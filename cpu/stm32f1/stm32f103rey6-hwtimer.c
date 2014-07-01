@@ -53,17 +53,19 @@ void hwtimer_arch_disable_interrupt(void)
 
 void hwtimer_arch_set(unsigned long offset, short timer)
 {
-    timer_set(HW_TIMER, timer + 1, offset);
+    if ( timer_set(HW_TIMER, timer, offset) ) {
+        printf("Error: setting timer %d to %d\n", timer, offset );
+    }
 }
 
 void hwtimer_arch_set_absolute(unsigned long value, short timer)
 {
-    // will not be implemented
+    timer_set_absolute(HW_TIMER, timer, value);
 }
 
 void hwtimer_arch_unset(short timer)
 {
-    timer_clear(HW_TIMER, timer + 1);
+    timer_clear(HW_TIMER, timer);
 }
 
 unsigned long hwtimer_arch_now(void)
@@ -73,6 +75,8 @@ unsigned long hwtimer_arch_now(void)
 
 void irq_handler(int channel)
 {
-    timeout_handler((short)(channel - 1));
+    timeout_handler((short)(channel));
+    DEBUG("before yield\n");
     thread_yield();
+    DEBUG("after yield\n");
 }

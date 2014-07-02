@@ -19,15 +19,16 @@
  * @}
  */
 
+#include <stdint.h>
 #include <stdio.h>
 
 #include "arch/thread_arch.h"
+#include "thread.h"
 #include "sched.h"
 #include "thread.h"
 #include "irq.h"
 #include "cpu.h"
 #include "kernel_internal.h"
-
 
 /**
  * @name noticeable marker marking the beginning of a stack segment
@@ -42,9 +43,8 @@
  */
 #define EXCEPT_RET_TASK_MODE        (0xfffffffd)
 
-
 static void context_save(void);
-static void context_restore(void);
+static void context_restore(void) NORETURN;
 
 /**
  * Cortex-M knows stacks and handles register backups, so use different stack frame layout
@@ -113,9 +113,9 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
         *stk = i;
     }
 
-    /* lr means exception return code  */
+    /* put LR to trigger return to thread stack pointer */
     stk--;
-    *stk = EXCEPT_RET_TASK_MODE; /* return to task-mode main stack pointer */
+    *stk = (uint32_t)EXCEPT_RET_TASK_MODE;
 
     return (char*) stk;
 }
@@ -137,22 +137,12 @@ void thread_arch_stack_print(void)
     printf("current stack size: %u byte\n", count);
 }
 
-__attribute__((naked)) void NORETURN thread_arch_start_threading(void)
+__attribute__((naked)) void thread_arch_start_threading(void)
 {
-    /* switch to user mode use PSP instead of MSP in ISR Mode*/
-    CONTROL_Type mode;
-    mode.w = __get_CONTROL();
-    mode.b.SPSEL = 1; /* select PSP */
-    mode.b.nPRIV = 0; /* privilege */
-    __set_CONTROL(mode.w);
-
     /* enable IRQs to make sure the SVC interrupt is reachable */
     enableIRQ();
-
     /* trigger the SVC interrupt which will get and execute the next thread */
     asm("svc    0x01");
-
-    UNREACHABLE();
 }
 
 void thread_arch_yield(void)
@@ -165,28 +155,29 @@ __attribute__((always_inline)) static __INLINE void context_save(void)
 {
     /* {r0-r3,r12,LR,PC,xPSR} are saved automatically on exception entry */
 
-    /* save unsaved registers */
-    asm("mrs    r0, psp"            );      /* get stack pointer from user mode */
-    asm("stmdb  r0!,{r4-r11}"       );      /* save regs */
-    asm("stmdb  r0!,{lr}"           );      /* exception return value */
-/*  asm("vstmdb sp!, {s16-s31}"     ); */   /* TODO save FPU registers if needed */
-    asm("ldr    r1, =sched_active_thread" );      /* load address of current tcb */
-    asm("ldr    r1, [r1]"           );      /* dereference pdc */
-    asm("str    r0, [r1]"           );      /* write r0 to pdc->sp means current threads stack pointer */
+    /* save unsaved registers onto the stack */
+    asm("mrs    r0, psp"                    );  /* get stack pointer from user mode */
+    asm("stmdb  r0!,{r4-r11}"               );  /* save regs */
+    asm("stmdb  r0!,{lr}"                   );  /* exception return value */
+    asm("ldr    r1, =sched_active_thread"   );  /* load address of current TCB */
+    asm("ldr    r1, [r1]"                   );  /* dereference TCB */
+    asm("str    r0, [r1]"                   );  /* write r0 to tcb->sp */
 }
 
 __attribute__((always_inline)) static __INLINE void context_restore(void)
 {
-    asm("ldr    r0, =sched_active_thread" );      /* load address of current TCB */
-    asm("ldr    r0, [r0]"           );      /* dereference TCB */
-    asm("ldr    r1, [r0]"           );      /* load tcb->sp to register 1 */
-    asm("ldmia  r1!, {r0}"          );      /* restore exception return value from stack */
-/*  asm("pop    {s16-s31}"          ); */   /* TODO load FPU register if needed depends on r0 exret */
-    asm("ldmia  r1!, {r4-r11}"      );      /* restore other registers */
-    asm("msr    psp, r1"            );      /* restore PSP register (user mode SP)*/
-    asm("bx     r0"                 );      /* load exception return value to PC causes end of exception*/
+    /* restore registers from stack */
+    asm("ldr    r0, =sched_active_thread"   );  /* load address of current TCB */
+    asm("ldr    r0, [r0]"                   );  /* dereference TCB */
+    asm("ldr    r1, [r0]"                   );  /* load tcb->sp to register 1 */
+    asm("ldmia  r1!, {r0}"                  );  /* restore exception return value from stack */
+    asm("ldmia  r1!, {r4-r11}"              );  /* restore other registers */
+    asm("msr    psp, r1"                    );  /* restore PSP register (user mode SP) */
+    asm("bx     r0"                         );  /* load exception return value to PC */
 
     /* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
+
+    UNREACHABLE();
 }
 
 /**

@@ -5,19 +5,17 @@ export CFLAGS += -DCOREIF_NG=1
 export USEMODULE += cortex-m3_common
 
 # define path to cortex-m common module, which is needed for this CPU
-export CORTEX-M3_COMMON = $(RIOTCPU)/cortex-m3_common/
+export CORTEXM_COMMON = $(RIOTCPU)/cortex-m3_common/
 
 # define the linker script to use for this CPU
-export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/stm32f1_linkerscript.ld
+export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/$(CPU_MODEL)_linkerscript.ld
 
 # include CPU specific includes
-INCLUDES += -I$(RIOTCPU)/$(CPU)/include/components
-INCLUDES += -I$(RIOTBASE)/drivers/include/periph
-#INCLUDES += -I$(CORTEX_COMMON)/include
+export INCLUDES += -I$(RIOTCPU)/$(CPU)/include/components
 export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
 
 # explicitly tell the linker to link the syscalls and startup code.
-#   Without this the interrupt vectors will not be linked correctly!
+# Without this the interrupt vectors will not be linked correctly!
 export UNDEF += $(BINDIR)cpu/syscalls.o
 export UNDEF += $(BINDIR)cpu/startup.o
 
@@ -25,10 +23,4 @@ export UNDEF += $(BINDIR)cpu/startup.o
 export USEMODULE += periph
 
 # CPU depends on the cortex-m common module, so include it
-include $(CORTEX-M3_COMMON)Makefile.include
-
-#INCLUDES += -Iinclude
-#INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/Include
-#INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x
-#INCLUDES += -I$(RIOTCPU)/$(CPU)/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc
-#INCLUDES += -I$(RIOTBASE)/core/include -I$(RIOTBASE)/sys/include -I$(RIOTBASE)/sys/lib
+include $(CORTEXM_COMMON)Makefile.include

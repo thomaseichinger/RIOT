@@ -6,4 +6,4 @@ DISABLE_MODULE += auto_init
 include $(RIOTBASE)/Makefile.include
 
 reset:
-	$(RIOTCPU)/$(CPU)/tools/reset.sh
+	$(RIOTBOARD)/$(BOARD)/dist/reset.sh

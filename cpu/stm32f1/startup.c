@@ -186,7 +186,6 @@ void isr_dma2_ch3(void)       __attribute__ ((weak, alias("dummy_handler")));
 void isr_dma2_ch4_5(void)     __attribute__ ((weak, alias("dummy_handler")));
 
 
-
 /* interrupt vector table */
 __attribute__ ((section(".vectors")))
 const void *interrupt_vector[] = {

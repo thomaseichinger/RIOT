@@ -1,83 +1,73 @@
 /*
  * Copyright (C) 2013 INRIA
+ * Copyright (C) 2014 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser General
  * Public License v2.1. See the file LICENSE in the top level directory for more
  * details.
  */
 
+/**
+ * @defgroup        cpu_stm32f1 STM32F1
+ * @addtogroup      cpu
+ * @brief           CPU specific implementations for the STM32F1
+ * @{
+ *
+ * @file
+ * @brief           Implementation specific CPU configuration options
+ *
+ * @author          Alaeddine Weslati <alaeddine.weslati@intia.fr>
+ * @author          Hauke Petersen <hauke.petersen@fu-berlin.de>
+ */
+
 #ifndef CPUCONF_H_
 #define CPUCONF_H_
 
-/**
- * @ingroup		cpu_stm32f1
- *
- * @{
- */
-
-/**
- * @file
- * @brief		STM32f103 CPUconfiguration
- *
- * @author    Freie Universität Berlin, Computer Systems & Telematics, FeuerWhere project
- * @author		baar
- * @author    Alaeddine Weslati <alaeddine.weslati@intia.fr>
- * @version
- *
- *
- */
-#include "stm32f1.h"
-
-#define TRANSCEIVER_BUFFER_SIZE (3)
-
-#define FEUERWARE_CONF_CPU_NAME			"stm32f103rey6"
-
-/**
- * @name CPU capabilities
- * @{
- */
-//#define FEUERWARE_CPU_LPC2387					1
-#define FEUERWARE_CONF_CORE_SUPPORTS_TIME		1
-/** @} */
-
-/**
- * @name Stdlib configuration
- * @{
- */
-#define __FOPEN_MAX__		4
-#define __FILENAME_MAX__	12
-/** @} */
+#include "stm32f10x.h"
 
 /**
  * @name Kernel configuration
+ *
+ * TODO: measure and adjust for the cortex-m3
  * @{
  */
+#define KERNEL_CONF_STACKSIZE_PRINTF    (2500)
+
 #ifndef KERNEL_CONF_STACKSIZE_DEFAULT
-#define KERNEL_CONF_STACKSIZE_DEFAULT	1024
+#define KERNEL_CONF_STACKSIZE_DEFAULT   (2500)
 #endif
 
-#define KERNEL_CONF_STACKSIZE_IDLE		1024
-
-#define KERNEL_CONF_STACKSIZE_PRINTF_FLOAT  (4096)
-#define KERNEL_CONF_STACKSIZE_PRINTF        (2048)
-
-#define UART0_BUFSIZE                   (128)
-
+#define KERNEL_CONF_STACKSIZE_IDLE      (512)
 /** @} */
 
 /**
- * @name Compiler specifics
+ * @name UART0 buffer size definition for compatibility reasons
+ *
+ * TODO: remove once the remodeling of the uart0 driver is done
  * @{
  */
-#define CC_CONF_INLINE					inline
-#define CC_CONF_USED					__attribute__((used))
-#define CC_CONF_NONNULL(...)			__attribute__((nonnull(__VA_ARGS__)))
-#define CC_CONF_WARN_UNUSED_RESULT		__attribute__((warn_unused_result))
+#ifndef UART0_BUFSIZE
+#define UART0_BUFSIZE                   (128)
+#endif
 /** @} */
 
-#define CPU_ID_LEN              (12)
-#define CPU_ID_EUI64_START      (4)
-#define CPU_ID_RADDR_START      (8)
+/**
+ * @name Macro for reading CPU_ID
+ */
+#define GET_CPU_ID(id)          memcpy(&id, (void *)(0x1ffff7e8), CPU_ID_LEN)
 
+/**
+ * @name Definition of different panic modes
+ */
+typedef enum {
+    HARD_FAULT,
+    WATCHDOG,
+    BUS_FAULT,
+    USAGE_FAULT,
+    DUMMY_HANDLER
+} panic_t;
+
+void cpu_clock_scale(uint32_t source, uint32_t target, uint32_t *prescale);
+
+#endif /* __CPU_CONF_H */
 /** @} */
-#endif /* CPUCONF_H_ */

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#include "stm32f1.h"
+#include "cpu.h"
 #include "periph/gpio.h"
 #include "spi.h"
 #include "periph_conf.h"

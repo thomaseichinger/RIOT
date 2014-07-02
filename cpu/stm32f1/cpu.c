@@ -11,23 +11,19 @@
  * @ingroup     cpu_stm32f1
  * @{
  *
- * @file        stm32f103rey6-atom.c
- * @brief       Implementation of atomic set and return
+ * @file
+ * @brief       Implementation of the kernel cpu functions
  *
- * @author      Stefan Pfeiffer
+ * @author      Stefan Pfeiffer <stefan.pfeiffer@fu-berlin.de>
  * @author      Alaeddine Weslati <alaeddine.weslati@inria.fr>
+ * @author      Thomas Eichinger <thomas.eichinger@fu-berlin.de>
  *
  * @}
  */
+
 #include "cpu.h"
 
-unsigned int atomic_set_return(unsigned int *p, unsigned int uiVal)
+void cpu_init(void)
 {
-    //unsigned int cspr = disableIRQ();		//crashes
-    dINT();
-    unsigned int uiOldVal = *p;
-    *p = uiVal;
-    //restoreIRQ(cspr);						//crashes
-    eINT();
-    return uiOldVal;
+    /* nothing to do here, yet */
 }

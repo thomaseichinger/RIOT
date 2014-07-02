@@ -19,9 +19,14 @@
 #ifndef HWTIMER_CPU_H_
 #define HWTIMER_CPU_H_
 
-#define HWTIMER_MAXTIMERS   (4)
-#define HWTIMER_SPEED       (2000U)
-#define HWTIMER_MAXTICKS    (0xFFFF)
+/**
+ * @name Hardware timer configuration
+ * @{
+ */
+#define HWTIMER_MAXTIMERS   (4)             /**< the CPU implementation supports 3 HW timers */
+#define HWTIMER_SPEED       (2000U)         /**< the HW timer runs with 2KHz */
+#define HWTIMER_MAXTICKS    (0xFFFF)        /**< 16-bit timer */
+/** @} */
 
 #endif /* HWTIMER_CPU_H_ */
 /** @} */

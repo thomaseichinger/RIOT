@@ -94,7 +94,6 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
     USART_TypeDef *dev;
     GPIO_TypeDef *port;
     uint32_t rx_pin, tx_pin;
-    uint8_t af;
     float divider;
     uint16_t mantissa;
     uint8_t fraction;
@@ -107,7 +106,6 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             port = UART_0_PORT;
             rx_pin = UART_0_RX_PIN;
             tx_pin = UART_0_TX_PIN;
-            af = UART_0_AF;
             /* enable clocks */
             UART_0_CLKEN();
             UART_0_PORT_CLKEN();
@@ -119,7 +117,6 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             port = UART_1_PORT;
             tx_pin = UART_1_TX_PIN;
             rx_pin = UART_1_RX_PIN;
-            af = UART_1_AF;
             /* enable clocks */
             UART_1_CLKEN();
             UART_1_PORT_CLKEN();
@@ -161,7 +158,6 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
     return 0;
 }
 
-
 void uart_tx_begin(uart_t uart)
 {
     switch (uart) {
@@ -180,7 +176,6 @@ void uart_tx_begin(uart_t uart)
     }
 }
 
-#include <stdio.h>
 void uart_tx_end(uart_t uart)
 {
     switch (uart) {
@@ -278,12 +273,14 @@ int uart_write_blocking(uart_t uart, char data)
     return 1;
 }
 
+#if UART_0_EN
 __attribute__((naked)) void UART_0_ISR(void)
 {
     ISR_ENTER();
     irq_handler(UART_0, UART_0_DEV);
     ISR_EXIT();
 }
+#endif
 
 #if UART_1_EN
 __attribute__((naked)) void UART_1_ISR(void)
@@ -293,7 +290,6 @@ __attribute__((naked)) void UART_1_ISR(void)
     ISR_EXIT();
 }
 #endif
-
 
 static inline void irq_handler(uint8_t uartnum, USART_TypeDef *dev)
 {

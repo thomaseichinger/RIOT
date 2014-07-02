@@ -11,3 +11,7 @@ export RIOTBASE ?= $(CURDIR)/../..
 export QUIET ?= 1
 
 include $(RIOTBASE)/Makefile.include
+
+reset:
+	$(RIOTBOARD)/$(BOARD)/dist/reset.sh
+

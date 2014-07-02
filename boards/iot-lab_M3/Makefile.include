@@ -14,8 +14,8 @@ export LINK = $(PREFIX)gcc
 export SIZE = $(PREFIX)size
 export OBJCOPY = $(PREFIX)objcopy
 export TERMPROG = $(RIOTBASE)/dist/tools/pyterm/pyterm.py
-export FLASHER = $(RIOTBOARD)/$(BOARD)/tools/flash.sh
-export DEBUGGER = $(RIOTBOARD)/$(BOARD)/tools/debug.sh
+export FLASHER = $(RIOTBOARD)/$(BOARD)/dist/flash.sh
+export DEBUGGER = $(RIOTBOARD)/$(BOARD)/dist/debug.sh
 
 # define build specific options
 export CPU_USAGE = -mcpu=cortex-m3

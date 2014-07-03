@@ -25,5 +25,6 @@
 
 void cpu_init(void)
 {
-    /* nothing to do here, yet */
+    /* set PendSV priority to the lowest possible priority */
+    NVIC_SetPriority(PendSV_IRQn, 0xff);
 }

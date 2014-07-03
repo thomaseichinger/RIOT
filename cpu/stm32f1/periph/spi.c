@@ -12,7 +12,15 @@
 
 int spi_init_master(spi_t dev, spi_conf_t conf, uint32_t speed)
 {
-    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+    switch(dev) {
+#ifdef SPI_0_EN
+        case SPI_0:
+            SPI_0_CLKEN();
+#endif
+        case SPI_UNDEFINED:
+        default:
+            return -1;
+    }
 
     return 0;
 }
@@ -31,7 +39,7 @@ int spi_transfer_byte(spi_t dev, char out, char *in)
     switch(dev) {
 #ifdef SPI_0_EN
         case SPI_0:
-            SPI_dev = SPI1;
+            SPI_dev = SPI_0_DEV;
 #endif
         case SPI_UNDEFINED:
         default:

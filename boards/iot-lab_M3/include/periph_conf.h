@@ -194,14 +194,26 @@
 #define SPI_NUM_OF      1
 #define SPI_0_EN        1
 
+#define SPI_0_DEV       SPI1
 #define SPI_IRQ_0       SPI_0
 
 #define SPI_0_BR_PRESC  16
 
-#define SPI_0_SCLK      GPIO_5_PIN
-#define SPI_0_MISO      GPIO_6_PIN
-#define SPI_0_MOSI      GPIO_7_PIN
-#define SPI_0_CS        GPIO_4_PIN
+#define SPI_0_CLKEN()       (RCC->APB2ENR |= RCC_APB2ENR_SPI1EN)
+#define SPI_0_SCLK_PIN      5
+#define SPI_0_SCLK_PORT     GPIOA
+#define SPI_0_MISO_PIN      6
+#define SPI_0_MISO_PORT     GPIOA
+#define SPI_0_MOSI_PIN      7
+#define SPI_0_MOSI_PORT     GPIOA
+#define SPI_0_CS_PIN        4
+#define SPI_0_CS_PORT       GPIOA
+#define SPI_0_IRQ0_PIN      4
+#define SPI_0_IRQ0_PORT     GPIOC
+#define SPI_0_RESET_PIN     1
+#define SPI_0_RESET_PORT    GPIOC
+#define SPI_0_SLEEP_PIN     2
+#define SPI_0_SLEEP_PORT    GPIOA
 
 #endif /* __PERIPH_CONF_H */
 /** @} */

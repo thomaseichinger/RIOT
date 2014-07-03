@@ -5,6 +5,7 @@
 #include "sched.h"
 #include "vtimer.h"
 
+#include "arch/thread_arch.h"
 #include "periph/gpio.h"
 #include "periph_conf.h"
 #include "board.h"
@@ -31,23 +32,23 @@ GPIO
 
 inline static void RESET_CLR(void)
 {
-    GPIOC->BRR = 1 << 1;
+    SPI_0_RESET_PORT->BRR = 1 << SPI_0_RESET_PIN;
 }
 inline static void RESET_SET(void)
 {
-    GPIOC->BSRR = 1 << 1;
+    SPI_0_RESET_PORT->BSRR = 1 << SPI_0_RESET_PIN;
 }
 inline static void CSn_SET(void)
 {
-    GPIOA->BSRR = 1 << 4;
+    SPI_0_CS_PORT->BSRR = 1 << SPI_0_CS_PIN;
 }
 inline static void CSn_CLR(void)
 {
-    GPIOA->BRR = 1 << 4;
+    SPI_0_CS_PORT->BRR = 1 << SPI_0_CS_PIN;
 }
 inline static void SLEEP_CLR(void)
 {
-    GPIOA->BRR = 1 << 2;
+    SPI_0_SLEEP_PORT->BRR = 1 << SPI_0_SLEEP_PIN;
 }
 
 uint8_t at86rf231_get_status(void)
@@ -190,23 +191,23 @@ void at86rf231_disable_interrupts(void)
     disable_exti_interrupt();
 }
 
-// extern void at86rf231_rx_irq(void);
-// __attribute__((naked))
-// void EXTI4_IRQHandler(void)
-// {
-//     save_context();
+extern void at86rf231_rx_irq(void);
+__attribute__((naked))
+void isr_exti4(void)
+{
+    ISR_ENTER();
 
-//     if (EXTI_GetITStatus(EXTI_Line4) != RESET) {
-//         /* IRQ_3 (TRX_END), read Frame Buffer */
-//         EXTI_ClearITPendingBit(EXTI_Line4);
+    // if (EXTI_GetITStatus(EXTI_Line4) != RESET) {
+    //     /* IRQ_3 (TRX_END), read Frame Buffer */
+    //     EXTI_ClearITPendingBit(EXTI_Line4);
 
-//         at86rf231_rx_irq();
+        at86rf231_rx_irq();
 
-//         if (sched_context_switch_request) {
-//             /* scheduler */
-//             thread_yield();
-//         }
-//     }
+        if (sched_context_switch_request) {
+            /* scheduler */
+            thread_yield();
+        }
+    // }
 
-//     restore_context();
-// }
+    ISR_EXIT();
+}

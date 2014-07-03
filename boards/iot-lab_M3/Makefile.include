@@ -37,14 +37,3 @@ endif
 
 # export board specific includes to the global includes-listing
 export INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
-
-
-
-# TODO -> move this to the appropriate Makefile.dep!!!
-ifneq (,$(filter defaulttransceiver,$(USEMODULE)))
-	USEMODULE += at86rf231
-	USEMODULE += transceiver
-endif
-
-# TODO -> is this needed?
-TERM = miniterm.py -b 115200

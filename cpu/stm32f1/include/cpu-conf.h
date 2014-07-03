@@ -69,5 +69,7 @@ typedef enum {
 
 void cpu_clock_scale(uint32_t source, uint32_t target, uint32_t *prescale);
 
+#define TRANSCEIVER_BUFFER_SIZE (3)
+
 #endif /* __CPU_CONF_H */
 /** @} */

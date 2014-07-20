@@ -23,6 +23,8 @@ QUIET ?= 1
 
 ## Modules to include. 
 
+USEMODULE += ps
+USEMODULE += vtimer
 USEMODULE += openwsn_stack
 
 INCLUDES += -I$(RIOTBASE)/sys/net/openwsn_stack/ -I$(RIOTBASE)/sys/net/openwsn_stack/kernel -I$(RIOTBASE)/sys/net/openwsn_stack/bsp -I$(RIOTBASE)/sys/net/openwsn_stack/bsp/riot

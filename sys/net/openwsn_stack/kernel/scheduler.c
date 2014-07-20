@@ -11,7 +11,7 @@
 #include "leds.h"
 
 #include "thread.h"
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 //=========================== variables =======================================
@@ -61,6 +61,7 @@ void scheduler_start(void) {
       // debugpins_task_clr();
       // board_sleep();
       // debugpins_task_set();                      // IAR should halt here if nothing to do
+      DEBUG("yield for the rest of RIOT\n");
       thread_yield();
    }
 }

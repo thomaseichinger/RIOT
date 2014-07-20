@@ -1,11 +1,18 @@
+#include <stdio.h>
+
+#include "vtimer.h"
 #include "openwsn.h"
-#include "scheduler.h"
 
 int main(void) {
 //   board_init();
 //   scheduler_init();
     openwsn_start_thread();
-   //  puts("hello?!");
+    unsigned i = 0;
+    while (1) {
+        printf("RIOT -> %u\n", i++);
+        thread_print_all();
+        vtimer_usleep(2000 * 1000);
+    }
    // openwsn_init();
    // puts("and now?!");
    // scheduler_start();

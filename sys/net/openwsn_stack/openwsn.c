@@ -74,7 +74,7 @@
 //#include "heli.h"
 //#include "imu.h"
 
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 //=========================== variables =======================================
@@ -91,7 +91,7 @@ void* openwsn_start(void *arg);
 void openwsn_start_thread(void) {
     DEBUG("%s\n",__PRETTY_FUNCTION__);
     thread_create(openwsn_stack, KERNEL_CONF_STACKSIZE_MAIN,
-                   PRIORITY_OPENWSN, CREATE_STACKTEST,
+                   PRIORITY_OPENWSN+1, CREATE_STACKTEST,
                    openwsn_start, NULL, "openwsn thread");
 }
 

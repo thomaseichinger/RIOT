@@ -9,7 +9,7 @@
 #include "spi.h"
 #include "periph_conf.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 
@@ -250,7 +250,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                             uint8_t* pCrc) {
    uint8_t temp_reg_value;
-
+DEBUG("%s\n", __PRETTY_FUNCTION__);
    //===== crc
    temp_reg_value  = radio_spiReadReg(RG_PHY_RSSI);
    *pCrc           = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
@@ -390,7 +390,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
    // - *[1B]     LQI
    uint8_t spi_tx_buffer[125];
    uint8_t spi_rx_buffer[3];
-   DEBUG("%s\n",__PRETTY_FUNCTION__);
+   // DEBUG("%s\n",__PRETTY_FUNCTION__);
    spi_tx_buffer[0] = 0x20;
    
    CSn_CLR();
@@ -454,6 +454,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radio_isr(void) {
+   DEBUG("%s\n",__PRETTY_FUNCTION__);
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
 

@@ -16,6 +16,9 @@
 #include "adaptive_sync.h"
 #include "processIE.h"
 
+#define ENABLE_DEBUG (1)
+#include "debug.h"
+
 //=========================== variables =======================================
 
 ieee154e_vars_t    ieee154e_vars;
@@ -164,6 +167,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(void) {
+   // DEBUG("%s\n",__PRETTY_FUNCTION__);
    radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
@@ -398,6 +402,7 @@ port_INLINE void activity_synchronize_newSlot(void) {
    if (ieee154e_vars.state==S_SYNCRX) {
       return;
    }
+   // DEBUG("%s\n", __PRETTY_FUNCTION__);
 
    // if this is the first time I call this function while not synchronized,
    // switch on the radio in Rx mode
@@ -441,6 +446,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
       return;
    }
+   DEBUG("%s\n", __PRETTY_FUNCTION__);
 
    // change state
    changeState(S_SYNCRX);
@@ -458,7 +464,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    uint16_t lenIE=0;//len of IEs being received if any.
-
+   DEBUG("%s\n", __PRETTY_FUNCTION__);
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
       // log the error

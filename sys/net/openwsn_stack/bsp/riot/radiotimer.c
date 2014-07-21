@@ -81,9 +81,12 @@ uint16_t radiotimer_getValue(void) {
 }
 
 void radiotimer_setPeriod(uint16_t period) {
+  DEBUG("%s\n", __PRETTY_FUNCTION__);
+    timer_irq_disable(TIMER_1);
     timer_set(TIMER_1, 1, (0xffff)&((unsigned int)period));
     current_period = period;
     radiotimer_vars.currentSlotPeriod = period;
+    timer_irq_enable(TIMER_1);
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
@@ -96,6 +99,7 @@ uint16_t radiotimer_getPeriod(void) {
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
+  DEBUG("%s\n", __PRETTY_FUNCTION__);
     timer_irq_disable(TIMER_1);
     timer_set(TIMER_1, 1, offset);
     current_period = offset;
@@ -105,6 +109,7 @@ void radiotimer_schedule(uint16_t offset) {
 }
 
 void radiotimer_cancel(void) {
+  DEBUG("%s\n", __PRETTY_FUNCTION__);
     timer_irq_disable(TIMER_1);
     timer_clear(TIMER_1, 1);
     current_period = 0;
@@ -128,7 +133,7 @@ kick_scheduler_t radiotimer_isr(void) {
     uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
     switch (taiv_temp) {
         case RADIOTIMER_COMPARE:
-            DEBUG("%s cmp\n", __PRETTY_FUNCTION__);
+            // DEBUG("%s cmp\n", __PRETTY_FUNCTION__);
             if (radiotimer_vars.compare_cb!=NULL) {
                 radiotimer_vars.compare_cb();
                 // kick the OS
@@ -136,13 +141,13 @@ kick_scheduler_t radiotimer_isr(void) {
             }
             break;
         case RADIOTIMER_OVERFLOW: // timer overflows
-            DEBUG("%s of\n", __PRETTY_FUNCTION__);
+            // DEBUG("%s of\n", __PRETTY_FUNCTION__);
             if (radiotimer_vars.overflow_cb!=NULL) {
                 //Wait until last write operation on RTC registers has finished
                 timer_reset(TIMER_1);
                 // call the callback
                 radiotimer_vars.overflow_cb();
-                DEBUG("returned...\n");
+                // DEBUG("returned...\n");
                 // kick the OS
                 return KICK_SCHEDULER;
             }
@@ -151,7 +156,7 @@ kick_scheduler_t radiotimer_isr(void) {
             DEBUG("%s none\n", __PRETTY_FUNCTION__);
       default:
             DEBUG("%s default\n", __PRETTY_FUNCTION__);
-            // while(1);                               // this should not happen
+            while(1);                               // this should not happen
     }
     return DO_NOT_KICK_SCHEDULER;
 }

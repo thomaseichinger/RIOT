@@ -113,7 +113,7 @@ void openwsn_init(void) {
     DEBUG("%s\n",__PRETTY_FUNCTION__);
 
    //===== drivers
-   //openserial_init();
+   openserial_init();
 
    //===== stack
    //-- cross-layer

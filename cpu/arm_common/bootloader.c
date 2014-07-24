@@ -81,7 +81,7 @@ void abtorigin(const char *vector, u_long *lnk_ptr1)
     __asm__ __volatile__("mov %0, lr" : "=r"(lnk_ptr2));        // copy lr
     __asm__ __volatile__("mov %0, sp" : "=r"(sp));              // copy sp
     __asm__ __volatile__("msr cpsr_c, %0" :: "r"(cpsr));        // switch back to abt mode
-
+    thread_print_all();
     printf("#!%s abort at %p (0x%08lX) originating from %p (0x%08lX) in mode 0x%X\n",
            vector, (void *)lnk_ptr1, *(lnk_ptr1), (void *)lnk_ptr2, *(lnk_ptr2), spsr
           );

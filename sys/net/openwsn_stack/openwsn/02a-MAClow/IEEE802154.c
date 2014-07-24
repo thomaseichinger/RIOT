@@ -5,6 +5,10 @@
 #include "openserial.h"
 #include "topology.h"
 
+
+#define ENABLE_DEBUG (1)
+#include "debug.h"
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -32,9 +36,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
-
+   
    //General IEs here (those that are carried in all packets) -- None by now.
-
+   
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -55,7 +59,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                                   (errorparameter_t)nextHop->type,
                                   (errorparameter_t)1);
       }
-
+      
    }
    // destpan
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
@@ -82,7 +86,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
    temp_8b             |= frameVersion                    << IEEE154_FCF_FRAME_VERSION;
-
+     
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -110,11 +114,11 @@ Note We are writing the fields from the begnning of the header to the end.
 void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
    uint8_t temp_8b;
-
+   
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
    ieee802514_header->valid=FALSE;
-
+   
    ieee802514_header->headerLength = 0;
    // fcf, byte 1
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
@@ -135,7 +139,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
-
+   
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
          ieee802514_header->dest.type = ADDR_NONE;
@@ -147,6 +151,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          ieee802514_header->dest.type = ADDR_64B;
          break;
       default:
+          DEBUG("%s: invalid addr mode, dst\n", __PRETTY_FUNCTION__);
          openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)1,
                                (errorparameter_t)(temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03);
@@ -163,6 +168,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          ieee802514_header->src.type = ADDR_64B;
          break;
       default:
+        DEBUG("%s: invalid addr mode, dst\n", __PRETTY_FUNCTION__);
          openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)2,
                                (errorparameter_t)(temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03);
@@ -227,13 +233,15 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          break;
       // no need for a default, since case would have been caught above
    }
-
+   
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+      DEBUG("%s: invalid packet\n", __PRETTY_FUNCTION__);
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
-
+   
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
+      DEBUG("%s: topology filter rejects\n", __PRETTY_FUNCTION__);
       // the topology filter does accept this packet, return
       return;
    }

@@ -50,7 +50,7 @@ int main(void)
     net_if_set_src_address_mode(0, NET_IF_TRANS_ADDR_M_SHORT);
 
     shell_t shell;
-    shell_init(&shell, shell_commands, UART0_BUFSIZE, uart0_readc, uart0_putc);
+    shell_init(&shell, shell_commands, UART0_BUFSIZE, getchar, uart0_putc);
 
     shell_run(&shell);
     return 0;

@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "thread.h"
 
 /* "public" variables holding the crash data */
 char panic_str[80];
@@ -41,6 +42,7 @@ NORETURN void core_panic(int crash_code, const char *message)
         crashed = 1;
         puts("******** SYSTEM FAILURE ********\n");
         puts(message);
+        thread_print_all();
 #if DEVELHELP
         puts("******** RIOT HALTS HERE ********\n");
 #else

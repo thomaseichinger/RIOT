@@ -80,14 +80,15 @@ int main(int argc, char **argv)
         usage();
         exit(1);
     }
-
+    printf("Step 1\n");
     char *port_name = argv[1];
     char *file_name = argv[2];
 
     if (open_serial_port(port_name) < 0) {
+        printf("Step -1\n");
         return (1);
     }
-
+    printf("Step 2\n");
     if (!download_begin(file_name)) {
         return 1;
     }

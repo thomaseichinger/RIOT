@@ -46,7 +46,7 @@ to return the board's description.
 // radio /RST
 #define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;// nothing
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
-//#define PORT_PIN_RADIO_RESET_LOW()            GPIOC->ODR &= ~(1<<1);
+// #define PORT_PIN_RADIO_RESET_LOW()            GPIOC->ODR &= ~(1<<1);
 
 //===== IEEE802154E timing
 // time-slot related

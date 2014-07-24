@@ -9,8 +9,8 @@ int main(void) {
     openwsn_start_thread();
     unsigned i = 0;
     while (1) {
-        printf("RIOT -> %u\n", i++);
-        thread_print_all();
+        // printf("RIOT -> %u\n", i++);
+        // thread_print_all();
         vtimer_usleep(2000 * 1000);
     }
    // openwsn_init();

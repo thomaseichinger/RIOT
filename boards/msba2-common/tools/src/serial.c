@@ -61,13 +61,14 @@ int open_serial_port(const char *port_name)
 {
     int r;
     struct termios term_setting;
-
+    printf("Step 1.1\n");
     if (port_fd >= 0) {
         close(port_fd);
     }
-
+    printf("Step 1.2\n");
+    printf("%s\n", port_name);
     port_fd = open(port_name, O_RDWR);
-
+    printf("Step 1.3\n");
     if (port_fd < 0) {
         report_open_error(port_name, errno);
         return -1;

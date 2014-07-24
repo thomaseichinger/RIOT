@@ -514,10 +514,12 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
                                    &ieee154e_vars.dataReceived->l1_crc);
+      DEBUG("l: %x p: %s rssi: %x\n", ieee154e_vars.dataReceived->length, ieee154e_vars.dataReceived->payload, ieee154e_vars.dataReceived->l1_rssi);
 
       // break if packet too short
       if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
+         DEBUG("%s: ERROR: packet too short\n", __PRETTY_FUNCTION__);
           openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)0,
                             ieee154e_vars.dataReceived->length);
@@ -529,6 +531,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         DEBUG("%s: ERROR: wrong CRC\n", __PRETTY_FUNCTION__);
          // break from the do-while loop and execute abort code below
          break;
       }
@@ -538,6 +541,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
+         DEBUG("%s: ERROR: invalid 15.4 header\n", __PRETTY_FUNCTION__);
          // break from the do-while loop and execute the clean-up code below
          break;
       }
@@ -559,6 +563,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))   &&
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
          // break from the do-while loop and execute the clean-up code below
+         DEBUG("%s: ERROR: invalid ADV\n", __PRETTY_FUNCTION__);
          break;
       }
 

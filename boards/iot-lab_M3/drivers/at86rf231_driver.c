@@ -46,54 +46,54 @@ GPIO
   SLEEP : PA2 : control sleep, tx & rx state
 */
 
-uint8_t at86rf231_get_status(void)
+uint8_t at86rf231_arch_get_status(void)
 {
     return at86rf231_reg_read(AT86RF231_REG__TRX_STATUS)
            & AT86RF231_TRX_STATUS_MASK__TRX_STATUS;
 }
 
 
-void at86rf231_spi_select(void)
+void at86rf231_arch_spi_select(void)
 {
     gpio_clear(SPI_0_CS_GPIO);
 }
 
-void at86rf231_spi_unselect(void)
+void at86rf231_arch_spi_unselect(void)
 {
     gpio_set(SPI_0_CS_GPIO);
 }
 
-void at86rf231_slp_set(void)
+void at86rf231_arch_slp_set(void)
 {
     gpio_set(SPI_0_SLEEP_GPIO);
 }
 
-void at86rf231_slp_clear(void)
+void at86rf231_arch_slp_clear(void)
 {
     gpio_clear(SPI_0_SLEEP_GPIO);
 }
 
-void at86rf231_rst_set(void)
+void at86rf231_arch_rst_set(void)
 {
     gpio_clear(SPI_0_RESET_GPIO);
 }
 
-void at86rf231_rst_clear(void)
+void at86rf231_arch_rst_clear(void)
 {
     gpio_set(SPI_0_RESET_GPIO);
 }
 
-void at86rf231_enable_interrupts(void)
+void at86rf231_arch_enable_interrupts(void)
 {
     gpio_irq_enable(SPI_0_IRQ0_GPIO);
 }
 
-void at86rf231_disable_interrupts(void)
+void at86rf231_arch_disable_interrupts(void)
 {
     gpio_irq_disable(SPI_0_IRQ0_GPIO);
 }
 
-void at86rf231_gpio_spi_interrupts_init(void)
+void at86rf231_arch_init(void)
 {
     /* set up GPIO pins */
     /* SCLK and MOSI*/
@@ -114,7 +114,7 @@ void at86rf231_gpio_spi_interrupts_init(void)
     gpio_init_int(SPI_0_IRQ0_GPIO, GPIO_NOPULL, GPIO_RISING, (gpio_cb_t)at86rf231_rx_irq, NULL);
 
     /* Connect EXTI4 Line to PC4 pin */
-    at86rf231_enable_interrupts();
+    gpio_irq_enable(SPI_0_IRQ0_GPIO);
 
     /* CS */
     gpio_init_out(SPI_0_CS_GPIO, GPIO_NOPULL);
@@ -125,20 +125,20 @@ void at86rf231_gpio_spi_interrupts_init(void)
 
 }
 
-void at86rf231_reset(void)
+void at86rf231_arch_reset(void)
 {
     /* force reset */
-    at86rf231_rst_set();
+    at86rf231_arch_rst_set();
 
     /* put pins to default values */
-    at86rf231_spi_unselect();
-    at86rf231_slp_clear();
+    at86rf231_arch_spi_unselect();
+    at86rf231_arch_slp_clear();
 
     /* additional waiting to comply to min rst pulse width */
     uint8_t delay = 50;
     while (delay--){}
 
-    at86rf231_rst_clear();
+    at86rf231_arch_rst_clear();
 
     /* Send a FORCE TRX OFF command */
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__FORCE_TRX_OFF);
@@ -148,7 +148,7 @@ void at86rf231_reset(void)
     uint8_t max_wait = 100;
 
     do {
-        status = at86rf231_get_status();
+        status = at86rf231_arch_get_status();
 
         if (!--max_wait) {
             printf("at86rf231 : ERROR : could not enter TRX_OFF mode\n");

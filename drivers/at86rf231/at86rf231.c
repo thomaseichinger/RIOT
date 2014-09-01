@@ -41,9 +41,9 @@ void at86rf231_init(kernel_pid_t tpid)
 {
     transceiver_pid = tpid;
 
-    at86rf231_gpio_spi_interrupts_init();
+    at86rf231_arch_init();
 
-    at86rf231_reset();
+    at86rf231_arch_reset();
 
     // TODO : Enable addr decode, auto ack, auto crc
     // and configure security, power, channel, pan
@@ -71,7 +71,7 @@ void at86rf231_init(kernel_pid_t tpid)
 
 void at86rf231_switch_to_rx(void)
 {
-    at86rf231_disable_interrupts();
+    at86rf231_arch_disable_interrupts();
     // Send a FORCE TRX OFF command
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__FORCE_TRX_OFF);
 
@@ -82,7 +82,7 @@ void at86rf231_switch_to_rx(void)
     at86rf231_reg_read(AT86RF231_REG__IRQ_STATUS);
 
     // Enable IRQ interrupt
-    at86rf231_enable_interrupts();
+    at86rf231_arch_enable_interrupts();
 
     // Start RX
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__RX_ON);
@@ -92,7 +92,7 @@ void at86rf231_switch_to_rx(void)
     uint8_t max_wait = 100;   // TODO : move elsewhere, this is in 10us
 
     do {
-        status = at86rf231_get_status();
+        status = at86rf231_arch_get_status();
 
         vtimer_usleep(10);
 

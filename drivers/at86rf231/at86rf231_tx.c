@@ -80,7 +80,7 @@ static void at86rf231_xmit(uint8_t *data, radio_packet_length_t length)
     uint8_t max_wait = 100;   // TODO : move elsewhere, this is in 10us
 
     do {
-        status = at86rf231_get_status();
+        status = at86rf231_arch_get_status();
 
         vtimer_usleep(10);
 

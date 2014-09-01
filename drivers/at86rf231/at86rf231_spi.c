@@ -15,12 +15,12 @@
 void at86rf231_reg_write(uint8_t addr, uint8_t value)
 {
     /* Start the SPI transfer */
-    at86rf231_spi_select();
+    at86rf231_arch_spi_select();
 
     spi_transfer_reg(SPI_0, AT86RF231_ACCESS_REG | AT86RF231_ACCESS_WRITE | addr, value, NULL);
 
     /* End the SPI transfer */
-    at86rf231_spi_unselect();
+    at86rf231_arch_spi_unselect();
 }
 
 uint8_t at86rf231_reg_read(uint8_t addr)
@@ -28,12 +28,12 @@ uint8_t at86rf231_reg_read(uint8_t addr)
     uint8_t value;
 
     /* Start the SPI transfer */
-    at86rf231_spi_select();
+    at86rf231_arch_spi_select();
 
     spi_transfer_reg(SPI_0, AT86RF231_ACCESS_REG | AT86RF231_ACCESS_READ | addr, 0, (char*)(&value));
 
     /* End the SPI transfer */
-    at86rf231_spi_unselect();
+    at86rf231_arch_spi_unselect();
 
     return value;
 }
@@ -41,7 +41,7 @@ uint8_t at86rf231_reg_read(uint8_t addr)
 void at86rf231_read_fifo(uint8_t *data, radio_packet_length_t length)
 {
     /* Start the SPI transfer */
-    at86rf231_spi_select();
+    at86rf231_arch_spi_select();
 
     /* Send Frame Buffer read access */
     spi_transfer_byte(SPI_0, AT86RF231_ACCESS_FRAMEBUFFER | AT86RF231_ACCESS_READ, NULL);
@@ -50,13 +50,13 @@ void at86rf231_read_fifo(uint8_t *data, radio_packet_length_t length)
     spi_transfer_bytes(SPI_0, NULL, (char*)data, (unsigned int) length);
 
     /* End the SPI transfer */
-    at86rf231_spi_unselect();
+    at86rf231_arch_spi_unselect();
 }
 
 void at86rf231_write_fifo(const uint8_t *data, radio_packet_length_t length)
 {
     /* Start the SPI transfer */
-    at86rf231_spi_select();
+    at86rf231_arch_spi_select();
 
     /* Send Frame Buffer Write access */
     spi_transfer_byte(SPI_0, AT86RF231_ACCESS_FRAMEBUFFER | AT86RF231_ACCESS_WRITE, NULL);
@@ -65,5 +65,5 @@ void at86rf231_write_fifo(const uint8_t *data, radio_packet_length_t length)
     spi_transfer_bytes(SPI_0, (char*)data, NULL, (unsigned int)length);
 
     /* End the SPI transfer */
-    at86rf231_spi_unselect();
+    at86rf231_arch_spi_unselect();
 }

@@ -157,15 +157,3 @@ void at86rf231_reset(void)
     } while ((status & AT86RF231_TRX_STATUS_MASK__TRX_STATUS)
              != AT86RF231_TRX_STATUS__TRX_OFF);
 }
-
-uint8_t at86rf231_spi_transfer_byte(uint8_t byte)
-{
-    char ret;
-    spi_transfer_byte(SPI_0, byte, &ret);
-    return ret;
-}
-
-void at86rf231_spi_transfer(const uint8_t *data_out, uint8_t *data_in, uint16_t length)
-{
-    spi_transfer_bytes(SPI_0, (char*)data_out, (char*)data_in, length);
-}

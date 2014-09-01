@@ -13,13 +13,18 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-static void at86rf231_xmit(uint8_t *data, radio_packet_length_t length);
-
 static void at86rf231_gen_pkt(uint8_t *buf, at86rf231_packet_t *packet);
 
 static uint8_t sequenz_nr;
 
 int16_t at86rf231_send(at86rf231_packet_t *packet)
+{
+    int16_t sent = at86rf231_preload(packet);
+    at86rf231_transmit();
+    return sent;
+}
+
+int16_t at86rf231_preload(at86rf231_packet_t *packet)
 {
     // Set missing frame information
     packet->frame.fcf.frame_ver = 0;
@@ -60,18 +65,12 @@ int16_t at86rf231_send(at86rf231_packet_t *packet)
     }
 
     // FCS is added in hardware
-    uint8_t pkt[packet->length];
+    uint8_t data[packet->length];
 
     /* generate pkt */
-    at86rf231_gen_pkt(pkt, packet);
+    at86rf231_gen_pkt(data, packet);
 
     // transmit packet
-    at86rf231_xmit(pkt, packet->length);
-    return packet->length;
-}
-
-static void at86rf231_xmit(uint8_t *data, radio_packet_length_t length)
-{
     // Go to state PLL_ON
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__PLL_ON);
 
@@ -96,9 +95,14 @@ static void at86rf231_xmit(uint8_t *data, radio_packet_length_t length)
     driver_state = AT_DRIVER_STATE_SENDING;
 
     // copy the packet to the radio FIFO
-    at86rf231_write_fifo(data, length);
+    at86rf231_write_fifo(data, packet->length);
     DEBUG("Wrote to FIFO\n");
 
+    return packet->length;
+}
+
+void at86rf231_transmit(void)
+{
     // Start TX
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__TX_START);
     DEBUG("Started TX\n");

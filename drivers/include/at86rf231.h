@@ -51,6 +51,8 @@ void at86rf231_rx_handler(void);
 void at86rf231_rx_irq(void);
 
 int16_t at86rf231_send(at86rf231_packet_t *packet);
+int16_t at86rf231_preload(at86rf231_packet_t *packet);
+void at86rf231_transmit(void);
 
 uint8_t at86rf231_set_channel(uint8_t channel);
 uint8_t at86rf231_get_channel(void);

@@ -16,4 +16,6 @@ void at86rf231_arch_spi_unselect(void);
 void at86rf231_arch_init_interrupts(void);
 void at86rf231_arch_enable_interrupts(void);
 void at86rf231_arch_disable_interrupts(void);
+
+void _at86rf231_arch_wait(uint8_t status);
 #endif

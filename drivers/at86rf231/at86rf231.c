@@ -88,20 +88,7 @@ void at86rf231_switch_to_rx(void)
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__RX_ON);
 
     // wait until it is on RX_ON state
-    uint8_t status;
-    uint8_t max_wait = 100;   // TODO : move elsewhere, this is in 10us
-
-    do {
-        status = at86rf231_arch_get_status();
-
-        vtimer_usleep(10);
-
-        if (!--max_wait) {
-            printf("at86rf231 : ERROR : could not enter RX_ON mode\n");
-            break;
-        }
-    }
-    while ((status & AT86RF231_TRX_STATUS_MASK__TRX_STATUS) != AT86RF231_TRX_STATUS__RX_ON);
+    _at86rf231_arch_wait(AT86RF231_TRX_STATUS__RX_ON);
 }
 
 void at86rf231_rx_irq(void)

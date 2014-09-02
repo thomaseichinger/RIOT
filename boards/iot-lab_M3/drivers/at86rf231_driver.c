@@ -30,6 +30,7 @@
 #include "periph_conf.h"
 
 #include "at86rf231.h"
+#include "at86rf231_arch.h"
 #include "at86rf231_spi.h"
 
 /*
@@ -144,16 +145,14 @@ void at86rf231_arch_reset(void)
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__FORCE_TRX_OFF);
 
     /* busy wait for TRX_OFF state */
-    uint8_t status;
-    uint8_t max_wait = 100;
+    _at86rf231_arch_wait(AT86RF231_TRX_STATUS__TRX_OFF);
+}
 
+void _at86rf231_arch_wait(uint8_t status)
+{
+    uint8_t s = 0;
     do {
-        status = at86rf231_arch_get_status();
-
-        if (!--max_wait) {
-            printf("at86rf231 : ERROR : could not enter TRX_OFF mode\n");
-            break;
-        }
-    } while ((status & AT86RF231_TRX_STATUS_MASK__TRX_STATUS)
-             != AT86RF231_TRX_STATUS__TRX_OFF);
+        s = at86rf231_arch_get_status();
+    } while ((s & AT86RF231_TRX_STATUS_MASK__TRX_STATUS)
+              != status);
 }

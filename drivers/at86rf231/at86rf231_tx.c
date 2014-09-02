@@ -75,20 +75,7 @@ int16_t at86rf231_preload(at86rf231_packet_t *packet)
     at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__PLL_ON);
 
     // wait until it is on PLL_ON state
-    uint8_t status;
-    uint8_t max_wait = 100;   // TODO : move elsewhere, this is in 10us
-
-    do {
-        status = at86rf231_arch_get_status();
-
-        vtimer_usleep(10);
-
-        if (!--max_wait) {
-            printf("at86rf231 : ERROR : could not enter PLL_ON mode");
-            break;
-        }
-    }
-    while ((status & AT86RF231_TRX_STATUS_MASK__TRX_STATUS) != AT86RF231_TRX_STATUS__PLL_ON);
+    _at86rf231_arch_wait(AT86RF231_TRX_STATUS__PLL_ON);
 
     /* radio driver state: sending */
     /* will be freed in at86rf231_rx_irq when TRX_END interrupt occurs */

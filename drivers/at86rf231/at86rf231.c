@@ -85,10 +85,12 @@ void at86rf231_switch_to_rx(void)
     at86rf231_arch_enable_interrupts();
 
     // Start RX
-    at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__RX_ON);
+    at86rf231_reg_write(AT86RF231_REG__TRX_STATE, AT86RF231_TRX_STATE__RX_AACK_ON);
 
     // wait until it is on RX_ON state
-    _at86rf231_arch_wait(AT86RF231_TRX_STATUS__RX_ON);
+    _at86rf231_arch_wait(AT86RF231_TRX_STATUS__RX_AACK_ON);
+
+    at86rf231_reg_write(AT86RF231_REG__XAH_CTRL_1, AT86RF231_XAH_CTRL_1__AACK_PROM_MODE);
 }
 
 void at86rf231_rx_irq(void)
@@ -113,8 +115,8 @@ radio_address_t at86rf231_set_address(radio_address_t address)
 {
     radio_address = address;
 
-    at86rf231_reg_write(AT86RF231_REG__SHORT_ADDR_0, (uint8_t)(0x00FF & radio_address));
-    at86rf231_reg_write(AT86RF231_REG__SHORT_ADDR_1, (uint8_t)(radio_address >> 8));
+    at86rf231_reg_write(AT86RF231_REG__SHORT_ADDR_1, (uint8_t)(0x00FF & radio_address));
+    at86rf231_reg_write(AT86RF231_REG__SHORT_ADDR_0, (uint8_t)(radio_address >> 8));
 
     return radio_address;
 }

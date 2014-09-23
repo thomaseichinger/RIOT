@@ -1,0 +1,56 @@
+# Copyright (C) 2014 Loci Controls Inc.
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+#
+# @author Ian Martin <ian@locicontrols.com>
+
+export CPU_MODEL ?= cc2538nf53
+
+# Define tools used for building the project:
+export PREFIX ?= arm-none-eabi-
+
+export CC      = $(PREFIX)gcc
+export AR      = $(PREFIX)ar
+export AS      = $(PREFIX)as
+export LINK    = $(PREFIX)gcc
+export SIZE    = $(PREFIX)size
+export OBJCOPY = $(PREFIX)objcopy
+export OBJDUMP = $(PREFIX)objdump
+
+# This CPU implementation is using the new core/CPU interface:
+export CFLAGS += -DCOREIF_NG=1
+
+export OBJDUMPFLAGS += --disassemble --source --disassembler-options=force-thumb
+
+# Tell the build system that the CPU depends on the Cortex-M common files:
+export USEMODULE += cortex-m3_common
+
+# Define path to cortex-m common module, which is needed for this CPU:
+export CORTEX_COMMON = $(RIOTCPU)/cortex-m3_common/
+
+# Define the linker script to use for this CPU:
+export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/$(CPU_MODEL)_linkerscript.ld
+
+# Include CPU specific includes:
+export INCLUDES += -I$(RIOTCPU)/$(CPU)
+export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
+
+# Explicitly tell the linker to link the syscalls and startup code.
+#   Without this the interrupt vectors will not be linked correctly!
+export UNDEF += $(BINDIR)cpu/syscalls.o
+export UNDEF += $(BINDIR)cpu/startup.o
+
+# Export the peripheral drivers to be linked into the final binary:
+export USEMODULE += periph
+
+# CPU depends on the cortex-m common module, so include it:
+include $(CORTEX_COMMON)Makefile.include
+
+# Avoid overriding the default rule:
+all:
+
+# Rule to generate assembly listings from ELF files:
+%.lst: %.elf
+	$(OBJDUMP) $(OBJDUMPFLAGS) $< > $@

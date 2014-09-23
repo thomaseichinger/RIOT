@@ -7,7 +7,7 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_cc2538
  * @{
  *
  * @file        hwtimer_arch.c
@@ -24,6 +24,7 @@
 #include "board.h"
 #include "periph/timer.h"
 #include "thread.h"
+#include "hwtimer_cpu.h"
 
 
 void irq_handler(int channel);
@@ -33,7 +34,7 @@ void (*timeout_handler)(int);
 void hwtimer_arch_init(void (*handler)(int), uint32_t fcpu)
 {
     timeout_handler = handler;
-    timer_init(HW_TIMER, 1, &irq_handler);
+    timer_init(HW_TIMER, HWTIMER_SPEED / 1000000, &irq_handler);
 }
 
 void hwtimer_arch_enable_interrupt(void)

@@ -7,11 +7,11 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_cc2538
  * @{
  *
  * @file        syscalls.c
- * @brief       NewLib system calls implementations for SAM3X8E
+ * @brief       NewLib system calls implementations for CC2538
  *
  * @author      Michael Baar <michael.baar@fu-berlin.de>
  * @author      Stefan Pfeiffer <pfeiffer@inf.fu-berlin.de>
@@ -38,7 +38,7 @@
  * manage the heap
  */
 extern uint32_t _end;                       /* address of last used memory cell */
-caddr_t heap_top = (caddr_t)&_end + 4;
+caddr_t heap_top = (caddr_t) &_end + 4;
 
 
 /**
@@ -69,7 +69,8 @@ void _exit(int n)
 {
     printf("#! exit %i: resetting\n", n);
     NVIC_SystemReset();
-    while(1);
+
+    while (1);
 }
 
 /**
@@ -84,7 +85,7 @@ void _exit(int n)
  *
  * @return [description]
  */
-caddr_t _sbrk_r(struct _reent *r, ptrdiff_t incr)
+caddr_t _sbrk_r(struct _reent *r, size_t incr)
 {
     unsigned int state = disableIRQ();
     caddr_t res = heap_top;
@@ -153,7 +154,7 @@ int _open_r(struct _reent *r, const char *name, int mode)
 int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
 {
     char c;
-    char *buff = (char*)buffer;
+    char *buff = (char *)buffer;
     uart_read_blocking(UART_0, &c);
     buff[0] = c;
     return 1;
@@ -176,10 +177,12 @@ int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
  */
 int _write_r(struct _reent *r, int fd, const void *data, unsigned int count)
 {
-    char *c = (char*)data;
+    char *c = (char *)data;
+
     for (int i = 0; i < count; i++) {
         uart_write_blocking(UART_0, c[i]);
     }
+
     return count;
 }
 
@@ -222,7 +225,7 @@ _off_t _lseek_r(struct _reent *r, int fd, _off_t pos, int dir)
  *
  * @return      TODO
  */
-int _fstat_r(struct _reent *r, int fd, struct stat * st)
+int _fstat_r(struct _reent *r, int fd, struct stat *st)
 {
     r->_errno = ENODEV;                     /* not implemented yet */
     return -1;
@@ -254,7 +257,8 @@ int _stat_r(struct _reent *r, char *name, struct stat *st)
 int _isatty_r(struct _reent *r, int fd)
 {
     r->_errno = 0;
-    if(fd == STDOUT_FILENO || fd == STDERR_FILENO) {
+
+    if (fd == STDOUT_FILENO || fd == STDERR_FILENO) {
         return 1;
     }
     else {
@@ -270,7 +274,7 @@ int _isatty_r(struct _reent *r, int fd)
  *
  * @return      TODO
  */
-int _unlink_r(struct _reent *r, char* path)
+int _unlink_r(struct _reent *r, char *path)
 {
     r->_errno = ENODEV;                     /* not implemented yet */
     return -1;

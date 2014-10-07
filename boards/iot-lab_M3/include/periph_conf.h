@@ -122,23 +122,28 @@
 #define GPIO_14_EN          1
 #define GPIO_IRQ_PRIO       1
 
-/* IRQ config */
-#define GPIO_IRQ_0          GPIO_0
-#define GPIO_IRQ_1          GPIO_1
-#define GPIO_IRQ_2          GPIO_0                  /* not configured */
-#define GPIO_IRQ_3          GPIO_0                  /* not configured */
-#define GPIO_IRQ_4          GPIO_2
-#define GPIO_IRQ_5          GPIO_3
-#define GPIO_IRQ_6          GPIO_4
+/**
+ * @brief IRQ config
+ *
+ * These defines are used for the backmapping in the matching interrupt
+ * service routines to call the correct callbacks.
+ */
+#define GPIO_IRQ_1          GPIO_13
+#define GPIO_IRQ_2          GPIO_14
+#define GPIO_IRQ_3          GPIO_0
+#define GPIO_IRQ_4          GPIO_12
+#define GPIO_IRQ_5          GPIO_8
+#define GPIO_IRQ_6          GPIO_9
 #define GPIO_IRQ_7          GPIO_5
-#define GPIO_IRQ_8          GPIO_0                  /* not configured */
-#define GPIO_IRQ_9          GPIO_0                  /* not configured */
-#define GPIO_IRQ_10         GPIO_6
+#define GPIO_IRQ_8          GPIO_1
+#define GPIO_IRQ_9          GPIO_4
 #define GPIO_IRQ_11         GPIO_7
-#define GPIO_IRQ_12         GPIO_4
+#define GPIO_IRQ_12         GPIO_2
 #define GPIO_IRQ_13         GPIO_9
 #define GPIO_IRQ_14         GPIO_10
-#define GPIO_IRQ_15         GPIO_11
+/* not configured */
+#define GPIO_IRQ_0          (GPIO_NUMOF-1)
+#define GPIO_IRQ_10         (GPIO_NUMOF-1)
 
 /* GPIO channel 0 config */
 #define GPIO_0_PORT         GPIOA                   /* Used for user button 1 */

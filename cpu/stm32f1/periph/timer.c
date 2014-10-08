@@ -406,4 +406,7 @@ static inline void irq_handler(tim_t timer, TIM_TypeDef *dev0, TIM_TypeDef *dev1
     else {
         dev0->SR = 0;
     }
+    if (sched_context_switch_request) {
+        thread_yield();
+    }
 }

@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include "periph_conf.h"
+
 /* guard this file in case no I2C device is defined */
 #if I2C_NUMOF
 

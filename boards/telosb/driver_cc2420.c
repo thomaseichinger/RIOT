@@ -186,7 +186,7 @@ void cc2420_spi_init(void)
     /* Switch off async UART */
     while(!(U0TCTL & TXEPT));   /* Wait for empty UxTXBUF register */
     IE1 &= ~(URXIE0 + UTXIE0);  /* Disable USART0 receive&transmit interrupt */
-    ME1 &= ~(UTXE0 + URXE0);
+    ME1 &= ~(USPIE0);           /* Disable SPI */
 
     /* configure SPI-related pins */
     P3SEL     |=  0x0E;                           /* P3.1 -  SIMO mode, P3.2 - SOMI mode, P3.3 - SCL mode */
@@ -223,6 +223,7 @@ void cc2420_spi_init(void)
 interrupt (PORT1_VECTOR) __attribute__ ((naked)) cc2420_isr(void)
 {
     __enter_isr();
+    puts("haha");
      /* Check IFG */
     if ((P1IFG & CC2420_FIFOP_PIN) != 0) {
         P1IFG &= ~CC2420_FIFOP_PIN;

@@ -74,6 +74,12 @@
 #include "periph/cpuid.h"
 #endif
 
+#ifdef MODULE_ISL29020
+#include "isl29020.h"
+#include "board.h"
+isl29020_t isl29020_dev;
+#endif
+
 #define ENABLE_DEBUG (0)
 #if ENABLE_DEBUG
 #define DEBUG_ENABLED
@@ -242,5 +248,14 @@ void auto_init(void)
 #ifdef MODULE_TCP
     DEBUG("Auto init transport layer module: [tcp].\n");
     tcp_init_transport_layer();
+#endif
+
+#ifdef MODULE_ISL29020
+#if defined(ISL29020_DEFAULT_I2C) && defined(ISL29020_DEFAULT_ADDR) && defined(ISL29020_DEFAULT_MODE) && defined(ISL29020_DEFAULT_RANGE)
+    DEBUG("Auto init isl29020 sensor.\n");
+    isl29020_init(&isl29020_dev, ISL29020_DEFAULT_I2C, ISL29020_DEFAULT_ADDR, ISL29020_DEFAULT_RANGE, ISL29020_DEFAULT_MODE);
+#else
+#error "Missing defines to use ISL29020 with auto_init"
+#endif
 #endif
 }

@@ -125,6 +125,10 @@ extern void _mersenne_init(int argc, char **argv);
 extern void _mersenne_get(int argc, char **argv);
 #endif
 
+#ifdef MODULE_ISL29020
+extern void _isl29020_get(int argc, char **argv);
+#endif
+
 const shell_command_t _shell_command_list[] = {
     {"reboot", "Reboot the node", _reboot_handler},
 #ifdef MODULE_CONFIG

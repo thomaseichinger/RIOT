@@ -104,6 +104,16 @@
 #define HAS_RADIO
 
 /**
+ * @name Default values for isl29020 sensor.
+ * @{
+ */
+#define ISL29020_DEFAULT_I2C     (I2C_0)
+#define ISL29020_DEFAULT_ADDR    (0x44)
+#define ISL29020_DEFAULT_MODE    ISL29020_MODE_AMBIENT
+#define ISL29020_DEFAULT_RANGE   ISL29020_RANGE_16K
+/** @} */
+
+/**
  * Define the type for the radio packet length for the transceiver
  */
 typedef uint8_t radio_packet_length_t;

@@ -80,7 +80,7 @@
  */
 #define UART_NUMOF          (1U)
 #define UART_0_EN           1
-#define UART_1_EN           0
+#define UART_1_EN           1
 #define UART_IRQ_PRIO       1
 
 /* UART 0 device configuration */
@@ -97,17 +97,17 @@
 #define UART_0_AF           0
 
 /* UART 1 device configuration */
-#define UART_1_DEV          USART2
-#define UART_1_CLKEN()      (RCC->APB1ENR |= RCC_APB1ENR_USART2EN)
-#define UART_1_IRQ          USART2_IRQn
-#define UART_1_ISR          isr_usart2
-#define UART_1_BUS_FREQ     36000000
+#define UART_1_DEV          USART3
+#define UART_1_CLKEN()      (RCC->APB1ENR |= RCC_APB1ENR_USART3EN)
+#define UART_1_IRQ          USART3_IRQn
+#define UART_1_ISR          isr_usart3
+#define UART_1_BUS_FREQ     36000000U 		/* not sure here, timer on APB1 seems to be seeded by 72MHz */
 /* UART 1 pin configuration */
-#define UART_1_PORT         GPIOA
-#define UART_1_PORT_CLKEN() (RCC->APB2ENR |= RCC_APB2ENR_IOPAEN)
-#define UART_1_RX_PIN       3
-#define UART_1_TX_PIN       2
-#define UART_1_AF           1
+#define UART_1_PORT         GPIOB
+#define UART_1_PORT_CLKEN() (RCC->APB2ENR |= RCC_APB2ENR_IOPBEN)
+#define UART_1_RX_PIN       11
+#define UART_1_TX_PIN       10
+#define UART_1_AF           0
 
 /**
  * @brief GPIO configuration

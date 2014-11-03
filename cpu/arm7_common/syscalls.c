@@ -56,19 +56,19 @@ extern uintptr_t __heap3_start;     ///< start of heap memory space
 extern uintptr_t __heap3_max;       ///< maximum for end of heap memory space
 
 /*-----------------------------------------------------------------------------------*/
-void __assert_func(const char *file, int line, const char *func, const char *failedexpr)
+__attribute__((used)) void __assert_func(const char *file, int line, const char *func, const char *failedexpr)
 {
     printf("#!assertion %s failed\n\t%s() in %s:%d\n", failedexpr, func, file, line);
     _exit(3);
 }
 /*-----------------------------------------------------------------------------------*/
-void __assert(const char *file, int line, const char *failedexpr)
+__attribute__((used)) void __assert(const char *file, int line, const char *failedexpr)
 {
     __assert_func(file, line, "?", failedexpr);
 }
 
 /*---------------------------------------------------------------------------*/
-int _isatty_r(struct _reent *r, int fd)
+__attribute__((used)) int _isatty_r(struct _reent *r, int fd)
 {
     r->_errno = 0;
 
@@ -80,7 +80,7 @@ int _isatty_r(struct _reent *r, int fd)
     }
 }
 /*---------------------------------------------------------------------------*/
-_off_t _lseek_r(struct _reent *r, int fd, _off_t pos, int whence)
+__attribute__((used)) _off_t _lseek_r(struct _reent *r, int fd, _off_t pos, int whence)
 {
     /* to get rid of gcc warnings */
     (void) fd;
@@ -95,7 +95,7 @@ _off_t _lseek_r(struct _reent *r, int fd, _off_t pos, int whence)
     return result;
 }
 /*---------------------------------------------------------------------------*/
-int _open_r(struct _reent *r, const char *name, int mode)
+__attribute__((used)) int _open_r(struct _reent *r, const char *name, int mode)
 {
     /* to get rid of gcc warnings */
     (void) name;
@@ -109,7 +109,7 @@ int _open_r(struct _reent *r, const char *name, int mode)
     return ret;
 }
 /*---------------------------------------------------------------------------*/
-int _stat_r(struct _reent *r, char *name, struct stat *st)
+__attribute__((used)) int _stat_r(struct _reent *r, char *name, struct stat *st)
 {
     /* to get rid of gcc warnings */
     (void) name;
@@ -121,7 +121,7 @@ int _stat_r(struct _reent *r, char *name, struct stat *st)
     return ret;
 }
 /*---------------------------------------------------------------------------*/
-int _fstat_r(struct _reent *r, int fd, struct stat *st)
+__attribute__((used)) int _fstat_r(struct _reent *r, int fd, struct stat *st)
 {
     int ret = -1;
 
@@ -139,7 +139,7 @@ int _fstat_r(struct _reent *r, int fd, struct stat *st)
     return ret;
 }
 /*---------------------------------------------------------------------------*/
-int _write_r(struct _reent *r, int fd, const void *data, unsigned int count)
+__attribute__((used)) int _write_r(struct _reent *r, int fd, const void *data, unsigned int count)
 {
     int result = EOF;
     r->_errno = EBADF;
@@ -160,7 +160,7 @@ int _write_r(struct _reent *r, int fd, const void *data, unsigned int count)
     return result;
 }
 /*---------------------------------------------------------------------------*/
-int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
+__attribute__((used)) int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
 {
     /* to get rid of gcc warnings */
     (void) fd;
@@ -174,7 +174,7 @@ int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
     return result;
 }
 /*---------------------------------------------------------------------------*/
-int _close_r(struct _reent *r, int fd)
+__attribute__((used)) int _close_r(struct _reent *r, int fd)
 {
     (void) fd;
     int result = -1;
@@ -185,7 +185,7 @@ int _close_r(struct _reent *r, int fd)
     return result;
 }
 /*---------------------------------------------------------------------------*/
-int _unlink_r(struct _reent *r, char *path)
+__attribute__((used)) int _unlink_r(struct _reent *r, char *path)
 {
     /* get rid of gcc warnings */
     (void) path;
@@ -198,7 +198,7 @@ int _unlink_r(struct _reent *r, char *path)
     return result;
 }
 /*---------------------------------------------------------------------------*/
-void _exit(int n)
+__attribute__((used)) void _exit(int n)
 {
     printf("#!exit %i: resetting\n", n);
 
@@ -208,12 +208,12 @@ void _exit(int n)
     while (1);
 }
 /*---------------------------------------------------------------------------*/
-pid_t _getpid(void)
+__attribute__((used)) pid_t _getpid(void)
 {
     return (pid_t) sched_active_pid;
 }
 /*---------------------------------------------------------------------------*/
-__attribute__ ((weak))
+__attribute__ ((weak)) __attribute__((used))
 int _kill_r(struct _reent *r, int pid, int sig)
 {
     (void) pid;

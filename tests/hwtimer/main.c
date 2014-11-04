@@ -53,7 +53,7 @@ int main(void)
     /* make the first timer first to fire so timers do not run out linearly */
     char *msgn = msg;
     snprintf(msgn, MSGLEN, "callback %2x", 1);
-    hwtimer_set(HWTIMER_TICKS(BASE_DELAY), callback, (void *) msgn);
+    hwtimer_set(HWTIMER_TICKS(delay), callback, (void *) msgn);
     printf("set %s\n", msgn);
 
     /* set up to HWTIMER_MAXTIMERS-1 because hwtimer_wait below also

@@ -147,10 +147,15 @@ int sem_post(sem_t *sem)
         tcb_t *next_process = (tcb_t*) next->data;
         DEBUG("%s: waking up %s\n", sched_active_thread->name, next_process->name);
         sched_set_status(next_process, STATUS_PENDING);
-        sched_switch(next_process->priority);
+
+        uint16_t prio = next_process->priority;
+        restoreIRQ(old_state);
+        sched_switch(prio);
+    }
+    else {
+        restoreIRQ(old_state);
     }
 
-    restoreIRQ(old_state);
     return 1;
 }
 

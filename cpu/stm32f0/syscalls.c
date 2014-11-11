@@ -148,21 +148,6 @@ int _getpid(void)
 }
 
 /**
- * @brief Send a signal to a given thread
- *
- * @param r     TODO
- * @param pid   TODO
- * @param sig   TODO
- *
- * @return      TODO
- */
-int _kill_r(struct _reent *r, int pid, int sig)
-{
-    r->_errno = ESRCH;                      /* not implemented yet */
-    return -1;
-}
-
-/**
  * @brief Open a file
  *
  * @param r     TODO
@@ -324,3 +309,5 @@ int _unlink_r(struct _reent *r, char* path)
     r->_errno = ENODEV;                     /* not implemented yet */
     return -1;
 }
+
+void _kill(void) {}

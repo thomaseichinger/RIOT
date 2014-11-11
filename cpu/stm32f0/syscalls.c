@@ -310,4 +310,16 @@ int _unlink_r(struct _reent *r, char* path)
     return -1;
 }
 
-void _kill(void) {}
+/**
+ * @brief Send a signal to a thread
+ *
+ * @param[in] pid the pid to send to
+ * @param[in] sig the signal to send
+ *
+ * @return TODO
+ */
+int _kill(int pid, int sig)
+{
+    errno = EINVAL;
+    return -1;
+}

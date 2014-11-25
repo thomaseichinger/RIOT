@@ -7,13 +7,13 @@
  */
 
 /**
- * @defgroup    board_stm32f4discovery STM32F4Discovery
+ * @defgroup    board_stm32f411nucleo STM32F411nucleo
  * @ingroup     boards
- * @brief       Board specific files for the STM32F4Discovery board
+ * @brief       Board specific files for the STM32F411nucleo board
  * @{
  *
  * @file
- * @brief       Board specific definitions for the STM32F4Discovery evaluation board
+ * @brief       Board specific definitions for the STM32F411nucleo evaluation board
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  */

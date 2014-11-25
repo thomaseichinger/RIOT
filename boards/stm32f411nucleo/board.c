@@ -7,11 +7,11 @@
  */
 
 /**
- * @ingroup     board_stm32f4discovery
+ * @ingroup     board_stm32f411nucleo
  * @{
  *
  * @file
- * @brief       Board specific implementations for the STM32F4Discovery evaluation board
+ * @brief       Board specific implementations for the STM32F411nucleo evaluation board
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  *
@@ -19,6 +19,7 @@
  */
 
 #include "board.h"
+#include "cpu.h"
 
 static void leds_init(void);
 

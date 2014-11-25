@@ -7,11 +7,11 @@
  */
 
 /**
- * @ingroup     board_stm32f4discovery
+ * @ingroup     board_stm32f411nucleo
  * @{
  *
  * @file
- * @name       Peripheral MCU configuration for the STM32F4discovery board
+ * @name        Peripheral MCU configuration for the STM32F411nucleo board
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  * @author      Peter Kietzmann <peter.kietzmann@haw-hamburg.de>

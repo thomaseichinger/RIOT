@@ -95,12 +95,12 @@ extern "C" {
 #define UART_0_AF           7
 
 /* UART 1 device configuration */
-#define UART_1_DEV          USART3
-#define UART_1_CLKEN()      (RCC->APB1ENR |= RCC_APB1ENR_USART3EN)
-#define UART_1_CLKDIS()     (RCC->APB1ENR &= ~(RCC_APB1ENR_USART3EN))
+#define UART_1_DEV          USART1
+#define UART_1_CLKEN()      (RCC->APB2ENR |= RCC_APB2ENR_USART1EN)
+#define UART_1_CLKDIS()     (RCC->APB2ENR &= ~(RCC_APB2ENR_USART1EN))
 #define UART_1_CLK          (42000000)          /* UART clock runs with 42MHz (F_CPU / 4) */
-#define UART_1_IRQ_CHAN     USART3_IRQn
-#define UART_1_ISR          isr_usart3
+#define UART_1_IRQ_CHAN     USART1_IRQn
+#define UART_1_ISR          isr_usart1
 /* UART 1 pin configuration */
 #define UART_1_PORT_CLKEN() (RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN)
 #define UART_1_PORT         GPIOD
@@ -113,9 +113,8 @@ extern "C" {
  * @name ADC configuration
  * @{
  */
-#define ADC_NUMOF           (2U)
+#define ADC_NUMOF           (1U)
 #define ADC_0_EN            1
-#define ADC_1_EN            1
 #define ADC_MAX_CHANNELS    2
 
 /* ADC 0 configuration */
@@ -132,19 +131,6 @@ extern "C" {
 #define ADC_0_CH1           4
 #define ADC_0_CH1_PIN       4
 
-/* ADC 0 configuration */
-#define ADC_1_DEV           ADC2
-#define ADC_1_CHANNELS      2
-#define ADC_1_CLKEN()       (RCC->APB2ENR |= RCC_APB2ENR_ADC2EN)
-#define ADC_1_CLKDIS()      (RCC->APB2ENR &= ~(RCC_APB2ENR_ADC2EN))
-#define ADC_1_PORT          GPIOC
-#define ADC_1_PORT_CLKEN()  (RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN)
-/* ADC 0 channel 0 pin config */
-#define ADC_1_CH0           11
-#define ADC_1_CH0_PIN       1
-/* ADC 0 channel 1 pin config */
-#define ADC_1_CH1           12
-#define ADC_1_CH1_PIN       2
 /** @} */
 
 /**
@@ -185,13 +171,6 @@ extern "C" {
 #define PWM_1_PIN_CH2       0
 #define PWM_1_PIN_CH3       1
 #define PWM_1_PIN_AF        2
-/** @} */
-
-/**
- * @name Random Number Generator configuration
- * @{
- */
-#define RANDOM_NUMOF        (1U)
 /** @} */
 
 /**

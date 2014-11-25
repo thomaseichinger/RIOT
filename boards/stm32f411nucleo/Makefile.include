@@ -1,6 +1,6 @@
 # define the cpu used by the stm32f4-discovery board
 export CPU = stm32f4
-export CPU_MODEL = stm32f411re
+export CPU_MODEL = stm32f411xe
 
 #define the default port depending on the host OS
 OS := $(shell uname)

@@ -132,6 +132,13 @@ SECTIONS
         _estack = .;
     } > ram
 
+    /* exception handling */
+    . = ALIGN(4);
+    .eh_frame :
+    {
+        KEEP (*(.eh_frame))
+    } > ram
+
     /* heap section */
     . = ALIGN(4);
     _sheap = . ;

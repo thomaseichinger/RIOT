@@ -85,6 +85,28 @@ extern "C" {
 /** @} */
 
 /**
+ * @name I2C configuration
+ * @{
+ */
+#define I2C_NUMOF          (1U)
+#define I2C_0_EN            1
+#define I2C_1_EN            0
+#define I2C_2_EN            0
+#define I2C_3_EN            0
+#define I2C_IRQ_PRIO        1
+
+#define I2C_0_DEV           SERCOM3->I2CM
+#define I2C_0_IRQ           SERCOM3_IRQn
+#define I2C_0_ISR           isr_sercom3
+/* I2C 0 pin configuration */
+#define I2C_0_PORT          (PORT->Group[0])
+#define I2C_SDA    	        PIN_PA16
+#define I2C_SCL	   	        PIN_PA17
+#define I2C_0_PINS          (PORT_PA16 | PORT_PA17)
+/* Default Clock Source on reset OSC8M - 8MHz */
+#define I2C_0_REF_F	        (8000000UL) 
+
+/**
  * @name Random Number Generator configuration
  * @{
  */

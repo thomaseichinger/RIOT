@@ -34,7 +34,7 @@
 #if I2C_NUMOF
 
 /* static function definitions */
-static inline void  _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag);
+static inline void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag);
 static inline void _write(SercomI2cm *dev, char *data, int length);
 static inline void _read(SercomI2cm *dev, char *data, int length);
 static inline void _stop(SercomI2cm *dev);
@@ -54,9 +54,9 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
     uint32_t timeout_counter = 0;
     int32_t tmp_baud;
 
-        switch (dev) {
+    switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
+        case I2C_0:
             I2CSercom = &I2C_0_DEV;
             port_group = &I2C_0_PORT;
             pin_scl = I2C_SDA;
@@ -65,11 +65,11 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
             clock_source_speed = I2C_0_REF_F;
             sercom_core = SERCOM3_GCLK_ID_CORE;
             sercom_gclk_id_slow = SERCOM3_GCLK_ID_SLOW ;
-                    break;
+            break;
 #endif
-            default:
+        default:
             DEBUG("I2C FALSE VALUE\n");
-                    return -1;
+            return -1;
     }
     /* DISABLE I2C MASTER */
     i2c_poweroff(dev);
@@ -79,13 +79,17 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
     while(I2CSercom->SYNCBUSY.reg & SERCOM_I2CM_SYNCBUSY_MASK);
 
     /* Turn on power manager for sercom */
-    PM->APBCMASK.reg |= (PM_APBCMASK_SERCOM0 << (sercom_core-20));
+    PM->APBCMASK.reg |= (PM_APBCMASK_SERCOM0 << (sercom_core - 20));
 
     /*I2C using CLK GEN 0*/
-    GCLK->CLKCTRL.reg = (uint32_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 << GCLK_CLKCTRL_GEN_Pos | (sercom_core << GCLK_CLKCTRL_ID_Pos));
+    GCLK->CLKCTRL.reg = (uint32_t)(GCLK_CLKCTRL_CLKEN 
+                                   | GCLK_CLKCTRL_GEN_GCLK0 << GCLK_CLKCTRL_GEN_Pos 
+                                   | (sercom_core << GCLK_CLKCTRL_ID_Pos));
     while (GCLK->STATUS.bit.SYNCBUSY);
 
-    GCLK->CLKCTRL.reg = (uint16_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 << GCLK_CLKCTRL_GEN_Pos  | (sercom_gclk_id_slow << GCLK_CLKCTRL_ID_Pos)));
+    GCLK->CLKCTRL.reg = (uint16_t)(GCLK_CLKCTRL_CLKEN 
+                                   | GCLK_CLKCTRL_GEN_GCLK0 << GCLK_CLKCTRL_GEN_Pos  
+                                   | (sercom_gclk_id_slow << GCLK_CLKCTRL_ID_Pos));
     while (GCLK->STATUS.bit.SYNCBUSY);
 
 
@@ -140,30 +144,30 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
     /* Find and set baudrate. Read speed configuration. Set transfer speed:
     * SERCOM_I2CM_CTRLA_SPEED(0): Standard-mode (Sm) up to 100 kHz and Fast-mode (Fm) up to 400 kHz*/
     switch (speed) {
-            case I2C_SPEED_NORMAL:
-                tmp_baud = (int32_t)(((clock_source_speed + (2*(100000)) - 1) / (2*(100000))) - 5);
+        case I2C_SPEED_NORMAL:
+            tmp_baud = (int32_t)(((clock_source_speed + (2*(100000)) - 1) / (2*(100000))) - 5);
             if (tmp_baud < 255 && tmp_baud > 0) {
                 I2CSercom->CTRLA.reg |= SERCOM_I2CM_CTRLA_SPEED(0);
                 I2CSercom->BAUD.reg = SERCOM_I2CM_BAUD_BAUD(tmp_baud);
             }
             break;
-            case I2C_SPEED_FAST:
-                    tmp_baud = (int32_t)(((clock_source_speed + (2*(400000)) - 1) / (2*(400000))) - 5);
+        case I2C_SPEED_FAST:
+            tmp_baud = (int32_t)(((clock_source_speed + (2*(400000)) - 1) / (2*(400000))) - 5);
             if (tmp_baud < 255 && tmp_baud > 0) {
                 I2CSercom->CTRLA.reg |= SERCOM_I2CM_CTRLA_SPEED(0);
                 I2CSercom->BAUD.reg = SERCOM_I2CM_BAUD_BAUD(tmp_baud);
             }
             break;
-            case I2C_SPEED_HIGH:
+        case I2C_SPEED_HIGH:
             tmp_baud = (int32_t)(((clock_source_speed + (2*(3400000)) - 1) / (2*(3400000))) - 1);
             if (tmp_baud < 255 && tmp_baud > 0) {
                 I2CSercom->CTRLA.reg |= SERCOM_I2CM_CTRLA_SPEED(2);
                 I2CSercom->BAUD.reg =SERCOM_I2CM_BAUD_HSBAUD(tmp_baud);
             }
             break;
-            default:
+        default:
             DEBUG("BAD BAUDRATE\n");
-                return -2;
+            return -2;
     }
 
     /* ENABLE I2C MASTER */
@@ -181,13 +185,13 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 
 int i2c_init_slave(i2c_t dev, uint8_t address)
 {
-	//TODO
-	return 0;
+    /* TODO */
+    return 0;
 }
 
 int i2c_read_byte(i2c_t dev, uint8_t address, char *data)
 {
-        return i2c_read_bytes(dev, address, data, 1);
+    return i2c_read_bytes(dev, address, data, 1);
 }
 
 int i2c_read_bytes(i2c_t dev, uint8_t address, char *data, int length)
@@ -196,52 +200,52 @@ int i2c_read_bytes(i2c_t dev, uint8_t address, char *data, int length)
 
     switch (dev) {
 #if I2C_0_EN
-		case I2C_0:
-			i2c = &I2C_0_DEV;
-			break;
+        case I2C_0:
+            i2c = &I2C_0_DEV;
+            break;
 #endif
         default:
-                    return -1;
+            return -1;
     }
 
-	/* start transmission and send slave address */
-	_start(i2c, address, I2C_FLAG_READ);
-	/* read data to register */
-	_read(i2c, data, length);
-	_stop(i2c);
-	/* return number of bytes sent */
-	return length;
+    /* start transmission and send slave address */
+    _start(i2c, address, I2C_FLAG_READ);
+    /* read data to register */
+    _read(i2c, data, length);
+    _stop(i2c);
+    /* return number of bytes sent */
+    return length;
 }
 
 int i2c_read_reg(i2c_t dev, uint8_t address, uint8_t reg, char *data)
 {
-        return i2c_read_regs(dev, address, reg, data, 1);
+    return i2c_read_regs(dev, address, reg, data, 1);
 }
 
 int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, char *data, int length)
 {
     SercomI2cm *i2c;
 
-	switch (dev) {
+    switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
+        case I2C_0:
             i2c = &I2C_0_DEV;
-                    break;
+            break;
 #endif
-            default:
-                    return -1;
+        default:
+            return -1;
     }
 
-	/* start transmission and send slave address */
-	_start(i2c, address, I2C_FLAG_WRITE);
-	/* send register address/command and wait for complete transfer to be finished*/
-	_write(i2c, (char *)(&reg), 1);
-	return i2c_read_bytes(dev, address, data, length);
+    /* start transmission and send slave address */
+    _start(i2c, address, I2C_FLAG_WRITE);
+    /* send register address/command and wait for complete transfer to be finished*/
+    _write(i2c, (char *)(&reg), 1);
+    return i2c_read_bytes(dev, address, data, length);
 }
 
 int i2c_write_byte(i2c_t dev, uint8_t address, char data)
 {
-        return i2c_write_bytes(dev, address, &data, 1);
+    return i2c_write_bytes(dev, address, &data, 1);
 }
 
 int i2c_write_bytes(i2c_t dev, uint8_t address, char *data, int length)
@@ -250,12 +254,12 @@ int i2c_write_bytes(i2c_t dev, uint8_t address, char *data, int length)
 
     switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
+        case I2C_0:
             I2CSercom = &I2C_0_DEV;
-                    break;
+            break;
 #endif
         default:
-                return -1;
+            return -1;
     }
 
     _start(I2CSercom, address, I2C_FLAG_WRITE);
@@ -267,21 +271,21 @@ int i2c_write_bytes(i2c_t dev, uint8_t address, char *data, int length)
 
 int i2c_write_reg(i2c_t dev, uint8_t address, uint8_t reg, char data)
 {
-	return i2c_write_regs(dev, address, reg, &data, 1);
+    return i2c_write_regs(dev, address, reg, &data, 1);
 }
 
 int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, char *data, int length)
 {
     SercomI2cm *i2c;
 
-	switch (dev) {
+    switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
+        case I2C_0:
             i2c = &I2C_0_DEV;
             break;
 #endif
-            default:
-                    return -1;
+        default:
+            return -1;
         }
 
     /* start transmission and send slave address */
@@ -297,15 +301,15 @@ int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, char *data, int leng
 
 void i2c_poweron(i2c_t dev)
 {
-	switch (dev) {
+    switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
-                while(I2C_0_DEV.SYNCBUSY.reg & SERCOM_I2CM_SYNCBUSY_MASK);
+        case I2C_0:
+            while(I2C_0_DEV.SYNCBUSY.reg & SERCOM_I2CM_SYNCBUSY_MASK);
             I2C_0_DEV.CTRLA.bit.ENABLE = 1;
-                    break;
+            break;
 #endif
         default:
-                    return;
+            return;
     }
 }
 
@@ -313,13 +317,13 @@ void i2c_poweroff(i2c_t dev)
 {
     switch (dev) {
 #if I2C_0_EN
-            case I2C_0:
-                while(I2C_0_DEV.SYNCBUSY.reg & SERCOM_I2CM_SYNCBUSY_MASK);
-                I2C_0_DEV.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
+        case I2C_0:
+            while(I2C_0_DEV.SYNCBUSY.reg & SERCOM_I2CM_SYNCBUSY_MASK);
+            I2C_0_DEV.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
             break;
 #endif
         default:
-                return;
+            return;
     }
 }
 
@@ -389,8 +393,8 @@ static inline void _write(SercomI2cm *dev, char *data, int length)
         dev->DATA.reg = data[buffer_counter++];
 
         DEBUG("Wait for response.\n");
-        while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) &&
-                !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
+        while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) 
+               && !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
             if (++timeout_counter >= buffer_timeout) {
                 DEBUG("STATUS_ERR_TIMEOUT\n");
                 return;
@@ -428,7 +432,8 @@ static inline void _read(SercomI2cm *dev, char *data, int length)
 
         /* Wait for response. */
         timeout_counter = 0;
-        while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) &&    !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
+        while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) 
+               && !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
             if (++timeout_counter >= buffer_timeout) {
                 DEBUG("STATUS_ERR_TIMEOUT\n");
                 return;

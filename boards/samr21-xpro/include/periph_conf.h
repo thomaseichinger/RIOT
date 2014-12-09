@@ -100,11 +100,11 @@ extern "C" {
 #define I2C_0_ISR           isr_sercom3
 /* I2C 0 pin configuration */
 #define I2C_0_PORT          (PORT->Group[0])
-#define I2C_SDA    	        PIN_PA16
-#define I2C_SCL	   	        PIN_PA17
+#define I2C_SDA             PIN_PA16
+#define I2C_SCL             PIN_PA17
 #define I2C_0_PINS          (PORT_PA16 | PORT_PA17)
 /* Default Clock Source on reset OSC8M - 8MHz */
-#define I2C_0_REF_F	        (8000000UL)
+#define I2C_0_REF_F         (8000000UL)
 
 /**
  * @name Random Number Generator configuration
@@ -126,16 +126,16 @@ extern "C" {
 /* GPIO channel 0 config */
 #define GPIO_0_DEV          PORT->Group[0]
 #define GPIO_0_PIN          PIN_PA13
-#define GPIO_0_EXTINT		13
+#define GPIO_0_EXTINT       13
 /* GPIO channel 1 config */
 /* SW0 Button, configure w/ GPIO_PULLUP and GPIO_FALLING */
 #define GPIO_1_DEV          PORT->Group[0]
 #define GPIO_1_PIN          PIN_PA28
-#define GPIO_1_EXTINT		8
+#define GPIO_1_EXTINT       8
 /* GPIO channel 2 config */
 #define GPIO_2_DEV          PORT->Group[0]
 #define GPIO_2_PIN          PIN_PA15
-#define GPIO_2_EXTINT		15
+#define GPIO_2_EXTINT       15
 /* GPIO channel 3 config */
 #define GPIO_3_DEV          PORT->Group[0]
 #define GPIO_3_PIN          PIN_PA19

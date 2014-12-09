@@ -33,6 +33,8 @@
 /* guard file in case no I2C device is defined */
 #if I2C_NUMOF
 
+#define SAMD21_I2C_TIMEOUT  (65535)
+
 /* static function definitions */
 static inline void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag);
 static inline void _write(SercomI2cm *dev, char *data, int length);
@@ -175,8 +177,7 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 
     /* Start timeout if bus state is unknown. */
     while (!(I2CSercom->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(1))) {
-        timeout_counter++;
-        if(timeout_counter >= 65535) {
+        if(timeout_counter++ >= SAMD21_I2C_TIMEOUT) {
             I2CSercom->STATUS.reg = SERCOM_I2CM_STATUS_BUSSTATE(1); /* Timeout, force bus state to idle. */
         }
     }
@@ -330,7 +331,6 @@ void i2c_poweroff(i2c_t dev)
 static void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag)
 {
     uint32_t timeout_counter = 0;
-    uint16_t buffer_timeout = 65535;
 
     /*Wait for hardware module to sync*/
     DEBUG("Wait for device to be ready\n");
@@ -345,7 +345,7 @@ static void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag)
 
     /* Wait for response on bus. */
     while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) &&    !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
-        if (++timeout_counter >= buffer_timeout) {
+        if (++timeout_counter >= SAMD21_I2C_TIMEOUT) {
             DEBUG("STATUS_ERR_TIMEOUT\n");
             return;
         }
@@ -374,7 +374,6 @@ static void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag)
 static inline void _write(SercomI2cm *dev, char *data, int length)
 {
     uint16_t tmp_data_length = length;
-    uint16_t buffer_timeout = 65535;
     uint32_t timeout_counter = 0;
     uint16_t buffer_counter = 0;
 
@@ -395,7 +394,7 @@ static inline void _write(SercomI2cm *dev, char *data, int length)
         DEBUG("Wait for response.\n");
         while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) 
                && !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
-            if (++timeout_counter >= buffer_timeout) {
+            if (++timeout_counter >= SAMD21_I2C_TIMEOUT) {
                 DEBUG("STATUS_ERR_TIMEOUT\n");
                 return;
             }
@@ -412,7 +411,6 @@ static inline void _write(SercomI2cm *dev, char *data, int length)
 static inline void _read(SercomI2cm *dev, char *data, int length)
 {
     uint32_t timeout_counter = 0;
-    uint16_t buffer_timeout = 65535;
     uint8_t count = 0;
 
     /* Set action to ack. */
@@ -434,7 +432,7 @@ static inline void _read(SercomI2cm *dev, char *data, int length)
         timeout_counter = 0;
         while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) 
                && !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
-            if (++timeout_counter >= buffer_timeout) {
+            if (++timeout_counter >= SAMD21_I2C_TIMEOUT) {
                 DEBUG("STATUS_ERR_TIMEOUT\n");
                 return;
             }

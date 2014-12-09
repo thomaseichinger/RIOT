@@ -178,7 +178,8 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
     /* Start timeout if bus state is unknown. */
     while (!(I2CSercom->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(1))) {
         if(timeout_counter++ >= SAMD21_I2C_TIMEOUT) {
-            I2CSercom->STATUS.reg = SERCOM_I2CM_STATUS_BUSSTATE(1); /* Timeout, force bus state to idle. */
+            /* Timeout, force bus state to idle. */
+            I2CSercom->STATUS.reg = SERCOM_I2CM_STATUS_BUSSTATE(1);
         }
     }
     return 0;
@@ -344,7 +345,8 @@ static void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag)
     dev->ADDR.reg = (address << 1) | rw_flag | (0 << SERCOM_I2CM_ADDR_HS_Pos);
 
     /* Wait for response on bus. */
-    while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB) &&    !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
+    while (!(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_MB)
+           && !(dev->INTFLAG.reg & SERCOM_I2CM_INTFLAG_SB)) {
         if (++timeout_counter >= SAMD21_I2C_TIMEOUT) {
             DEBUG("STATUS_ERR_TIMEOUT\n");
             return;
@@ -361,8 +363,8 @@ static void _start(SercomI2cm *dev, uint8_t address, uint8_t rw_flag)
             DEBUG("STATUS_ERR_PACKET_COLLISION\n");
             return;
         }
+    }
     /* Check that slave responded with ack. */
-    } 
     else if (dev->STATUS.reg & SERCOM_I2CM_STATUS_RXNACK) {
         /* Slave busy. Issue ack and stop command. */
         dev->CTRLB.reg |= SERCOM_I2CM_CTRLB_CMD(3);
@@ -380,7 +382,8 @@ static inline void _write(SercomI2cm *dev, char *data, int length)
     /* Write data buffer until the end. */
     DEBUG("Looping through bytes\n");
     while (tmp_data_length--) {
-        if (!(dev->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(2))) {   /* Check that bus ownership is not lost. */
+        /* Check that bus ownership is not lost. */
+        if (!(dev->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(2))) {
             DEBUG("STATUS_ERR_PACKET_COLLISION\n");
             return;
         }
@@ -418,7 +421,8 @@ static inline void _read(SercomI2cm *dev, char *data, int length)
 
     /* Read data buffer. */
     while (count != length) {
-        if (!(dev->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(2))) {   /* Check that bus ownership is not lost. */
+        /* Check that bus ownership is not lost. */
+        if (!(dev->STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE(2))) {
             DEBUG("STATUS_ERR_PACKET_COLLISION\n");
             return;
         }

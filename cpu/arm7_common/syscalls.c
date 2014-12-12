@@ -213,7 +213,8 @@ __attribute__((used)) pid_t _getpid(void)
     return (pid_t) sched_active_pid;
 }
 /*---------------------------------------------------------------------------*/
-__attribute__((used)) int _kill_r(struct _reent *r, int pid, int sig)
+__attribute__ ((weak)) __attribute__((used))
+int _kill_r(struct _reent *r, int pid, int sig)
 {
     (void) pid;
     (void) sig;
@@ -224,3 +225,18 @@ __attribute__((used)) int _kill_r(struct _reent *r, int pid, int sig)
 
 void _init(void) {}
 void _fini(void) {}
+
+/**
+ * @brief Send a signal to a thread
+ *
+ * @param[in] pid the pid to send to
+ * @param[in] sig the signal to send
+ *
+ * @return TODO
+ */
+__attribute__ ((weak))
+int _kill(int pid, int sig)
+{
+    errno = ESRCH;                         /* not implemented yet */
+    return -1;
+}

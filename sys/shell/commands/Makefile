@@ -13,6 +13,9 @@ ifneq (,$(filter cc110x_legacy_csma,$(USEMODULE)))
 		SRC += sc_cc110x_legacy_csma.c
 	endif
 endif
+ifneq (,$(filter l2_ping,$(USEMODULE)))
+	SRC += sc_l2_ping.c
+endif
 ifneq (,$(filter net_if,$(USEMODULE)))
 	SRC += sc_net_if.c
 endif
@@ -34,7 +37,7 @@ endif
 ifneq (,$(filter sht11,$(USEMODULE)))
 	SRC += sc_sht11.c
 endif
-ifneq (,$(filter lpc_common,$(USEMODULE)))
+ifneq (,$(filter lpc2387,$(USEMODULE)))
 	SRC += sc_heap.c
 endif
 ifneq (,$(filter random,$(USEMODULE)))

@@ -83,7 +83,7 @@ extern void _x86_lspci(int argc, char **argv);
 #ifdef DBG_IGNORE
 #define _TC_IGN
 #endif
-#if (defined(MODULE_CC110X_LEGACY) || defined(MODULE_CC2420) || defined(MODULE_AT86RF231) || defined(MODULE_NATIVENET))
+#if (defined(MODULE_CC110X) || defined(MODULE_CC110X_LEGACY) || defined(MODULE_CC2420) || defined(MODULE_AT86RF231) || defined(MODULE_NATIVENET))
 #define _TC_ADDR
 #define _TC_CHAN
 #define _TC_MON
@@ -122,6 +122,12 @@ extern void _transceiver_get_set_pan_handler(int argc, char **argv);
 #ifdef _TC_IGN
 extern void _transceiver_set_ignore_handler(int argc, char **argv);
 #endif
+#endif
+
+#ifdef MODULE_L2_PING
+extern void _l2_ping_req_handler(int argc, char **argv);
+extern void _l2_ping_probe_handler(int argc, char **argv);
+extern void _l2_ping_get_probe_handler(int argc, char **argv);
 #endif
 
 #ifdef MODULE_NET_IF
@@ -212,6 +218,11 @@ const shell_command_t _shell_command_list[] = {
     {"addr", "Gets or sets the address for the CC1100 transceiver", _cc110x_get_set_address_handler},
     {"chan", "Gets or sets the channel for the CC1100 transceiver", _cc110x_get_set_channel_handler},
 #endif
+#endif
+#ifdef MODULE_L2_PING
+    {"l2_ping", "Sends link layer ping requests", _l2_ping_req_handler},
+    {"l2_probe", "Sends link layer probes", _l2_ping_probe_handler},
+    {"l2_probe_stats", "Get statistics about received probes", _l2_ping_get_probe_handler},
 #endif
 #ifdef MODULE_NET_IF
     {"ifconfig", "Configures a network interface", _net_if_ifconfig},

@@ -132,6 +132,9 @@ void create_usage(void)
 #ifdef MODULE_CC2420
          "        * cc2420\n"
 #endif
+#ifdef MODULE_CC2538
+         "        * cc2538\n"
+#endif
 #ifdef MODULE_MC1322X
          "        * mc1322x\n"
 #endif
@@ -426,6 +429,9 @@ void _net_if_ifconfig_create(char *transceivers_str)
         else if (strcasecmp(transceiver_str, "cc2420") == 0) {
             transceivers |= TRANSCEIVER_CC2420;
         }
+        else if (strcasecmp(transceiver_str, "cc2538") == 0) {
+            transceivers |= TRANSCEIVER_CC2538;
+        }
         else if (strcasecmp(transceiver_str, "mc1322x") == 0) {
             transceivers |= TRANSCEIVER_MC1322X;
         }
@@ -607,6 +613,10 @@ void _net_if_ifconfig_list(int if_id)
 
     if (transceivers & TRANSCEIVER_CC2420) {
         puts("             * cc2420");
+    }
+
+    if (transceivers & TRANSCEIVER_CC2538) {
+        puts("             * cc2538");
     }
 
     if (transceivers & TRANSCEIVER_MC1322X) {

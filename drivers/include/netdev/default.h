@@ -43,6 +43,14 @@
 #endif /* NETDEV_DEFAULT */
 #endif /* MODULE_CC110X */
 
+#ifdef MODULE_CC2538
+#include "cc2538-rf.h"
+
+#ifndef NETDEV_DEFAULT
+#define NETDEV_DEFAULT  ((netdev_t *)(&cc2538_netdev))
+#endif /* NETDEV_DEFAULT */
+#endif /* MODULE_CC2538 */
+
 #ifdef MODULE_NATIVENET
 #include "nativenet.h"
 

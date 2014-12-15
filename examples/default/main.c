@@ -35,7 +35,7 @@
 #include "ltc4150.h"
 #endif
 
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
 #include "ieee802154_frame.h"
 #endif
 
@@ -58,7 +58,7 @@ void *radio(void *arg)
 
     msg_t m;
 
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
     ieee802154_packet_t *p;
 #else
     radio_packet_t *p;
@@ -71,7 +71,7 @@ void *radio(void *arg)
         msg_receive(&m);
 
         if (m.type == PKT_PENDING) {
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
             p = (ieee802154_packet_t*) m.content.ptr;
             printf("Got radio packet:\n");
             printf("\tLength:\t%u\n", p->length);

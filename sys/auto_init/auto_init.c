@@ -109,6 +109,9 @@ void auto_init_net_if(void)
 #ifdef MODULE_CC2420
     transceivers |= TRANSCEIVER_CC2420;
 #endif
+#ifdef MODULE_CC2538
+    transceivers |= TRANSCEIVER_CC2538;
+#endif
 #ifdef MODULE_MC1322X
     transceivers |= TRANSCEIVER_MC1322X;
 #endif

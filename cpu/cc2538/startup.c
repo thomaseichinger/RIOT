@@ -149,7 +149,7 @@ void isr_timer1_chan1(void)  __attribute__ ((weak, alias("dummy_handler")));
 void isr_timer2_chan0(void)  __attribute__ ((weak, alias("dummy_handler")));
 void isr_timer2_chan1(void)  __attribute__ ((weak, alias("dummy_handler")));
 void isr_comp(void)          __attribute__ ((weak, alias("dummy_handler")));
-void isr_rfcoretx(void)      __attribute__ ((weak, alias("dummy_handler")));
+void isr_rfcorerxtx(void)    __attribute__ ((weak, alias("dummy_handler")));
 void isr_rfcoreerr(void)     __attribute__ ((weak, alias("dummy_handler")));
 void isr_icepick(void)       __attribute__ ((weak, alias("dummy_handler")));
 void isr_flash(void)         __attribute__ ((weak, alias("dummy_handler")));
@@ -212,7 +212,7 @@ const void *interrupt_vector[] = {
     (void*) isr_timer2_chan0,       /* 39 Timer 2 subtimer A */
     (void*) isr_timer2_chan1,       /* 40 Timer 2 subtimer B */
     (void*) isr_comp,               /* 41 Analog Comparator 0 */
-    (void*) isr_rfcoretx,           /* 42 RFCore Rx/Tx */
+    (void*) isr_rfcorerxtx,         /* 42 RFCore Rx/Tx */
     (void*) isr_rfcoreerr,          /* 43 RFCore Error */
     (void*) isr_icepick,            /* 44 IcePick */
     (void*) isr_flash,              /* 45 FLASH Control */

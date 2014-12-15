@@ -60,6 +60,13 @@
 #endif
 #endif
 
+#ifdef MODULE_CC2538
+#include "cc2538.h"
+#ifndef TRANSCEIVER_DEFAULT
+#define TRANSCEIVER_DEFAULT TRANSCEIVER_CC2538
+#endif
+#endif
+
 #ifdef MODULE_MC1322X
 #include "mc1322x.h"
 #include "maca.h"
@@ -120,6 +127,12 @@ extern "C" {
 #define PAYLOAD_SIZE (CC2420_MAX_DATA_LENGTH)
 #endif
 #endif
+#ifdef MODULE_CC2538
+#if (CC2538_MAX_DATA_LENGTH > PAYLOAD_SIZE)
+#undef PAYLOAD_SIZE
+#define PAYLOAD_SIZE (CC2538_MAX_DATA_LENGTH)
+#endif
+#endif
 #ifdef MODULE_AT86RF231
 #if (AT86RF231_MAX_DATA_LENGTH > PAYLOAD_SIZE)
 #undef PAYLOAD_SIZE
@@ -169,6 +182,7 @@ extern "C" {
 #define TRANSCEIVER_MC1322X     (0x08)      /**< MC1322X transceivers */
 #define TRANSCEIVER_NATIVE      (0x10)      /**< NATIVE transceivers */
 #define TRANSCEIVER_AT86RF231   (0x20)      /**< AT86RF231 transceivers */
+#define TRANSCEIVER_CC2538      (0x40)      /**< CC2538 transceivers */
 /**
  * @}
  */
@@ -191,6 +205,7 @@ enum transceiver_msg_type_t {
     RCV_PKT_CC1020,        /**< packet was received by CC1020 transceiver */
     RCV_PKT_CC1100,        /**< packet was received by CC1100 transceiver */
     RCV_PKT_CC2420,        /**< packet was received by CC2420 transceiver */
+    RCV_PKT_CC2538,        /**< packet was received by CC2538 transceiver */
     RCV_PKT_MC1322X,       /**< packet was received by mc1322x transceiver */
     RCV_PKT_NATIVE,        /**< packet was received by native transceiver */
     RCV_PKT_AT86RF231,     /**< packet was received by AT86RF231 transceiver */

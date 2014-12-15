@@ -47,6 +47,11 @@
 #include "ieee802154_frame.h"
 #endif
 
+#ifdef MODULE_CC2538
+#include "cc2538-rf.h"
+#include "ieee802154_frame.h"
+#endif
+
 #ifdef MODULE_MC1322X
 #include "mc1322x.h"
 #include "maca.h"
@@ -79,7 +84,7 @@ transceiver_type_t transceivers = TRANSCEIVER_NONE;
 registered_t reg[TRANSCEIVER_MAX_REGISTERED];
 
 /* packet buffers */
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
 ieee802154_packet_t transceiver_buffer[TRANSCEIVER_BUFFER_SIZE];
 #else
 radio_packet_t transceiver_buffer[TRANSCEIVER_BUFFER_SIZE];
@@ -120,6 +125,9 @@ void receive_cc1100_packet(radio_packet_t *trans_p);
 #endif
 #ifdef MODULE_CC2420
 static void receive_cc2420_packet(ieee802154_packet_t *trans_p);
+#endif
+#ifdef MODULE_CC2538
+static void receive_cc2538_packet(ieee802154_packet_t *trans_p);
 #endif
 #ifdef MODULE_NATIVENET
 static void receive_nativenet_packet(radio_packet_t *trans_p);
@@ -175,7 +183,7 @@ void transceiver_init(transceiver_type_t t)
     }
 
     /* check if a non defined bit is set */
-    if (t & ~(TRANSCEIVER_CC1100 | TRANSCEIVER_CC2420 | TRANSCEIVER_MC1322X | TRANSCEIVER_NATIVE | TRANSCEIVER_AT86RF231)) {
+    if (t & ~(TRANSCEIVER_CC1100 | TRANSCEIVER_CC2420 | TRANSCEIVER_CC2538 | TRANSCEIVER_MC1322X | TRANSCEIVER_NATIVE | TRANSCEIVER_AT86RF231)) {
         puts("Invalid transceiver type");
     }
     else {
@@ -211,6 +219,13 @@ kernel_pid_t transceiver_start(void)
     else if (transceivers & TRANSCEIVER_CC2420) {
         DEBUG("transceiver: Transceiver started for CC2420\n");
         cc2420_init(transceiver_pid);
+    }
+
+#endif
+#ifdef MODULE_CC2538
+    else if (transceivers & TRANSCEIVER_CC2538) {
+        DEBUG("transceiver: Transceiver started for CC2538\n");
+        cc2538_init(transceiver_pid);
     }
 
 #endif
@@ -287,7 +302,7 @@ static void *run(void *arg)
     msg_init_queue(msg_buffer, TRANSCEIVER_MSG_BUFFER_SIZE);
 
     while (1) {
-        DEBUG("transceiver: Waiting for next message\n");
+        DEBUG("transceiver: Waiting for next message (pid = %d)\n", thread_getpid());
         msg_t m;
         msg_receive(&m);
         /* only makes sense for messages for upper layers */
@@ -298,6 +313,7 @@ static void *run(void *arg)
             case RCV_PKT_CC1020:
             case RCV_PKT_CC1100:
             case RCV_PKT_CC2420:
+            case RCV_PKT_CC2538:
             case RCV_PKT_MC1322X:
             case RCV_PKT_NATIVE:
             case RCV_PKT_AT86RF231:
@@ -408,6 +424,10 @@ static void receive_packet(uint16_t type, uint8_t pos)
             t = TRANSCEIVER_CC2420;
             break;
 
+        case RCV_PKT_CC2538:
+            t = TRANSCEIVER_CC2538;
+            break;
+
         case RCV_PKT_MC1322X:
             t = TRANSCEIVER_MC1322X;
             break;
@@ -466,6 +486,12 @@ static void receive_packet(uint16_t type, uint8_t pos)
             receive_cc2420_packet(trans_p);
 #endif
         }
+        else if (type == RCV_PKT_CC2538) {
+#ifdef MODULE_CC2538
+            ieee802154_packet_t *trans_p = &(transceiver_buffer[transceiver_buffer_pos]);
+            receive_cc2538_packet(trans_p);
+#endif
+        }
         else if (type == RCV_PKT_AT86RF231) {
 #ifdef MODULE_AT86RF231
             ieee802154_packet_t *trans_p = &(transceiver_buffer[transceiver_buffer_pos]);
@@ -485,7 +511,7 @@ static void receive_packet(uint16_t type, uint8_t pos)
 
 #ifdef DBG_IGNORE
 
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
         radio_address_t short_addr;
         short_addr = (transceiver_buffer[transceiver_buffer_pos].frame.src_addr[1] << 8)
             | transceiver_buffer[transceiver_buffer_pos].frame.src_addr[0];
@@ -629,6 +655,25 @@ void receive_cc2420_packet(ieee802154_packet_t *trans_p)
 }
 #endif
 
+#ifdef MODULE_CC2538
+void receive_cc2538_packet(ieee802154_packet_t *trans_p)
+{
+    cc2538_packet_t* p;
+    void* buf = &(data_buffer[transceiver_buffer_pos * PAYLOAD_SIZE]);
+
+    p = &cc2538_packet;
+    buf = &cc2538_packet;
+    dINT();
+    trans_p->rssi          = p->rssi;
+    trans_p->crc           = p->crc;
+    trans_p->lqi           = p->lqi;
+    trans_p->length        = p->length;
+    trans_p->frame.payload = buf;
+    memcpy(buf, &(p->payload[0]), (p->length < PAYLOAD_SIZE)? p->length : PAYLOAD_SIZE);
+    eINT();
+}
+#endif
+
 #ifdef MODULE_MC1322X
 void receive_mc1322x_packet(ieee802154_packet_t *trans_p)
 {
@@ -716,14 +761,14 @@ void receive_at86rf231_packet(ieee802154_packet_t *trans_p)
  *
  * @param t     The transceiver device
  * @param pkt   Generic pointer to the packet (use ieee802154_packet_t for
- *              AT86RF231, CC2420, and MC1322X)
+ *              AT86RF231, CC2420, CC2538, and MC1322X)
  *
  * @return A negative value if operation failed, 0 or the number of bytes sent otherwise.
  */
 static int8_t send_packet(transceiver_type_t t, void *pkt)
 {
     int8_t res = -1;
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
     ieee802154_packet_t *p = (ieee802154_packet_t *)pkt;
     DEBUG("transceiver: Send packet to ");
 #if ENABLE_DEBUG
@@ -782,6 +827,12 @@ static int8_t send_packet(transceiver_type_t t, void *pkt)
             memcpy(&cc2420_pkt.frame, &p->frame, sizeof(ieee802154_frame_t));
             cc2420_pkt.length = p->frame.payload_len + IEEE_802154_FCS_LEN;
             res = cc2420_send(&cc2420_pkt);
+            break;
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            res = cc2538_send_lowlevel(p->frame.payload, p->frame.payload_len);
             break;
 #endif
 #ifdef MODULE_MC1322X
@@ -845,6 +896,12 @@ static int32_t set_channel(transceiver_type_t t, void *channel)
         case TRANSCEIVER_CC2420:
             return cc2420_set_channel(c);
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_set_channel(c);
+            return cc2538_get_channel();
+#endif
 #ifdef MODULE_MC1322X
 
         case TRANSCEIVER_MC1322X:
@@ -890,6 +947,11 @@ static int32_t get_channel(transceiver_type_t t)
         case TRANSCEIVER_CC2420:
             return cc2420_get_channel();
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            return cc2538_get_channel();
+#endif
 #ifdef MODULE_MC1322X
 
         case TRANSCEIVER_MC1322X:
@@ -931,6 +993,12 @@ static int32_t set_pan(transceiver_type_t t, void *pan)
         case TRANSCEIVER_CC2420:
             return cc2420_set_pan(c);
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_set_pan(c);
+            return c;
+#endif
 #ifdef MODULE_NATIVENET
 
         case TRANSCEIVER_NATIVE:
@@ -968,6 +1036,11 @@ static int32_t get_pan(transceiver_type_t t)
 
         case TRANSCEIVER_CC2420:
             return cc2420_get_pan();
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            return cc2538_get_pan();
 #endif
 #ifdef MODULE_NATIVENET
 
@@ -1014,6 +1087,11 @@ static radio_address_t get_address(transceiver_type_t t)
 
         case TRANSCEIVER_CC2420:
             return cc2420_get_address();
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            return cc2538_get_address();
 #endif
 #ifdef MODULE_MC1322X
 
@@ -1066,6 +1144,12 @@ static radio_address_t set_address(transceiver_type_t t, void *address)
         case TRANSCEIVER_CC2420:
             return cc2420_set_address(addr);
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_set_address(addr);
+            return addr;
+#endif
 #ifdef MODULE_MC1322X
 
         case TRANSCEIVER_MC1322X:
@@ -1102,6 +1186,11 @@ static transceiver_eui64_t get_long_addr(transceiver_type_t t)
         case TRANSCEIVER_CC2420:
             return cc2420_get_address_long();
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            return cc2538_get_address_long();
+#endif
 #ifdef MODULE_AT86RF231
 
         case TRANSCEIVER_AT86RF231:
@@ -1130,6 +1219,12 @@ static transceiver_eui64_t set_long_addr(transceiver_type_t t, void *address)
 
         case TRANSCEIVER_CC2420:
             return cc2420_set_address_long(addr);
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_set_address_long(addr);
+            return addr;
 #endif
 #ifdef MODULE_AT86RF231
 
@@ -1164,6 +1259,12 @@ static void set_monitor(transceiver_type_t t, void *mode)
 
         case TRANSCEIVER_CC2420:
             cc2420_set_monitor(*((uint8_t *) mode));
+            break;
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_set_monitor(*((uint8_t *) mode));
             break;
 #endif
 #ifdef MODULE_NATIVENET
@@ -1205,6 +1306,12 @@ static void powerdown(transceiver_type_t t)
             cc110x_switch_to_pwd();
             break;
 #endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+            cc2538_off();
+            break;
+#endif
 #ifdef MODULE_MC1322X
 
         case TRANSCEIVER_MC1322X:
@@ -1238,6 +1345,13 @@ static void switch_to_rx(transceiver_type_t t)
         case TRANSCEIVER_CC2420:
 
             cc2420_switch_to_rx();
+            break;
+#endif
+#ifdef MODULE_CC2538
+
+        case TRANSCEIVER_CC2538:
+
+            cc2538_switch_to_rx();
             break;
 #endif
 #ifdef MODULE_NATIVENET

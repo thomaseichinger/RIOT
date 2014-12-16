@@ -44,7 +44,7 @@ timer_conf_t config[TIMER_NUMOF];
  * @brief Setup the given timer
  *
  */
-int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
+int timer_init(tim_t dev, unsigned int us_per_tick, void (*callback)(int))
 {
     cc2538_gptimer_t *gptimer;
     unsigned int gptimer_num;

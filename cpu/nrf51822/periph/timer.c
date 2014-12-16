@@ -64,7 +64,7 @@ static NRF_TIMER_Type *const timer[] = {
 #endif
 };
 
-int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
+int timer_init(tim_t dev, unsigned int us_per_tick, void (*callback)(int))
 {
     if (dev >= TIMER_NUMOF) {
         return -1;
@@ -105,7 +105,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
     timer[dev]->MODE = TIMER_MODE_MODE_Timer;        /* set the timer in Timer Mode. */
     timer[dev]->TASKS_CLEAR    = 1;                  /* clear the task first to be usable for later. */
 
-    switch (ticks_per_us) {
+    switch (us_per_tick) {
         case 1:
             timer[dev]->PRESCALER = 4;
             break;

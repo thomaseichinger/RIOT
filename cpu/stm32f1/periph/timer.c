@@ -45,11 +45,12 @@ typedef struct {
  */
 static timer_conf_t config[TIMER_NUMOF];
 
-int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
+int timer_init(tim_t dev, unsigned int us_per_tick, void (*callback)(int))
 {
     TIM_TypeDef *timer0;
     TIM_TypeDef *timer1;
     uint8_t     trigger_selector;
+    uint16_t    prescaler;
 
     switch (dev) {
 #if TIMER_0_EN
@@ -63,6 +64,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
             timer0 = TIMER_0_DEV_0;
             timer1 = TIMER_0_DEV_1;
             trigger_selector = TIMER_0_TRIG_SEL;
+            prescaler = TIMER_0_PRESCALER;
             break;
 #endif
 #if TIMER_1_EN
@@ -76,6 +78,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
             timer0 = TIMER_1_DEV_0;
             timer1 = TIMER_1_DEV_1;
             trigger_selector = TIMER_1_TRIG_SEL;
+            prescaler = TIMER_1_PRESCALER;
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -95,8 +98,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
     timer0->CR2 |= TIM_CR2_MMS_1;
     /* set auto-reload and prescaler values and load new values */
     timer0->ARR = TIMER_0_MAX_VALUE;
-    timer0->PSC = TIMER_0_PRESCALER * ticks_per_us;
-    // timer->EGR |= TIM_EGR_UG;
+    timer0->PSC = prescaler * ticks_per_us;
 
     /* configure slave timer1 */
     /* get input trigger */

@@ -369,6 +369,9 @@ void isr_rfcorerxtx(void)
 #if ENABLE_DEBUG
                         ieee802154_frame_print_fcf_frame(&frame);
 #endif
+                        if (recv_func != NULL) {
+                            recv_func((void *)rx_buf, len, fcs.rssi, fcs.lqi, fcs.crc);
+                        }
 
                         if (netdev_rcv_data_cb != NULL) {
                             netdev_rcv_data_cb(

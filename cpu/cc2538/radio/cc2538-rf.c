@@ -698,7 +698,6 @@ radio_tx_status_t cc2538_load_tx_buf(ieee802154_packet_kind_t kind,
 radio_tx_status_t cc2538_transmit_tx_buf(void)
 {
     bool was_off = false;
-    int ret = RADIO_TX_ERROR;
 
     if (!cc2538_is_on()) {
         was_off = true;
@@ -724,7 +723,7 @@ radio_tx_status_t cc2538_transmit_tx_buf(void)
         cc2538_off();
     }
 
-    return ret;
+    return RADIO_TX_OK;
 }
 
 radio_tx_status_t cc2538_send(ieee802154_packet_kind_t kind,

@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+#include "debug.h"
 #include "kernel_types.h"
 #include "ieee802154_frame.h"
 #include "radio_driver.h"
@@ -41,10 +42,14 @@ extern "C" {
 
 #define rfcore_assert(expr) (void)( (expr) || rfcore_assert_failure(#expr, __FUNCTION__, __LINE__) )
 
+#if DEVELHELP
 #define rfcore_wait_until(expr) while (!(expr)) {                                        \
-    printf("rfcore_wait_until(%s) at line %u in %s()\n", #expr, __LINE__, __FUNCTION__); \
+    DEBUG("rfcore_wait_until(%s) at line %u in %s()\n", #expr, __LINE__, __FUNCTION__);  \
     thread_yield();                                                                      \
 }
+#else
+#define rfcore_wait_until(expr) while (!(expr)) thread_yield()
+#endif
 
 #ifndef BIT
 #define BIT(n) ( 1 << (n) )

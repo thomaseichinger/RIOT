@@ -17,6 +17,7 @@
  * @}
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "msg.h"
@@ -193,8 +194,11 @@ static const init_pair_t init_table[] = {
 
 bool rfcore_assert_failure(const char *expr, const char *func, int line)
 {
+#if (DEVELHELP || ENABLE_DEBUG)
     DEBUG_PRINT("rfcore_assert(%s) failed at line %u in %s()!\n", expr, line, func);
     DEBUG_PRINT("  RFCORE_SFR_RFERRF = 0x%02x\n", (unsigned int)RFCORE_SFR_RFERRF);
+#endif
+
     return false;
 }
 
@@ -329,7 +333,6 @@ void isr_rfcorerxtx(void)
     uint_fast8_t irq_status0, irq_status1, len;
     static uint8_t rx_buf[256];
     static ieee802154_frame_t frame;
-    int result;
     cc2538_fcs_t fcs;
 
     irq_status1 = RFCORE_SFR_RFIRQF1;
@@ -343,16 +346,16 @@ void isr_rfcorerxtx(void)
 
         if (irq_status0 & FIFOP) {
             if (RFCORE_XREG_RXFIFOCNT < 1) {
-                DEBUG_PRINT("%s(): FIFOP = 1 but RXFIFOCNT = 0!\n", __FUNCTION__);
+                DEBUG("%s(): FIFOP = 1 but RXFIFOCNT = 0!\n", __FUNCTION__);
             }
             else {
                 len = rfcore_read_byte();
 
                 if (len < CC2538_FCS_LEN) {
-                    DEBUG_PRINT("%s(): length %u < CC2538_FCS_LEN!\n", __FUNCTION__, len);
+                    DEBUG("%s(): length %u < CC2538_FCS_LEN!\n", __FUNCTION__, len);
                 }
                 else if (len > RFCORE_XREG_RXFIFOCNT) {
-                    DEBUG_PRINT("%s(): length %u > RXFIFOCNT!\n", __FUNCTION__, len);
+                    DEBUG("%s(): length %u > RXFIFOCNT!\n", __FUNCTION__, len);
                     rfcore_flush_receive_fifo();
                 }
                 else {
@@ -369,6 +372,7 @@ void isr_rfcorerxtx(void)
 #if ENABLE_DEBUG
                         ieee802154_frame_print_fcf_frame(&frame);
 #endif
+
                         if (recv_func != NULL) {
                             recv_func((void *)rx_buf, len, fcs.rssi, fcs.lqi, fcs.crc);
                         }
@@ -398,7 +402,8 @@ void isr_rfcorerxtx(void)
                             msg_t m;
                             m.type = RCV_PKT_CC2538;
                             m.content.ptr = (void *)rx_buf;
-                            result = msg_send_int(&m, local_transceiver_pid);
+#if DEVELHELP
+                            int result = msg_send_int(&m, local_transceiver_pid);
 
                             if (result < 1) {
                                 DEBUG_PRINT(
@@ -407,6 +412,11 @@ void isr_rfcorerxtx(void)
                                     result
                                 );
                             }
+
+#else
+                            msg_send_int(&m, local_transceiver_pid);
+#endif
+
                         }
 
 #endif
@@ -437,11 +447,11 @@ void isr_rfcoreerr(void)
     /* Fail in case of miscallaneous unexpected error conditions */
     rfcore_assert(NOT(flags & STROBE_ERR));
 
-    DEBUG_PRINT("%s(): RFERRF=0x%02x.\n", __FUNCTION__, flags);
+    DEBUG("%s(): RFERRF=0x%02x.\n", __FUNCTION__, flags);
 
     /* Flush the receive FIFO in case of a receive overflow */
     if (flags & RXOVERF) {
-        DEBUG_PRINT("%s(): RXOVERF detected!\n", __FUNCTION__);
+        DEBUG("%s(): RXOVERF detected!\n", __FUNCTION__);
         rfcore_flush_receive_fifo();
     }
 
@@ -450,7 +460,7 @@ void isr_rfcoreerr(void)
         /* The frequency synthesizer failed to achieve lock after time-out, or
          * lock is lost during reception. The receiver must be restarted to clear
          * this error situation. */
-        DEBUG_PRINT("%s(): NLOCK detected!\n", __FUNCTION__);
+        DEBUG("%s(): NLOCK detected!\n", __FUNCTION__);
         rfcore_flush_receive_fifo();
     }
 }
@@ -468,7 +478,7 @@ bool cc2538_get_monitor(void)
 
 void cc2538_set_freq(unsigned int freq)
 {
-    DEBUG_PRINT("%s(%u): Setting frequency to ", __FUNCTION__, freq);
+    DEBUG("%s(%u): Setting frequency to ", __FUNCTION__, freq);
 
     if (freq < CC2538_MIN_FREQ) {
         freq = CC2538_MIN_FREQ;
@@ -477,13 +487,13 @@ void cc2538_set_freq(unsigned int freq)
         freq = CC2538_MAX_FREQ;
     }
 
-    DEBUG_PRINT("%u + %u = %u MHz.\n", CC2538_MIN_FREQ, freq - CC2538_MIN_FREQ, freq);
+    DEBUG("%u + %u = %u MHz.\n", CC2538_MIN_FREQ, freq - CC2538_MIN_FREQ, freq);
     RFCORE_XREG_FREQCTRL = freq - CC2538_MIN_FREQ;
 }
 
 void cc2538_set_channel(unsigned int chan)
 {
-    DEBUG_PRINT("%s(%u);\n", __FUNCTION__, chan);
+    DEBUG("%s(%u);\n", __FUNCTION__, chan);
 
     cc2538_set_freq(ieee802154_chan2freq(chan));
     channel = chan;
@@ -771,30 +781,38 @@ void cc2538_set_recv_callback(receive_802154_packet_callback_t recv_cb)
     recv_func = recv_cb;
 }
 
+#if ENABLE_DEBUG
+static void printf_hex(const void *buf, size_t len)
+{
+    size_t n;
+
+    if (len <= 0) {
+        return;
+    }
+
+    printf("%02x", ((const uint8_t *)buf)[0]);
+
+    for (n = 1; n < len; n++) {
+        printf(":%02x", ((const uint8_t *)buf)[n]);
+    }
+}
+#endif
+
 void rfcore_rx_frame_hook(const void *buf, uint_fast8_t len, const cc2538_fcs_t *fcs)
 {
 #if ENABLE_DEBUG
-    uint_fast8_t n;
-
     DEBUG_PRINT("%s(): Received ", __FUNCTION__);
-
-    for (n = 0; n < len; n++) {
-        DEBUG_PRINT("%02x:", ((const uint8_t *)buf)[n]);
-    }
-
-    DEBUG_PRINT(", RSSI=%d, CRC=%u, LQI=%u", fcs->rssi, fcs->crc, fcs->lqi);
+    printf_hex(buf, len);
+    DEBUG_PRINT(", RSSI=%d, CRC=%u, LQI=%u\n", fcs->rssi, fcs->crc, fcs->lqi);
 #endif /* ENABLE_DEBUG */
 }
 
 void rfcore_tx_frame_hook(const void *buf, uint_fast8_t len)
 {
 #if ENABLE_DEBUG
-    uint_fast8_t n;
     DEBUG_PRINT("%s(): Sending ", __FUNCTION__);
-
-    for (n = 0; n < len; n++) {
-        DEBUG_PRINT("%02x:", ((const uint8_t *)buf)[n]);
-    }
+    printf_hex(buf, len);
+    DEBUG_PRINT("\n");
 #endif /* ENABLE_DEBUG */
 }
 

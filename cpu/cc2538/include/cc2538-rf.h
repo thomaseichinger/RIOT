@@ -106,35 +106,47 @@ typedef struct {
     /* @} */
 } cc2538_packet_t;
 
+/**
+ * @brief 802.15.4 long (IEEE) destination and source address pair
+ */
 typedef struct __attribute__((packed))
 {
-    uint64_t dest_addr;
-    uint64_t src_addr;
+    uint64_t dest_addr;         /**< Destination long (IEEE) address            */
+    uint64_t src_addr;          /**< Source long (IEEE) address                 */
 }
 long_addrs_t;
 
+/**
+ * @brief 802.15.4 short destination and source address pair
+ */
 typedef struct __attribute__((packed))
 {
-    uint16_t dest_pan;
-    uint16_t dest_addr;
-    uint16_t src_pan;
-    uint16_t src_addr;
+    uint16_t dest_pan;          /**< Destination Personal Area Network (PAN) ID */
+    uint16_t dest_addr;         /**< Destination short address                  */
+    uint16_t src_pan;           /**< Source Personal Area Network (PAN) ID      */
+    uint16_t src_addr;          /**< Source short address                       */
 }
 short_addrs_t;
 
+/**
+ * @brief 802.15.4 compressed short destination and source address pair
+ */
 typedef struct __attribute__((packed))
 {
-    uint16_t dest_pan;
-    uint16_t dest_addr;
-    uint16_t src_addr;
+    uint16_t dest_pan;          /**< Destination Personal Area Network (PAN) ID */
+    uint16_t dest_addr;         /**< Destination short address                  */
+    uint16_t src_addr;          /**< Source short address                       */
 }
 short_addrs_compr_t;
 
+/**
+ * @brief 802.15.4 MAC header format
+ */
 typedef struct __attribute__((packed))
 {
-    uint8_t type;
-    uint8_t addr_type;
-    uint8_t sequence_nr;
+    uint8_t type;               /**< IEEE 802.15.4 packet type                  */
+    uint8_t addr_type;          /**< IEEE 802.15.4 address type (short/long)    */
+    uint8_t sequence_nr;        /**< IEEE 802.15.4 sequence number              */
 
     union {
         long_addrs_t long_addrs;
@@ -144,11 +156,14 @@ typedef struct __attribute__((packed))
 }
 mac_header_t;
 
+/**
+ * @brief CC2538 received Frame Check Sequence (FCS) format
+ */
 typedef struct __attribute__((packed))
 {
-    signed   rssi : 8;
-    unsigned lqi  : 7;
-    unsigned crc  : 1;
+    signed   rssi : 8;          /**< Relative Signal Strength Indicator         */
+    unsigned lqi  : 7;          /**< Link Quality Indicator                     */
+    unsigned crc  : 1;          /**< Cyclic Redundancy Check pass flag          */
 }
 cc2538_fcs_t;
 

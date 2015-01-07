@@ -659,17 +659,16 @@ void receive_cc2420_packet(ieee802154_packet_t *trans_p)
 void receive_cc2538_packet(ieee802154_packet_t *trans_p)
 {
     cc2538_packet_t* p;
-    void* buf = &(data_buffer[transceiver_buffer_pos * PAYLOAD_SIZE]);
 
     p = &cc2538_packet;
-    buf = &cc2538_packet;
+
     dINT();
     trans_p->rssi          = p->rssi;
     trans_p->crc           = p->crc;
     trans_p->lqi           = p->lqi;
     trans_p->length        = p->length;
-    trans_p->frame.payload = buf;
-    memcpy(buf, &(p->payload[0]), (p->length < PAYLOAD_SIZE)? p->length : PAYLOAD_SIZE);
+    trans_p->frame.payload = data_buffer + transceiver_buffer_pos * PAYLOAD_SIZE;
+    memcpy(trans_p->frame.payload, &(p->payload[0]), (p->length < PAYLOAD_SIZE)? p->length : PAYLOAD_SIZE);
     eINT();
 }
 #endif

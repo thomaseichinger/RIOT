@@ -174,7 +174,7 @@ static int set_state(netdev_t *dev, netdev_state_t state)
             break;
 
         case NETDEV_STATE_PROMISCUOUS_MODE:
-            cc2538_set_monitor(false);
+            cc2538_set_monitor(true);
             cc2538_switch_to_rx();
             break;
 

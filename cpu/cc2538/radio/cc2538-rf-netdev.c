@@ -68,7 +68,7 @@ static int rem_receive_data_callback(netdev_t *dev, netdev_rcv_data_cb_t cb)
     }
 }
 
-#define case_helper(name, type, expr)                                  \
+#define CASE_HELPER(name, type, expr)                                  \
     case name:                                                         \
         if (*value_len < sizeof(type)) return -EOVERFLOW;              \
         else if (*value_len > sizeof(type)) *value_len = sizeof(type); \
@@ -82,12 +82,12 @@ static int get_option(netdev_t *dev, netdev_opt_t opt, void *value, size_t *valu
     }
 
     switch (opt) {
-        case_helper(NETDEV_OPT_CHANNEL,         uint8_t,  cc2538_get_channel());
-        case_helper(NETDEV_OPT_ADDRESS,         uint16_t, cc2538_get_address());
-        case_helper(NETDEV_OPT_NID,             uint16_t, cc2538_get_pan());
-        case_helper(NETDEV_OPT_ADDRESS_LONG,    uint64_t, cc2538_get_address_long());
-        case_helper(NETDEV_OPT_TX_POWER,        int,      cc2538_get_tx_power());
-        case_helper(NETDEV_OPT_MAX_PACKET_SIZE, uint8_t,  CC2538_RF_MAX_PACKET_LEN);
+        CASE_HELPER(NETDEV_OPT_CHANNEL,         uint8_t,  cc2538_get_channel());
+        CASE_HELPER(NETDEV_OPT_ADDRESS,         uint16_t, cc2538_get_address());
+        CASE_HELPER(NETDEV_OPT_NID,             uint16_t, cc2538_get_pan());
+        CASE_HELPER(NETDEV_OPT_ADDRESS_LONG,    uint64_t, cc2538_get_address_long());
+        CASE_HELPER(NETDEV_OPT_TX_POWER,        int,      cc2538_get_tx_power());
+        CASE_HELPER(NETDEV_OPT_MAX_PACKET_SIZE, uint8_t,  CC2538_RF_MAX_PACKET_LEN);
 
         default:
             return -ENOTSUP;
@@ -265,7 +265,7 @@ static netdev_802154_tx_status_t load_tx(
     /* sequence number */
     hdr.sequence_nr = sequence_nr++;
 
-    rfcore_assert(cc2538_is_on());
+    RFCORE_ASSERT(cc2538_is_on());
 
     rfcore_strobe(ISFLUSHTX);
 
@@ -291,7 +291,7 @@ static netdev_802154_tx_status_t transmit(netdev_t *dev)
     if (!cc2538_is_on()) {
         was_off = true;
         cc2538_on();
-        rfcore_wait_until(RFCORE->XREG_FSMSTAT0bits.FSM_FFCTRL_STATE > FSM_STATE_RX_CALIBRATION);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT0bits.FSM_FFCTRL_STATE > FSM_STATE_RX_CALIBRATION);
     }
 
     if (!cc2538_channel_clear()) {
@@ -307,7 +307,7 @@ static netdev_802154_tx_status_t transmit(netdev_t *dev)
 
     if (was_off) {
         /* Wait for transmission to start */
-        rfcore_wait_until(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE);
 
         cc2538_off();
     }

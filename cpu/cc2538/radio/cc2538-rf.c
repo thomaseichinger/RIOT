@@ -50,8 +50,8 @@
 #define IEEE802154_MAX_CHANNEL      26   /**< Max. channel (2480 MHz) */
 #define IEEE802154_CHANNEL_SPACING  5    /**< Channel spacing in MHz  */
 
-#define ieee802154_chan2freq(chan)  ( IEEE802154_MIN_FREQ + ((chan) - IEEE802154_MIN_CHANNEL) * IEEE802154_CHANNEL_SPACING )
-#define ieee802154_freq2chan(freq)  ( IEEE802154_MIN_CHANNEL + ((freq) - IEEE802154_MIN_FREQ) / IEEE802154_CHANNEL_SPACING )
+#define IEEE802154_CHAN2FREQ(chan)  ( IEEE802154_MIN_FREQ + ((chan) - IEEE802154_MIN_CHANNEL) * IEEE802154_CHANNEL_SPACING )
+#define IEEE802154_FREQ2CHAN(freq)  ( IEEE802154_MIN_CHANNEL + ((freq) - IEEE802154_MIN_FREQ) / IEEE802154_CHANNEL_SPACING )
 
 #ifndef CC2538_RF_CHANNEL_DEFAULT
 #define CC2538_RF_CHANNEL_DEFAULT   17
@@ -64,7 +64,7 @@
 
 #define BIT(n)                      ( 1 << (n) )
 
-#define rfcore_flush_receive_fifo() rfcore_strobe(ISFLUSHRX)
+#define RFCORE_FLUSH_RECEIVE_FIFO() rfcore_strobe(ISFLUSHRX)
 
 static const uint8_t power_lut[NUM_POWER_LEVELS] = {
       0, /**< -24 dBm */
@@ -192,10 +192,10 @@ static const init_pair_t init_table[] = {
     {NULL, 0},
 };
 
-bool rfcore_assert_failure(const char *expr, const char *func, int line)
+bool RFCORE_ASSERT_failure(const char *expr, const char *func, int line)
 {
 #if (DEVELHELP || ENABLE_DEBUG)
-    DEBUG_PRINT("rfcore_assert(%s) failed at line %u in %s()!\n", expr, line, func);
+    DEBUG_PRINT("RFCORE_ASSERT(%s) failed at line %u in %s()!\n", expr, line, func);
     DEBUG_PRINT("  RFCORE_SFR_RFERRF = 0x%02x\n", (unsigned int)RFCORE_SFR_RFERRF);
 #endif
 
@@ -209,13 +209,13 @@ void rfcore_strobe(uint_fast8_t instr)
 
 uint_fast8_t rfcore_read_byte(void)
 {
-    rfcore_assert(RFCORE_XREG_RXFIFOCNT > 0);
+    RFCORE_ASSERT(RFCORE_XREG_RXFIFOCNT > 0);
     return RFCORE_SFR_RFDATA;
 }
 
 void rfcore_write_byte(uint_fast8_t byte)
 {
-    rfcore_assert(RFCORE_XREG_TXFIFOCNT < CC2538_RF_FIFO_SIZE);
+    RFCORE_ASSERT(RFCORE_XREG_TXFIFOCNT < CC2538_RF_FIFO_SIZE);
     RFCORE_SFR_RFDATA = byte;
 }
 
@@ -223,7 +223,7 @@ void rfcore_read_fifo(void *buf, uint_fast8_t len)
 {
     uint_fast8_t n;
 
-    rfcore_assert(len <= RFCORE_XREG_RXFIFOCNT);
+    RFCORE_ASSERT(len <= RFCORE_XREG_RXFIFOCNT);
 
     for (n = 0; n < len; n++) {
         GET_BYTE(buf, n) = RFCORE_SFR_RFDATA;
@@ -234,7 +234,7 @@ void rfcore_write_fifo(const void *buf, uint_fast8_t len)
 {
     uint_fast8_t n;
 
-    rfcore_assert(len <= CC2538_RF_FIFO_SIZE - RFCORE_XREG_TXFIFOCNT);
+    RFCORE_ASSERT(len <= CC2538_RF_FIFO_SIZE - RFCORE_XREG_TXFIFOCNT);
 
     for (n = 0; n < len; n++) {
         RFCORE_SFR_RFDATA = GET_BYTE(buf, n);
@@ -312,7 +312,7 @@ void cc2538_init(kernel_pid_t tpid)
 
 bool cc2538_on(void)
 {
-    rfcore_flush_receive_fifo();
+    RFCORE_FLUSH_RECEIVE_FIFO();
     rfcore_strobe(ISRXON);
     return true;
 }
@@ -320,9 +320,9 @@ bool cc2538_on(void)
 void cc2538_off(void)
 {
     /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
-    rfcore_wait_until(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE == 0);
+    RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE == 0);
 
-    rfcore_flush_receive_fifo();
+    RFCORE_FLUSH_RECEIVE_FIFO();
 
     /* Don't turn off if we are off as this will trigger a Strobe Error */
     if (RFCORE_XREG_RXENABLE != 0) {
@@ -337,7 +337,7 @@ bool cc2538_is_on(void)
 
 void cc2538_switch_to_rx(void)
 {
-    rfcore_flush_receive_fifo();
+    RFCORE_FLUSH_RECEIVE_FIFO();
     rfcore_strobe(ISRXON);
 }
 
@@ -369,7 +369,7 @@ void isr_rfcorerxtx(void)
                 }
                 else if (len > RFCORE_XREG_RXFIFOCNT) {
                     DEBUG("%s(): length %u > RXFIFOCNT!\n", __FUNCTION__, len);
-                    rfcore_flush_receive_fifo();
+                    RFCORE_FLUSH_RECEIVE_FIFO();
                 }
                 else {
                     len -= CC2538_FCS_LEN;
@@ -407,7 +407,7 @@ void isr_rfcorerxtx(void)
                         cc2538_packet.crc = fcs.crc;
                         cc2538_packet.lqi = fcs.lqi;
                         cc2538_packet.length = len;
-                        rfcore_assert(len <= CC2538_RF_MAX_PACKET_LEN);
+                        RFCORE_ASSERT(len <= CC2538_RF_MAX_PACKET_LEN);
                         memcpy(&(cc2538_packet.payload[0]), &(rx_buf[0]), len);
 
                         /* notify transceiver thread if any */
@@ -453,19 +453,19 @@ void isr_rfcoreerr(void)
     RFCORE_SFR_RFERRF = 0;
 
     /* These conditions shouldn't happen if the driver is working properly */
-    rfcore_assert(NOT(flags & RXUNDERF));
-    rfcore_assert(NOT(flags & TXOVERF));
-    rfcore_assert(NOT(flags & TXUNDERF));
+    RFCORE_ASSERT(NOT(flags & RXUNDERF));
+    RFCORE_ASSERT(NOT(flags & TXOVERF));
+    RFCORE_ASSERT(NOT(flags & TXUNDERF));
 
     /* Fail in case of miscallaneous unexpected error conditions */
-    rfcore_assert(NOT(flags & STROBE_ERR));
+    RFCORE_ASSERT(NOT(flags & STROBE_ERR));
 
     DEBUG("%s(): RFERRF=0x%02x.\n", __FUNCTION__, flags);
 
     /* Flush the receive FIFO in case of a receive overflow */
     if (flags & RXOVERF) {
         DEBUG("%s(): RXOVERF detected!\n", __FUNCTION__);
-        rfcore_flush_receive_fifo();
+        RFCORE_FLUSH_RECEIVE_FIFO();
     }
 
     /* Flush the receive FIFO in case of a receive overflow */
@@ -474,7 +474,7 @@ void isr_rfcoreerr(void)
          * lock is lost during reception. The receiver must be restarted to clear
          * this error situation. */
         DEBUG("%s(): NLOCK detected!\n", __FUNCTION__);
-        rfcore_flush_receive_fifo();
+        RFCORE_FLUSH_RECEIVE_FIFO();
     }
 }
 
@@ -508,13 +508,13 @@ void cc2538_set_channel(unsigned int chan)
 {
     DEBUG("%s(%u);\n", __FUNCTION__, chan);
 
-    cc2538_set_freq(ieee802154_chan2freq(chan));
+    cc2538_set_freq(IEEE802154_CHAN2FREQ(chan));
     channel = chan;
 }
 
 unsigned int cc2538_get_channel(void)
 {
-    return ieee802154_freq2chan(CC2538_MIN_FREQ + RFCORE_XREG_FREQCTRL);
+    return IEEE802154_FREQ2CHAN(CC2538_MIN_FREQ + RFCORE_XREG_FREQCTRL);
 }
 
 void cc2538_set_address(uint16_t addr)
@@ -616,13 +616,13 @@ bool cc2538_channel_clear(void)
     if (RFCORE->XREG_FSMSTAT0bits.FSM_FFCTRL_STATE == FSM_STATE_IDLE) {
         bool result;
         cc2538_on();
-        rfcore_wait_until(RFCORE->XREG_RSSISTATbits.RSSI_VALID);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_RSSISTATbits.RSSI_VALID);
         result = BOOLEAN(RFCORE->XREG_FSMSTAT1bits.CCA);
         cc2538_off();
         return result;
     }
     else {
-        rfcore_wait_until(RFCORE->XREG_RSSISTATbits.RSSI_VALID);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_RSSISTATbits.RSSI_VALID);
         return BOOLEAN(RFCORE->XREG_FSMSTAT1bits.CCA);
     }
 }
@@ -693,7 +693,7 @@ radio_tx_status_t cc2538_load_tx_buf(ieee802154_packet_kind_t kind,
     /* sequence number */
     hdr.sequence_nr = sequence_nr++;
 
-    rfcore_assert(cc2538_is_on());
+    RFCORE_ASSERT(cc2538_is_on());
 
     rfcore_strobe(ISFLUSHTX);
 
@@ -715,7 +715,7 @@ radio_tx_status_t cc2538_transmit_tx_buf(void)
     if (!cc2538_is_on()) {
         was_off = true;
         cc2538_on();
-        rfcore_wait_until(RFCORE->XREG_FSMSTAT0bits.FSM_FFCTRL_STATE > FSM_STATE_RX_CALIBRATION);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT0bits.FSM_FFCTRL_STATE > FSM_STATE_RX_CALIBRATION);
     }
 
     if (!cc2538_channel_clear()) {
@@ -731,7 +731,7 @@ radio_tx_status_t cc2538_transmit_tx_buf(void)
 
     if (was_off) {
         /* Wait for transmission to start */
-        rfcore_wait_until(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE);
+        RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE);
 
         cc2538_off();
     }
@@ -776,7 +776,7 @@ int16_t cc2538_send_lowlevel(const void *buf, int len)
         return RADIO_TX_MEDIUM_BUSY;
     }
 
-    rfcore_assert(cc2538_is_on());
+    RFCORE_ASSERT(cc2538_is_on());
 
     rfcore_strobe(ISFLUSHTX);
 

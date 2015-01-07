@@ -40,15 +40,15 @@ extern "C" {
 
 #define CC2538_MAX_DATA_LENGTH      CC2538_RF_MAX_PACKET_LEN
 
-#define rfcore_assert(expr) (void)( (expr) || rfcore_assert_failure(#expr, __FUNCTION__, __LINE__) )
+#define RFCORE_ASSERT(expr) (void)( (expr) || RFCORE_ASSERT_failure(#expr, __FUNCTION__, __LINE__) )
 
 #if DEVELHELP
-#define rfcore_wait_until(expr) while (!(expr)) {                                        \
-    DEBUG("rfcore_wait_until(%s) at line %u in %s()\n", #expr, __LINE__, __FUNCTION__);  \
+#define RFCORE_WAIT_UNTIL(expr) while (!(expr)) {                                        \
+    DEBUG("RFCORE_WAIT_UNTIL(%s) at line %u in %s()\n", #expr, __LINE__, __FUNCTION__);  \
     thread_yield();                                                                      \
 }
 #else
-#define rfcore_wait_until(expr) while (!(expr)) thread_yield()
+#define RFCORE_WAIT_UNTIL(expr) while (!(expr)) thread_yield()
 #endif
 
 #ifndef BIT
@@ -181,7 +181,7 @@ extern cc2538_packet_t cc2538_packet;
 
 extern netdev_rcv_data_cb_t netdev_rcv_data_cb;
 
-bool rfcore_assert_failure(const char *expr, const char *func, int line);
+bool RFCORE_ASSERT_failure(const char *expr, const char *func, int line);
 void rfcore_strobe(uint_fast8_t instr);
 
 uint_fast8_t rfcore_read_byte(void);

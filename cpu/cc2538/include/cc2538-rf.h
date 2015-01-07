@@ -33,6 +33,7 @@ extern "C" {
 #include "netdev/802154.h"
 
 #define CC2538_RF_FIFO_SIZE         128
+#define CC2538_PACKET_LENGTH_SIZE     1 /**< Packet length is represented by one byte in the FIFO */
 #define CC2538_FCS_LEN                2
 #define CC2538_AUTOCRC_LEN            2
 

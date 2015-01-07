@@ -682,7 +682,7 @@ radio_tx_status_t cc2538_load_tx_buf(ieee802154_packet_kind_t kind,
     }
 
     /* total frame size */
-    if (1 + hdr_size + len > CC2538_RF_FIFO_SIZE) {
+    if (CC2538_RF_FIFO_SIZE + hdr_size + len > CC2538_RF_FIFO_SIZE) {
         return RADIO_TX_PACKET_TOO_LONG;
     }
 

@@ -255,7 +255,7 @@ static netdev_802154_tx_status_t load_tx(
     }
 
     /* total frame size */
-    if (1 + hdr_size + len > CC2538_RF_FIFO_SIZE) {
+    if (CC2538_PACKET_LENGTH_SIZE + hdr_size + len > CC2538_RF_FIFO_SIZE) {
         return NETDEV_802154_TX_STATUS_PACKET_TOO_LONG;
     }
 

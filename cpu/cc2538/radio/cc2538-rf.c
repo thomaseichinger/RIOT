@@ -593,14 +593,13 @@ int cc2538_get_tx_power(void)
 {
     int index;
     int best_index = 0;
-    int delta;
     int best_delta = INT_MAX;
     int txpower;
 
     txpower = RFCORE_XREG_TXPOWER & 0xff;
 
     for (index = 0; index < NUM_POWER_LEVELS; index++) {
-        delta = ABS_DIFF(power_lut[index], txpower);
+        int delta = ABS_DIFF(power_lut[index], txpower);
 
         if (delta < best_delta) {
             best_delta = delta;

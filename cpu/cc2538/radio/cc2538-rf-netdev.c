@@ -152,7 +152,8 @@ static int get_state(netdev_t *dev, netdev_state_t *state)
         return -ENODEV;
     }
 
-    return netdev_state;
+    *state = netdev_state;
+    return 0;
 }
 
 static int set_state(netdev_t *dev, netdev_state_t state)

@@ -61,7 +61,7 @@
 #endif
 
 #ifdef MODULE_CC2538
-#include "cc2538.h"
+#include "cc2538-rf.h"
 #ifndef TRANSCEIVER_DEFAULT
 #define TRANSCEIVER_DEFAULT TRANSCEIVER_CC2538
 #endif

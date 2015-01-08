@@ -52,7 +52,7 @@ int riot_send_transceiver(uint8_t *buf, uint16_t size, uint16_t to)
         return 0;
     }
 
-#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_MC1322X
+#if MODULE_AT86RF231 || MODULE_CC2420 || MODULE_CC2538 || MODULE_MC1322X
     p.frame.payload_len = size;
     p.frame.fcf.dest_addr_m = IEEE_802154_SHORT_ADDR_M;
     memset(p.frame.dest_addr, 0, sizeof(p.frame.dest_addr));

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 IMAGE=$1
+TARGET=$2
 
 openocd -f "${RIOTBOARD}/${BOARD}/dist/${BOARD}_jtag.cfg" \
     -f "target/stm32f1x.cfg" \
@@ -11,4 +12,5 @@ openocd -f "${RIOTBOARD}/${BOARD}/dist/${BOARD}_jtag.cfg" \
     -c "flash write_image erase ${IMAGE}" \
     -c "verify_image ${IMAGE}" \
     -c "reset run"\
-    -c "shutdown"
+    -c "shutdown" \
+    ${TARGET}

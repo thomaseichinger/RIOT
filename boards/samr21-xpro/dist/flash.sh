@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TARGET=${2}
+
 openocd -f "board/atmel_samr21_xplained_pro.cfg" \
     -c "init" \
     -c "targets" \
@@ -8,4 +10,5 @@ openocd -f "board/atmel_samr21_xplained_pro.cfg" \
     -c "flash write_image erase $1" \
     -c "verify_image $1" \
     -c "reset run" \
-    -c "shutdown"
+    -c "shutdown" \
+    ${TARGET}

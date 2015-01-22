@@ -7,7 +7,7 @@ OS := $(shell uname)
 ifeq ($(OS),Linux)
   PORT ?= /dev/ttyACM0
 else ifeq ($(OS),Darwin)
-  PORT ?= $(shell ls -1 /dev/tty.SLAB_USBtoUART* | head -n 1)
+  PORT ?= $(shell ls -1 /dev/tty.usbmodem* | head -n 1)
 else
   $(info CAUTION: No flash tool for your host system found!)
   # TODO: add support for windows as host platform

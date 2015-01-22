@@ -4,7 +4,7 @@ echo "##"
 echo "## Flashing $1"
 echo "##"
 
-openocd -f "${RIOTBOARD}/${BOARD}/dist/openocd.cfg" \
+openocd -f board/st_nucleo_f334r8.cfg \
     -c "init" \
     -c "targets" \
     -c "reset halt" \

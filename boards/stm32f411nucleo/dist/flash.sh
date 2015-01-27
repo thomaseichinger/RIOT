@@ -1,6 +1,6 @@
 #!/bin/sh
 
-openocd -f "${RIOTBOARD}/${BOARD}/dist/openocd.cfg" \
+openocd -f "board/st_nucleo_f4.cfg" \
     -c "init" \
     -c "targets" \
     -c "reset" \

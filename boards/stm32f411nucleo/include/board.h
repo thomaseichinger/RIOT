@@ -34,12 +34,7 @@ extern "C" {
 #define F_CPU               CLOCK_CORECLOCK
 
 /**
- * @name Assign the hardware timer
- */
-#define HW_TIMER            TIMER_0
-
-/**
- * @name Define UART device and baudrate for stdio
+ * @name Define the UART to be used as stdio and its baudrate
  * @{
  */
 #define STDIO               UART_0
@@ -48,40 +43,33 @@ extern "C" {
 /** @} */
 
 /**
+ * @name Assign the hardware timer
+ */
+#define HW_TIMER            TIMER_0
+
+/**
  * @name LED pin definitions
  * @{
  */
-#define LED_PORT            GPIOD
-#define LD3_PIN             (1 << 13)
-#define LD4_PIN             (1 << 12)
-#define LD5_PIN             (1 << 14)
-#define LD6_PIN             (1 << 15)
+#define LED_GREEN_PORT      (GPIOA)
+#define LED_GREEN_PIN       (5)
 /** @} */
 
 /**
  * @name Macros for controlling the on-board LEDs.
  * @{
  */
-#define LD3_ON              (LED_PORT->BSRRL = LD3_PIN)
-#define LD3_OFF             (LED_PORT->BSRRH = LD3_PIN)
-#define LD3_TOGGLE          (LED_PORT->ODR ^= LD3_PIN)
-#define LD4_ON              (LED_PORT->BSRRL = LD4_PIN)
-#define LD4_OFF             (LED_PORT->BSRRH = LD4_PIN)
-#define LD4_TOGGLE          (LED_PORT->ODR ^= LD4_PIN)
-#define LD5_ON              (LED_PORT->BSRRL = LD5_PIN)
-#define LD5_OFF             (LED_PORT->BSRRH = LD5_PIN)
-#define LD5_TOGGLE          (LED_PORT->ODR ^= LD5_PIN)
-#define LD6_ON              (LED_PORT->BSRRL = LD6_PIN)
-#define LD6_OFF             (LED_PORT->BSRRH = LD6_PIN)
-#define LD6_TOGGLE          (LED_PORT->ODR ^= LD6_PIN)
+#define LED_RED_ON
+#define LED_RED_OFF
+#define LED_RED_TOGGLE
 
-/* for compatability to other boards */
-#define LED_GREEN_ON        LD4_ON
-#define LED_GREEN_OFF       LD4_OFF
-#define LED_GREEN_TOGGLE    LD4_TOGGLE
-#define LED_RED_ON          LD5_ON
-#define LED_RED_OFF         LD5_OFF
-#define LED_RED_TOGGLE      LD5_TOGGLE
+#define LED_GREEN_ON        (LED_GREEN_PORT->ODR &= ~(1<<LED_GREEN_PIN))
+#define LED_GREEN_OFF       (LED_GREEN_PORT->ODR |= (1<<LED_GREEN_PIN))
+#define LED_GREEN_TOGGLE    (LED_GREEN_PORT->ODR ^= (1<<LED_GREEN_PIN))
+
+#define LED_ORANGE_ON
+#define LED_ORANGE_OFF
+#define LED_ORANGE_TOGGLE
 /** @} */
 
 /**

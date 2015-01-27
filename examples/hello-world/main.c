@@ -20,6 +20,7 @@
  */
 
 #include <stdio.h>
+#include "board.h"
 
 int main(void)
 {
@@ -28,5 +29,12 @@ int main(void)
     printf("You are running RIOT on a(n) %s board.\n", RIOT_BOARD);
     printf("This board features a(n) %s MCU.\n", RIOT_MCU);
 
+
+    while(1) {
+        LED_RED_TOGGLE;
+        for(int i = 0; i< 100000; i++) {
+            __asm__("nop");
+        }
+    }
     return 0;
 }

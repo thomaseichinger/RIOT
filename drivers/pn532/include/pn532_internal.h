@@ -1,0 +1,6 @@
+#define PN532_FRAME_PRE_POSTAMBLE   (0x00)
+#define PN532_FRAME_SOPC_0          (0x00)
+#define PN532_FRAME_SOPC_1          (0xff)
+#define PN532_FRAME_TFI_FROM_HOST   (0xd4)
+#define PN532_FRAME_TFI_TO_HOST     (0xd5)
+#define PN532_NORM_DATA_OFFSET      (0x06)

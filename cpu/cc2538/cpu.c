@@ -32,6 +32,8 @@
 
 #define CLOCK_STA_MASK ( OSC32K | OSC )
 
+extern const void *interrupt_vector[];
+
 static void cpu_clock_init(void);
 
 /**
@@ -40,7 +42,7 @@ static void cpu_clock_init(void);
 void cpu_init(void)
 {
     /* configure the vector table location to internal flash */
-    SCB->VTOR = FLASH_BASE;
+    SCB->VTOR = (uintptr_t)&interrupt_vector;
 
     /* Enable the CC2538's more compact alternate interrupt mapping */
     SYS_CTRL->I_MAP = 1;

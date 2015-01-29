@@ -38,6 +38,9 @@
 #ifndef __CORE_CMINSTR_H
 #define __CORE_CMINSTR_H
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* ##########################  Core Instruction Access  ######################### */
 /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
@@ -876,5 +879,9 @@ __attribute__( ( always_inline ) ) __STATIC_INLINE void __STRT(uint32_t value, v
 #endif
 
 /*@}*/ /* end of group CMSIS_Core_InstructionInterface */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CORE_CMINSTR_H */

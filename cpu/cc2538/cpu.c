@@ -17,6 +17,8 @@
  * @}
  */
 
+#include <assert.h>
+
 #include "cpu.h"
 
 #define BIT(n)          ( 1UL << (n) )
@@ -42,6 +44,7 @@ static void cpu_clock_init(void);
 void cpu_init(void)
 {
     /* configure the vector table location to internal flash */
+    assert((uintptr_t)&interrupt_vector % CC2538_VTOR_ALIGN == 0);
     SCB->VTOR = (uintptr_t)&interrupt_vector;
 
     /* Enable the CC2538's more compact alternate interrupt mapping */

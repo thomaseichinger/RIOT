@@ -226,9 +226,11 @@ static xbee_at_cmd_response_t xbee_send_AT_command(unsigned int len,
         buf[i + 1] = str[i];
     }
     xbee_send_API_command(0x08, len + 1, buf);
-    /* wait for response */
+    /* wait for response */puts("OK");
     mutex_lock(&mutex_wait_at_reponse);
+    puts("OK");
     mutex_lock(&mutex_wait_at_reponse);
+    puts("OK");
     mutex_unlock(&mutex_wait_at_reponse);  // release lock once response is here
     /* process response */
     if ( (latest_at_response.frame_num != buf[0])
@@ -286,8 +288,9 @@ static uint8_t cksum;
  *
  * @param[in] c character received from the XBee module via UART.
  */
-void xbee_incoming_char(char c)
+void xbee_incoming_char(void *arg, char c)
 {
+    printf("%s\n",__PRETTY_FUNCTION__);
     uint8_t in = (uint8_t) c;
     uint16_t cmd;
     uint32_t param;
@@ -405,10 +408,11 @@ void xbee_initialize(void)
     /* no RX callback function by default */
     rx_callback = NULL;
     /* UART initialization */
-    res = uart_init(xbee_uart_link,
+    res = uart_init(XBEE_UART_LINK,
                     9600U,
                     xbee_incoming_char,
-                    NULL);
+                    NULL,
+                    (void*)NULL);
     switch (res) {
     case 0:     /* OK */
         break;
@@ -420,7 +424,7 @@ void xbee_initialize(void)
                    "UART initialization failure for XBee link");
     }
     /* GPIO initialization (for sleep/weke-up...) */
-    if (XBEE_SLEEP_RQ_GPIO != GPIO_UNDEFINED) {
+    if (XBEE_SLEEP_RQ_GPIO != XBEE_GPIO_UNDEFINED) {
         /* don't try to initialize GPIOs if undefined */
         res = gpio_init_out(XBEE_SLEEP_RQ_GPIO,
                             GPIO_NOPULL);
@@ -438,7 +442,7 @@ void xbee_initialize(void)
                        "XBEE_SLEEP_RQ_GPIO initialization failure");
         }
     }
-    if (XBEE_ON_STATUS_GPIO != GPIO_UNDEFINED) {
+    if (XBEE_ON_STATUS_GPIO != XBEE_GPIO_UNDEFINED) {
         res = gpio_init_in(XBEE_ON_STATUS_GPIO,
                            GPIO_NOPULL);
         switch (res) {
@@ -483,23 +487,40 @@ void xbee_initialize(void)
     uint8_t buf[2];
     buf[0] = 'V';
     buf[1] = 'R';
-    xbee_at_cmd_response_t res = xbee_send_AT_command(2, buf);
-    if (res.status != XBEE_AT_CMD_OK) {
+    xbee_at_cmd_response_t result = xbee_send_AT_command(2, buf);
+    puts("OK");
+    if (result.status != XBEE_AT_CMD_OK) {
         core_panic(0x0bee,
                    "failed to query firware version from XBee modem");
     }
     printf("XBee modem initialized. Firmare version = %X.%X.%X.%X \n",
-           (uint8_t)((res.parameter >> 12) & 0x0f),
-           (uint8_t)((res.parameter >> 8) & 0x0f),
-           (uint8_t)((res.parameter >> 4) & 0x0f),
-           (uint8_t)(res.parameter & 0x0f) );
+           (uint8_t)((result.parameter >> 12) & 0x0f),
+           (uint8_t)((result.parameter >> 8) & 0x0f),
+           (uint8_t)((result.parameter >> 4) & 0x0f),
+           (uint8_t)(result.parameter & 0x0f) );
+}
+
+bool xbee_is_on(void)
+{
+    if (XBEE_ON_STATUS_GPIO == XBEE_GPIO_UNDEFINED) {
+        /* STATUS pin of XBee modem not accessible... */
+        if (XBEE_SLEEP_RQ_GPIO == XBEE_GPIO_UNDEFINED) {
+            /* if /SLEEP_RQ pin is not accessible,
+               then modem is always on */
+            return true;
+        }
+        /* XBee is on if SLEEP_RQ pin is not asserted */
+        return (gpio_read(XBEE_SLEEP_RQ_GPIO) == 0);
+    }
+    /* XBee is on if pin ON/SLEEP is asserted */
+    return (gpio_read(XBEE_ON_STATUS_GPIO) != 0);
 }
 
 bool xbee_on(void)
 {
-    if (XBEE_SLEEP_RQ_GPIO == GPIO_UNDEFINED) {
+    if (XBEE_SLEEP_RQ_GPIO == XBEE_GPIO_UNDEFINED) {
         /* if GPIO isn't defined, do nothing */
-        return;
+        return false;
     }
     /* turn XBee sleep mode off, by clearing SLEEP_RQ */
     gpio_clear(XBEE_SLEEP_RQ_GPIO);
@@ -511,28 +532,12 @@ bool xbee_on(void)
 
 void xbee_off(void)
 {
-    if (XBEE_SLEEP_RQ_GPIO == GPIO_UNDEFINED) {
+    if (XBEE_SLEEP_RQ_GPIO == XBEE_GPIO_UNDEFINED) {
         /* if GPIO isn't defined, do nothing */
         return;
     }
     /* put XBee into sleep mode, by asserting SLEEP_RQ */
     gpio_set(XBEE_SLEEP_RQ_GPIO);
-}
-
-bool xbee_is_on(void)
-{
-    if (XBEE_ON_STATUS_GPIO == GPIO_UNDEFINED) {
-        /* STATUS pin of XBee modem not accessible... */
-        if (XBEE_SLEEP_RQ_GPIO == GPIO_UNDEFINED) {
-            /* if /SLEEP_RQ pin is not accessible,
-               then modem is always on */
-            return true;
-        }
-        /* XBee is on if SLEEP_RQ pin is not asserted */
-        return (gpio_read(XBEE_SLEEP_RQ_GPIO) == 0);
-    }
-    /* XBee is on if pin ON/SLEEP is asserted */
-    return (gpio_read(XBEE_ON_STATUS_GPIO) != 0);
 }
 
 radio_tx_status_t xbee_load_tx_buf(ieee802154_packet_kind_t kind,

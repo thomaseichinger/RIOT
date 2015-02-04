@@ -236,14 +236,14 @@ extern "C" {
 #define GPIO_C14_MAP        13
 /* GPIO channel 14 config */
 #define GPIO_14_DEV         PIOC
-#define GPIO_14_PIN         PIO_PC12
+#define GPIO_14_PIN         PIO_PC21
 #define GPIO_14_IRQ         PIOC_IRQn
-#define GPIO_C12_MAP        14
+#define GPIO_C21_MAP        14
 /* GPIO channel 15 config */
 #define GPIO_15_DEV         PIOB
-#define GPIO_15_PIN         PIO_PB14
+#define GPIO_15_PIN         PIO_PB27
 #define GPIO_15_IRQ         PIOB_IRQn
-#define GPIO_B14_MAP        15
+#define GPIO_B27_MAP        15
 /** @} */
 
 #ifdef __cplusplus

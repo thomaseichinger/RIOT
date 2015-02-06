@@ -15,10 +15,20 @@ extern "C" {
 
 #define APP_VERSION "1.2"
 
-#define RADIO_CHANNEL   (10)
+#define RADIO_CHANNEL   (12)
 
 #define MONITOR_STACK_SIZE  (KERNEL_CONF_STACKSIZE_MAIN)
 #define RCV_BUFFER_SIZE     (32)
+
+
+/****** CONFIGURATION APP RPL_UDP ******/
+#define PASSERELLE                  1
+#define NODE                        0
+
+#define ADDRESS_IPV6_BOARD          1
+#define ADDRESS_ROOM                1
+#define ADDRESS_PASSERELLE          1
+/****** CONFIGURATION APP RPL_UDP ******/
 
 /* RPL shell command handlers */
 /**
@@ -31,7 +41,7 @@ extern "C" {
  * @param[in] argc  Argument count
  * @param[in] argv  Arguments
  */
-void rpl_udp_init(int argc, char **argv);
+void rpl_udp_init(void);
 
 /**
  * @brief   Shell command to set node's ID
@@ -42,17 +52,8 @@ void rpl_udp_init(int argc, char **argv);
  * @param[in] argc  Argument count
  * @param[in] argv  Arguments
  */
-void rpl_udp_set_id(int argc, char **argv);
+void rpl_udp_set_id(int i);
 
-/**
- * @brief   Shows the dodag
- *
- * @details No parameters required
- *
- * @param[in] argc  Argument count
- * @param[in] argv  Arguments
- */
-void rpl_udp_dodag(int argc, char **argv);
 
 /**
  * @brief Command handler to start a UDP server
@@ -62,7 +63,7 @@ void rpl_udp_dodag(int argc, char **argv);
  * @param[in] argc  Argument count
  * @param[in] argv  Arguments
  */
-void udp_server(int argc, char **argv);
+void udp_server(void);
 
 /**
  * @brief Sends a UDP datagram
@@ -74,32 +75,14 @@ void udp_server(int argc, char **argv);
  * @param[in] argc  Argument count
  * @param[in] argv  Arguments
  */
-void udp_send(int argc, char **argv);
+void udp_send(int add,char *c);
 
-/**
- * @brief Ignore a certain node
- *
- * @details Usage: ignore <ID>
- *          Ignore the node with IP address:
- *          fe80::ff:fe00:<ID>
- *
- * @param[in] argc  Argument count
- * @param[in] argv  Arguments
- */
-void rpl_udp_ignore(int argc, char **argv);
-
-/**
- * @brief monitoring thread start function
- *
- * @param arg Unused
- */
-void *rpl_udp_monitor(void *arg);
 
 /** @brief The nodes radio address */
 extern radio_address_t id;
 
 /** @brief Char array for IP address printing */
-extern char addr_str[IPV6_MAX_ADDR_STR_LEN];
+//extern char addr_str[IPV6_MAX_ADDR_STR_LEN];
 
 #ifdef __cplusplus
 }

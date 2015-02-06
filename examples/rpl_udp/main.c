@@ -19,38 +19,48 @@
  */
 
 #include <stdio.h>
+#include <math.h>
 
 #include "net_if.h"
 #include "posix_io.h"
-#include "shell.h"
-#include "shell_commands.h"
 #include "board_uart0.h"
 #include "udp.h"
+#include "periph_conf.h"
+#include "get_values.h"
+#include "periph/timer.h"
+#include "periph/gpio.h"
+#include "thread.h"
 
 #include "rpl_udp.h"
 
-static const shell_command_t shell_commands[] = {
-    {"init", "Initialize network", rpl_udp_init},
-    {"set", "Set ID", rpl_udp_set_id},
-    {"dodag", "Shows the dodag", rpl_udp_dodag},
-    {"server", "Starts a UDP server", udp_server},
-    {"send", "Send a UDP datagram", udp_send},
-    {"ign", "Ignore a node", rpl_udp_ignore},
-    {NULL, NULL, NULL}
-};
+
+void udp_rpl_init(void){
+    net_if_set_src_address_mode(0, NET_IF_TRANS_ADDR_M_SHORT);
+    id = net_if_get_hardware_address(0);
+
+    //initialisation du rpl et du udp
+    rpl_udp_set_id(ADDRESS_IPV6_BOARD);
+    rpl_udp_init();
+    udp_server();
+}
 
 int main(void)
 {
     puts("RPL router v"APP_VERSION);
 
-    /* start shell */
-    posix_open(uart0_handler_pid, 0);
-    net_if_set_src_address_mode(0, NET_IF_TRANS_ADDR_M_SHORT);
-    id = net_if_get_hardware_address(0);
+    int value = 0;
 
-    shell_t shell;
-    shell_init(&shell, shell_commands, UART0_BUFSIZE, uart0_readc, uart0_putc);
+    udp_rpl_init();
 
-    shell_run(&shell);
+#if NODE
+    get_values_pid = thread_create(get_values_stack_buffer,
+                                     sizeof(get_values_stack_buffer),
+                                     PRIORITY_MAIN - 2,
+                                     CREATE_STACKTEST,
+                                     get_values,
+                                     NULL,
+                                     "get_values");
+#endif /* NODE */
+
     return 0;
 }

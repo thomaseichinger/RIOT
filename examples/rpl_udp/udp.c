@@ -32,20 +32,19 @@
 
 #include "rpl_udp.h"
 
+#include "get_values.h"
+
 #define UDP_BUFFER_SIZE     (128)
 #define SERVER_PORT     (0xFF01)
 
-static char udp_server_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
+char udp_server_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
 char addr_str[IPV6_MAX_ADDR_STR_LEN];
 
 static void *init_udp_server(void *);
 
 /* UDP server thread */
-void udp_server(int argc, char **argv)
+void udp_server(void)
 {
-    (void) argc;
-    (void) argv;
-
     kernel_pid_t udp_server_thread_pid = thread_create(udp_server_stack_buffer,
                                                        sizeof(udp_server_stack_buffer),
                                                        PRIORITY_MAIN, CREATE_STACKTEST,
@@ -58,7 +57,7 @@ void udp_server(int argc, char **argv)
 static void *init_udp_server(void *arg)
 {
     (void) arg;
-
+    
     sockaddr6_t sa;
     char buffer_main[UDP_BUFFER_SIZE];
     uint32_t fromlen;
@@ -77,6 +76,8 @@ static void *init_udp_server(void *arg)
         return NULL;
     }
 
+    msg_t m;
+
     while (1) {
         int32_t recsize = socket_base_recvfrom(sock, (void *)buffer_main, UDP_BUFFER_SIZE, 0, &sa, &fromlen);
 
@@ -84,7 +85,16 @@ static void *init_udp_server(void *arg)
             printf("ERROR: recsize < 0!\n");
         }
 
-        printf("UDP packet received, payload: %s\n", buffer_main);
+        //TODO check that get_values_thread is running
+        if(strcmp(buffer_main,"start") == 0 || strcmp(buffer_main,"stop") == 0 ){
+            m.type = 0;
+            m.content.ptr = (void *) buffer_main;
+            msg_try_send(&m, get_values_pid);
+        }
+        else{
+//        printf("UDP packet received, payload: %s\n", buffer_main);
+            printf("%s\n",buffer_main);
+        }
     }
 
     socket_base_close(sock);
@@ -93,23 +103,18 @@ static void *init_udp_server(void *arg)
 }
 
 /* UDP send command */
-void udp_send(int argc, char **argv)
+void udp_send(int add,char *c)
 {
     int sock;
     sockaddr6_t sa;
     ipv6_addr_t ipaddr;
     int bytes_sent;
     int address;
-    char text[5];
+    char text[35];
 
-    if (argc != 3) {
-        printf("usage: send <addr> <text>\n");
-        return;
-    }
+    address = add;
 
-    address = atoi(argv[1]);
-
-    strncpy(text, argv[2], sizeof(text));
+    strncpy(text, c, sizeof(text));
     text[sizeof(text) - 1] = 0;
 
     sock = socket_base_socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
@@ -132,6 +137,8 @@ void udp_send(int argc, char **argv)
     memcpy(&sa.sin6_addr, &ipaddr, 16);
     sa.sin6_port = HTONS(SERVER_PORT);
 
+    //ipv6_iface_set_routing_provider(&ipaddr);
+
     bytes_sent = socket_base_sendto(sock, (char *)text,
                                        strlen(text) + 1, 0, &sa,
                                        sizeof(sa));
@@ -147,3 +154,4 @@ void udp_send(int argc, char **argv)
 
     socket_base_close(sock);
 }
+    

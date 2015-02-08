@@ -23,6 +23,7 @@
 #               GDB_PORT:       port opened for GDB connections
 #               TCL_PORT:       port opened for TCL connections
 #               TELNET_PORT:    port opened for telnet connections
+# 		TUI: 		if TUI!=null, the -tui option will be used
 #
 # debug-server: starts OpenOCD as GDB server, but does not connect to
 #               to it with any frontend. This might be useful when using
@@ -80,7 +81,6 @@ test_ports() {
 
 test_tui() {
     if [ ! -z ${TUI} ]; then
-        echo "hello hello"
         TUI=-tui
     fi
 }

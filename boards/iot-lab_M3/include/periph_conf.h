@@ -289,6 +289,8 @@ extern "C" {
 #define RTT_PRESCALER       (0x7fff)        /* run with 1 Hz */
 /** @} */
 
+#define RTC_NUMOF           (1U)
+
 /**
  * @name I2C configuration
   * @{

@@ -34,6 +34,8 @@
 /* message buffer */
 #define GET_VALUES_MSG_BUFFER_SIZE  4
 msg_t msg_buffer[GET_VALUES_MSG_BUFFER_SIZE];
+char get_values_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
+kernel_pid_t get_values_pid;
 
 char get_values_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
 kernel_pid_t get_values_pid;

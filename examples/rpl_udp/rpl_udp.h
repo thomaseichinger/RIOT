@@ -22,8 +22,8 @@ extern "C" {
 
 
 /****** CONFIGURATION APP RPL_UDP ******/
-#define PASSERELLE                  1
-#define NODE                        0
+#define PASSERELLE                  0
+#define NODE                        1
 
 #define ADDRESS_IPV6_BOARD          1
 #define ADDRESS_ROOM                1

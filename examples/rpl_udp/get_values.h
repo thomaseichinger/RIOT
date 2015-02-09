@@ -26,5 +26,7 @@
 
 void get_values_init(void);
 void send_msg_get_values(msg_t *m);
+extern char get_values_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
+extern kernel_pid_t get_values_pid;
 
 #endif /* GET_VALUES_H */

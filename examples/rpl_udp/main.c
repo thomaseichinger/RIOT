@@ -33,7 +33,6 @@
 
 #include "rpl_udp.h"
 
-
 void udp_rpl_init(void){
     net_if_set_src_address_mode(0, NET_IF_TRANS_ADDR_M_SHORT);
     id = net_if_get_hardware_address(0);
@@ -53,13 +52,7 @@ int main(void)
     udp_rpl_init();
 
 #if NODE
-    get_values_pid = thread_create(get_values_stack_buffer,
-                                     sizeof(get_values_stack_buffer),
-                                     PRIORITY_MAIN - 2,
-                                     CREATE_STACKTEST,
-                                     get_values,
-                                     NULL,
-                                     "get_values");
+    get_values_init();
 #endif /* NODE */
 
     return 0;

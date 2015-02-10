@@ -18,11 +18,10 @@
  * @}
  */
 
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
 #include "vtimer.h"
 #include "thread.h"
-#include "udp.h"
 #include "rpl_udp.h"
 
 #include "get_values.h"
@@ -36,7 +35,25 @@
 #define GET_VALUES_MSG_BUFFER_SIZE  4
 msg_t msg_buffer[GET_VALUES_MSG_BUFFER_SIZE];
 
-void *get_values(void *arg)
+char get_values_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
+kernel_pid_t get_values_pid;
+
+
+static void *get_values(void *);
+
+void get_values_init(void)
+{
+    get_values_pid = thread_create(get_values_stack_buffer,
+                                     sizeof(get_values_stack_buffer),
+                                     PRIORITY_MAIN - 2,
+                                     CREATE_STACKTEST,
+                                     get_values,
+                                     NULL,
+                                     "get_values");
+    printf("GET_VALUES (THREAD PID: %" PRIkernel_pid ")\n", get_values_pid);
+}
+
+static void *get_values(void *arg)
 {
     timex_t sleep = timex_set(1, 0);
     msg_init_queue(msg_buffer, GET_VALUES_MSG_BUFFER_SIZE);
@@ -68,6 +85,10 @@ void *get_values(void *arg)
             /*Pour les cartes connectées au pc: */
             puts(msg);
         }
-
     }
+    return NULL;
+}
+
+void send_msg_get_values(msg_t *m){
+    msg_try_send(m, get_values_pid);
 }

@@ -89,7 +89,7 @@ static void *init_udp_server(void *arg)
         if(strcmp(buffer_main,"start") == 0 || strcmp(buffer_main,"stop") == 0 ){
             m.type = 0;
             m.content.ptr = (void *) buffer_main;
-            msg_try_send(&m, get_values_pid);
+            send_msg_get_values(&m);
         }
         else{
 //        printf("UDP packet received, payload: %s\n", buffer_main);

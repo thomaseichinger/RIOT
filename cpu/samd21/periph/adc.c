@@ -60,7 +60,7 @@ int adc_init(adc_t dev, adc_precision_t precision)
                     break;
                 case ADC_RES_16BIT:
                     init = adc_configure_with_resolution(adc, ADC_0_RES_16BIT);
-                    DEBUG("Init switch DONE\n");            
+                    DEBUG("Init switch DONE\n");
                     break;
                 default:
                     return -1;
@@ -211,9 +211,6 @@ int adc_configure_with_resolution(Adc* adc, uint32_t precision)
 
     /* Set Voltage Reference */
     adc->REFCTRL.reg = (ADC_0_REF_COM_EN << ADC_REFCTRL_REFCOMP_Pos) | ADC_0_REF_DEFAULT;
-
-    int test = adc->REFCTRL.reg;
-    printf("\nREFCTRL %i\n", test);
 
     switch (precision)
     {

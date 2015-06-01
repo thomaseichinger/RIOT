@@ -121,6 +121,10 @@ typedef enum {
     NETCONF_OPT_TX_END_IRQ,
     NETCONF_OPT_CSMA,               /**< en/disable to check automatically
                                      *   before sending the channel is clear. */
+    NETCONF_OPT_CSMA_RETRIES        /**< get/set the number of retries when
+                                     *   when channel is busy */
+
+
     /* add more options if needed */
 } ng_netconf_opt_t;
 

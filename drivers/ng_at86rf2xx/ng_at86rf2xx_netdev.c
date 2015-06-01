@@ -506,6 +506,18 @@ static int _get(ng_netdev_t *device, ng_netconf_opt_t opt,
                 !!(dev->options & NG_AT86RF2XX_OPT_TELL_TX_END);
             return sizeof(ng_netconf_enable_t);
 
+        case NETCONF_OPT_CSMA:
+            *((ng_netconf_enable_t *)val) =
+                !!(dev->options & NG_AT86RF2XX_OPT_CSMA);
+            return sizeof(ng_netconf_enable_t);
+
+        case NETCONF_OPT_CSMA_RETRIES:
+            if (max_len < sizeof(uint8_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint8_t *)val) = ng_at86rf2xx_get_max_csma_retries(dev);
+            return sizeof(uint8_t);
+
         default:
             return -ENOTSUP;
     }
@@ -632,6 +644,18 @@ static int _set(ng_netdev_t *device, ng_netconf_opt_t opt,
             ng_at86rf2xx_set_option(dev, NG_AT86RF2XX_OPT_TELL_TX_END,
                                     ((bool *)val)[0]);
             return sizeof(ng_netconf_enable_t);
+
+        case NETCONF_OPT_CSMA:
+            ng_at86rf2xx_set_option(dev, NG_AT86RF2XX_OPT_CSMA,
+                                    ((bool *)val)[0]);
+            return sizeof(ng_netconf_enable_t);
+
+        case NETCONF_OPT_CSMA_RETRIES:
+            if (len > sizeof(uint8_t)) {
+                return -EOVERFLOW;
+            }
+            ng_at86rf2xx_set_max_csma_retries(dev, *((uint8_t *)val));
+            return sizeof(uint8_t);
 
         default:
             return -ENOTSUP;

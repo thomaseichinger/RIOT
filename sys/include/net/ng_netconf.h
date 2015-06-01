@@ -119,8 +119,8 @@ typedef enum {
      * @note not all transceivers may support this interrupt
      */
     NETCONF_OPT_TX_END_IRQ,
-    NETCONF_OPT_AUTOCCA,            /**< en/disable to check automatically
-                                         before sending the channel is clear. */
+    NETCONF_OPT_CSMA,               /**< en/disable to check automatically
+                                     *   before sending the channel is clear. */
     /* add more options if needed */
 } ng_netconf_opt_t;
 

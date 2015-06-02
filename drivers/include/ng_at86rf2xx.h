@@ -359,6 +359,25 @@ uint8_t ng_at86rf2xx_get_csma_max_retries(ng_at86rf2xx_t *dev);
  */
 void ng_at86rf2xx_set_csma_max_retries(ng_at86rf2xx_t *dev, int8_t retries);
 
+/**
+ * @brief   Set the min and max backoff exponent for CSMA/CA
+ *
+ * - Maximum BE: 0 - 8
+ * - Minimum BE: 0 - [max]
+ *
+ * @param[in] dev           device to write to
+ * @param[in] min           the minimum BE
+ * @param[in] max           the maximum BE
+ */
+void ng_at86rf2xx_set_csma_backoff_exp(ng_at86rf2xx_t *dev, uint8_t min, uint8_t max);
+
+/**
+ * @brief   Set seed for CSMA random backoff
+ *
+ * @param[in] dev           device to write to
+ * @param[in] entropy       11 bit of entropy as seed for random backoff
+ */
+void ng_at86rf2xx_set_csma_seed(ng_at86rf2xx_t *dev, uint8_t entropy[2]);
 
 /**
  * @brief   Enable or disable driver specific options

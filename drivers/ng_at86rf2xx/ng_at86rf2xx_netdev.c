@@ -515,7 +515,7 @@ static int _get(ng_netdev_t *device, ng_netconf_opt_t opt,
             if (max_len < sizeof(uint8_t)) {
                 return -EOVERFLOW;
             }
-            *((uint8_t *)val) = ng_at86rf2xx_get_max_csma_retries(dev);
+            *((uint8_t *)val) = ng_at86rf2xx_get_csma_max_retries(dev);
             return sizeof(uint8_t);
 
         default:
@@ -654,7 +654,7 @@ static int _set(ng_netdev_t *device, ng_netconf_opt_t opt,
             if (len > sizeof(uint8_t)) {
                 return -EOVERFLOW;
             }
-            ng_at86rf2xx_set_max_csma_retries(dev, *((uint8_t *)val));
+            ng_at86rf2xx_set_csma_max_retries(dev, *((uint8_t *)val));
             return sizeof(uint8_t);
 
         default:

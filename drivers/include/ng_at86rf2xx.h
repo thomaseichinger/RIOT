@@ -344,7 +344,7 @@ void ng_at86rf2xx_set_max_retries(ng_at86rf2xx_t *dev, uint8_t max);
  *
  * @return                  configured number of retries
  */
-uint8_t ng_at86rf2xx_get_max_csma_retries(ng_at86rf2xx_t *dev);
+uint8_t ng_at86rf2xx_get_csma_max_retries(ng_at86rf2xx_t *dev);
 
 /**
  * @brief   Set the maximum number of channel access attempts per frame (CSMA)
@@ -357,7 +357,7 @@ uint8_t ng_at86rf2xx_get_max_csma_retries(ng_at86rf2xx_t *dev);
  * @param[in] dev           device to write to
  * @param[in] max           the maximum number of retries
  */
-void ng_at86rf2xx_set_max_csma_retries(ng_at86rf2xx_t *dev, int8_t retries);
+void ng_at86rf2xx_set_csma_max_retries(ng_at86rf2xx_t *dev, int8_t retries);
 
 
 /**

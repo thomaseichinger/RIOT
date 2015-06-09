@@ -21,6 +21,7 @@ usage() {
     echo "                                (default: tap; ignored on OSX and FreeBSD)" >&2
     echo "         -6, --deactivate-ipv6: deactivate IPv6 for the interfaces and bridge" >&2
     echo "                                (ignored on OSX and FreeBSD)" >&2
+    echo "                    -h, --help: prints this text" >&2
 }
 
 unsupported_plattform() {
@@ -151,6 +152,9 @@ while true ; do
             fi
             COMMAND="delete"
             shift ;;
+        -h|--help)
+            usage
+            exit ;;
         -t|--tap)
             case "$2" in
                 "")

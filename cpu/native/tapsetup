@@ -8,7 +8,7 @@ TAPNAME="tap"
 DEACTIVATE_IPV6=""
 
 usage() {
-    echo "usage: $PROGRAM [OPTIONS]" >&2
+    echo "usage: ${PROGRAM} [OPTIONS]" >&2
     echo "" >&2
     echo "  If no option is given, -c is assumed" >&2
     echo "" >&2
@@ -32,7 +32,7 @@ unsupported_plattform() {
 create_bridge() {
     echo "creating ${BRNAME}"
 
-    case "$PLATFORM" in
+    case "${PLATFORM}" in
         FreeBSD)
             sudo kldload if_bridge
             sudo ifconfig ${BRNAME} create || exit 1 ;;
@@ -49,7 +49,7 @@ create_bridge() {
 }
 
 up_bridge() {
-    case "$PLATFORM" in
+    case "${PLATFORM}" in
         FreeBSD|OSX)
             sudo ifconfig ${BRNAME} up || exit 1 ;;
         Linux)
@@ -62,7 +62,7 @@ up_bridge() {
 delete_bridge() {
     echo "deleting ${BRNAME}"
 
-    case "$PLATFORM" in
+    case "${PLATFORM}" in
         FreeBSD)
             sudo kldunload if_tap || exit 1
             sudo kldunload if_bridge || exit 1 ;;
@@ -80,7 +80,7 @@ delete_bridge() {
 }
 
 begin_tap() {
-    case "$PLATFORM" in
+    case "${PLATFORM}" in
         FreeBSD)
             sudo kldload if_tap || exit 1;;
         *)
@@ -89,7 +89,7 @@ begin_tap() {
 }
 
 create_tap() {
-    case "$PLATFORM" in
+    case "${PLATFORM}" in
         FreeBSD)
             echo "creating ${TAPNAME}${N}" || exit 1
             sudo ifconfig tap${N} create || exit 1

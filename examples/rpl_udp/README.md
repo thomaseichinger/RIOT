@@ -30,7 +30,7 @@ builds the project and creates `103` entries for the RPL routing table for the r
 
 #### _[native only]_ Set up a bridge for *two* tap devices for communication
 
-    ../../cpu/native/tapsetup.sh create 2
+    ../../cpu/native/tapsetup -c 2
 
 The `2` corresponds to the number of _virtual_ nodes to be started.
 The tap devices are bound to the _virtual_ native node on starting the created executable `rpl_udp.elf`.

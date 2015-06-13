@@ -52,11 +52,12 @@ Its features comprise
 If you compile RIOT for the native cpu and include the nativenet module, you can specify a network interface like this: `PORT=tap0 make term`
 
 #### SETTING UP A TAP NETWORK
-There is a shellscript in `RIOT/cpu/native` called `tapsetup.sh` which you can use to create a network of tap interfaces.
+There is a shellscript in `RIOT/cpu/native` called `tapsetup` which you can use to create a network of tap interfaces.
 
 *USAGE*
 To create a bridge and two (or count at your option) tap interfaces:
-./tapsetup.sh create [count]
+
+    ./tapsetup [-c [<count>]]
 
 ### EXAMPLE APPLICATIONS
 In the `examples` directory you can find some example applications. The `default` application demonstrates all available features for the current platform.

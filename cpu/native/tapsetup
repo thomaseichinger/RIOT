@@ -8,20 +8,21 @@ TAPNAME="tap"
 DEACTIVATE_IPV6=""
 
 usage() {
-    echo "usage: ${PROGRAM} [OPTIONS]" >&2
+    echo "usage: ${PROGRAM} [arguments]" >&2
     echo "" >&2
-    echo "  If no option is given, -c is assumed" >&2
+    echo "Defaults:"
+    echo "   If no option is given, -c is assumed" >&2
     echo "" >&2
-    echo "  OPTIONS:" >&2
-    echo "  -c [<num>], --create [<num>]: Create <num> tap interfaces (default: 2)" >&2
-    echo "                  -d, --delete: Delete all interface" >&2
-    echo "    -b <name>, --bridge <name>: Give name for the bridge (default: tapbr)" >&2
-    echo "       -t <name>, --tap <name>: name base for the tap interfaces; the" >&2
-    echo "                                generated names will be <name>x" >&2
-    echo "                                (default: tap; ignored on OSX and FreeBSD)" >&2
-    echo "         -6, --deactivate-ipv6: deactivate IPv6 for the interfaces and bridge" >&2
-    echo "                                (ignored on OSX and FreeBSD)" >&2
-    echo "                    -h, --help: prints this text" >&2
+    echo "Options:" >&2
+    echo "   -c [<num>], --create [<num>]: Create <num> tap interfaces (default: 2)" >&2
+    echo "   -d, --delete:                 Delete all interface" >&2
+    echo "   -b <name>, --bridge <name>:   Give name for the bridge (default: tapbr)" >&2
+    echo "   -t <name>, --tap <name>:      Name base for the tap interfaces; the" >&2
+    echo "                                 generated names will be <name>x" >&2
+    echo "                                 (default: tap; ignored on OSX and FreeBSD)" >&2
+    echo "   -6, --deactivate-ipv6:        Deactivate IPv6 for the interfaces and bridge" >&2
+    echo "                                 (ignored on OSX and FreeBSD)" >&2
+    echo "   -h, --help:                   Prints this text" >&2
 }
 
 unsupported_plattform() {
@@ -64,6 +65,7 @@ delete_bridge() {
 
     case "${PLATFORM}" in
         FreeBSD)
+            sudo sysctl net.link.tap.user_open=0
             sudo kldunload if_tap || exit 1
             sudo kldunload if_bridge || exit 1 ;;
         Linux)
@@ -83,6 +85,7 @@ begin_tap() {
     case "${PLATFORM}" in
         FreeBSD)
             sudo kldload if_tap || exit 1;;
+            sudo sysctl net.link.tap.user_open=1
         *)
             ;;
     esac
@@ -94,8 +97,8 @@ create_tap() {
             echo "creating ${TAPNAME}${N}" || exit 1
             sudo ifconfig tap${N} create || exit 1
             sudo chown ${USER} /dev/tap${N} || exit 1
+            sudo ifconfig ${BRNAME} addm tap${N} || exit 1 ;;
             sudo ifconfig tap${N} up || exit 1
-            sudo ifconfig bridge0 addm tap${N} || exit 1 ;;
         Linux)
             echo "creating ${TAPNAME}${N}"
             sudo ip tuntap add dev ${TAPNAME}${N} mode tap user ${USER} || exit 1
@@ -130,7 +133,7 @@ while true ; do
                     shift 2 ;;
             esac ;;
         -c|--create)
-            if [ COMMAND = "delete" ]; then
+            if [ -n "${COMMAND}" ]; then
                 usage
                 exit 2
             fi
@@ -138,7 +141,7 @@ while true ; do
             case "$2" in
                 "")
                     shift ;;
-                *[!0-9]*:)
+                *[!0-9]*)
                     usage
                     exit 2;;
                 *)
@@ -146,7 +149,7 @@ while true ; do
                     shift 2 ;;
             esac ;;
         -d|--delete)
-            if [ COMMAND = "create" ]; then
+            if [ -n "${COMMAND}" ]; then
                 usage
                 exit 2
             fi
@@ -180,9 +183,15 @@ if [ -z "${COMMAND}" ]; then
 fi
 case "$(uname -s)" in
     Darwin)
-        PLATFORM="OSX" ;;
+        PLATFORM="OSX"
+        if echo "$BRNAME" | grep -v -q "^bridge"; then
+            BRNAME=bridge0
+        fi ;;
     FreeBSD)
-        PLATFORM="FreeBSD" ;;
+        PLATFORM="FreeBSD"
+        if echo "$BRNAME" | grep -v -q "^bridge"; then
+            BRNAME=bridge0
+        fi ;;
     Linux)
         PLATFORM="Linux" ;;
     *)

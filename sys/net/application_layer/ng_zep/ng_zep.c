@@ -281,6 +281,8 @@ static int _send(ng_netdev_t *netdev, ng_pktsnip_t *pkt)
         ptr = ptr->next;
     }
 
+    ng_pktbuf_release(pkt);
+
     DEBUG("zep: set frame FCS to 0x%04 " PRIx16 "\n", fcs);
     _set_uint16_ptr((uint16_t *)data, byteorder_btols(byteorder_htons(fcs)).u16);
 
@@ -299,8 +301,6 @@ static int _send(ng_netdev_t *netdev, ng_pktsnip_t *pkt)
         ng_netapi_send(entry->pid, new);
         entry = ng_netreg_getnext(entry);
     }
-
-    ng_pktbuf_release(pkt);
 
     return payload_len + hdr_len + 2;
 }

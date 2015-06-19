@@ -290,7 +290,6 @@ static int _send(ng_netdev_t *netdev, ng_pktsnip_t *pkt)
 
     if (entry == NULL) {
         DEBUG("zep: no UDP handler found: dropping packet\n");
-        ng_pktbuf_release(pkt);
         ng_pktbuf_release(new);
         return -ENOENT;
     }

@@ -779,8 +779,6 @@ static ng_pktsnip_t *_recv_v1(ng_zep_t *dev, ng_pktsnip_t *pkt)
     pkt = ng_pktbuf_remove_snip(pkt, zep);
 
     return _create_received(dev, pkt, lqi, frame_len, 2);
-
-    return NULL;
 }
 
 static ng_pktsnip_t *_recv_v2(ng_zep_t *dev, ng_pktsnip_t *pkt)
@@ -819,13 +817,23 @@ static ng_pktsnip_t *_recv_v2(ng_zep_t *dev, ng_pktsnip_t *pkt)
 
 static void _rx_started_event(ng_zep_t *dev)
 {
-    ng_pktsnip_t *pkt;
+    ng_pktsnip_t *tmp, *pkt;
     ng_zep_hdr_t *hdr;
 
     if (ringbuffer_get(&_rx_buf, (char *)(&pkt),
                        sizeof(ng_pktsnip_t *)) != sizeof(ng_pktsnip_t *)) {
         return;
     }
+
+    tmp = ng_pktbuf_start_write(pkt);
+
+    if (tmp == NULL) {
+        DEBUG("zep: Could not get write access to received packet\n");
+        ng_pktbuf_release(pkt);
+        return;
+    }
+
+    pkt = tmp;
 
     while (pkt->next) {
         /* remove everything below UDP */

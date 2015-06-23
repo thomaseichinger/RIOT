@@ -45,23 +45,23 @@ module, you need to specify a network interface like this:
 Setting Up A Tap Network
 ========================
 
-There is a shellscript in RIOT/cpu/native called `tapsetup` which you
+There is a shellscript in RIOT/dist/tools/tapsetup called `tapsetup` which you
 can use to create a network of tap interfaces.
 
 Usage:
 To create a bridge and two (or count at your option) tap interfaces:
 
-    ./tapsetup [-c [<count>]]
+    ../../dist/tools/tapsetup/tapsetup [-c [<count>]]
 
 On OSX you need to start the RIOT instance at some point during the script's
 execution. The script will instruct you when to do that.
 
 To delete the bridge and all tap interfaces:
 
-    ./tapsetup -d
+    ../../dist/tools/tapsetup/tapsetup -d
 
 For OSX you **have** to run this after killing your RIOT instance and rerun
-`./tapsetup [-c [<count>]]` before restarting.
+`../../dist/tools/tapsetup [-c [<count>]]` before restarting.
 
 
 Daemonization

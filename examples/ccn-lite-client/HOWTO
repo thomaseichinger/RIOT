@@ -1,7 +1,7 @@
 simple appserver (all in one shell)
 ====================================================
 
-0. create tap devices: *./cpu/native/tapsetup -c 3*
+0. create tap devices: *./dist/tools/tapsetup/tapsetup -c 3*
 1. build ccn-lite-client: *make -B clean all-valgrind*
 2. start: *./bin/native/ccn-lite-client.elf tap0* (valgrind support included)
 3. optional: *config 20* [enter] (this sets the content store size)
@@ -17,7 +17,7 @@ simple forward (needs two shells)
 
 SHELL 1                                                                        | SHELL 2
 --------------------------------------------------------------------------------------------------------------
-0. create tap devices: *./cpu/native/tapsetup -c 3*                            |
+0. create tap devices: *./dist/tools/tapsetup/tapsetup -c 3*                   |
 1. build ccn-lite-client: *make -B clean all*                                  | build ccn-lite: *make clean all*
 2. start: *./bin/native/ccn-lite-client.elf tap0*                              | start: *./bin/ccn-lite-relay.elf tap1*
 3. set content store size: *config 20* [enter]                                 | [stack starts automaticly]
@@ -31,7 +31,7 @@ advanced forward (needs three shells)
 
 SHELL 1                                                                     | SHELL 2                                        | SHELL 3
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-0. create tap devices: *./cpu/native/tapsetup -c 3*                         |                                                |
+0. create tap devices: *./dist/tools/tapsetup/tapsetup -c 3*                |                                                |
 1. build ccn-lite-client: *make -B clean all*                               |                                                | build ccn-lite: make clean all
 2. start: *./bin/native/ccn-lite-client.elf tap0*                           | start: *./bin/native/ccn-lite-client.elf tap1* | start: ./bin/ccn-lite-relay.elf tap2
 3. set content store size: *cconfig 20* [enter]                             | set content store size: *cconfig 20* [enter]   | [it starts ccn automaticly]
@@ -45,7 +45,7 @@ overdosed forward (needs three shells)
 
 SHELL 1                                                                     | SHELL 2                                 | SHELL 3
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-0. create tap devices: *./cpu/native/tapsetup.sh create 3*                  |                                         |
+0. create tap devices: *./dist/tools/tapsetup/tapsetup.sh create 3*         |                                         |
 1. build ccn-lite-client: *make -B clean all*                               |                                         |
 2. start: *./bin/native/ccn-lite-client.elf tap0*                           | start: *./bin/native/ccn-lite-client.elf tap1* | start: *./bin/native/ccn-lite-client.elf tap2*
 3. set content store size: *cconfig 20* [enter]                             | sset content store size: *cconfig 20* [enter]  | sset content store size: *cconfig 20* [enter]

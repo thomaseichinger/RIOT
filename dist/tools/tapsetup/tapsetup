@@ -84,8 +84,8 @@ delete_bridge() {
 begin_tap() {
     case "${PLATFORM}" in
         FreeBSD)
-            sudo kldload if_tap || exit 1;;
-            sudo sysctl net.link.tap.user_open=1
+            sudo kldload if_tap || exit 1
+            sudo sysctl net.link.tap.user_open=1 ;;
         *)
             ;;
     esac
@@ -97,8 +97,8 @@ create_tap() {
             echo "creating ${TAPNAME}${N}" || exit 1
             sudo ifconfig tap${N} create || exit 1
             sudo chown ${USER} /dev/tap${N} || exit 1
-            sudo ifconfig ${BRNAME} addm tap${N} || exit 1 ;;
-            sudo ifconfig tap${N} up || exit 1
+            sudo ifconfig ${BRNAME} addm tap${N} || exit 1
+            sudo ifconfig tap${N} up || exit 1 ;;
         Linux)
             echo "creating ${TAPNAME}${N}"
             sudo ip tuntap add dev ${TAPNAME}${N} mode tap user ${USER} || exit 1

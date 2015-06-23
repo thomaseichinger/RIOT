@@ -308,7 +308,8 @@ static int _fill_ipv6_hdr(kernel_pid_t iface, ng_pktsnip_t *ipv6,
 
         /* We deal with multiple interfaces here (multicast) => possible
          * different source addresses => duplication of payload needed */
-        while (ptr != payload) {
+        while (ptr != payload->next) {
+            ng_pktsnip_t *old = ptr->next;
             /* duplicate everything including payload */
             ptr->next = ng_pktbuf_start_write(ptr->next);
 
@@ -317,7 +318,7 @@ static int _fill_ipv6_hdr(kernel_pid_t iface, ng_pktsnip_t *ipv6,
                 return -ENOBUFS;
             }
 
-            ptr = ptr->next;
+            ptr = old;
         }
     }
 #endif /* NG_NETIF_NUMOF */
@@ -401,7 +402,7 @@ static void _send_multicast(kernel_pid_t iface, ng_pktsnip_t *pkt,
 
             LL_PREPEND(pkt, netif);
 
-            _send_multicast_over_iface(iface, pkt, netif);
+            _send_multicast_over_iface(ifs[i], pkt, netif);
         }
     }
     else {
@@ -419,6 +420,7 @@ static void _send_multicast(kernel_pid_t iface, ng_pktsnip_t *pkt,
         _send_multicast_over_iface(iface, pkt, netif);
     }
 #else   /* NG_NETIF_NUMOF */
+    (void)ifnum; /* not used in this build branch */
     if (iface == KERNEL_PID_UNDEF) {
         iface = ifs[0];
 

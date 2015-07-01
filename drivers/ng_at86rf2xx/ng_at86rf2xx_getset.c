@@ -290,8 +290,8 @@ void ng_at86rf2xx_set_csma_seed(ng_at86rf2xx_t *dev, uint8_t entropy[2])
     DEBUG("[ng_at86rf2xx] opt: Set CSMA seed to 0x%x 0x%x", entropy[0], entropy[1]);
 
     ng_at86rf2xx_reg_write(dev,
-        NG_AT86RF2XX_REG__CSMA_SEED_0,
-        entropy[0]);
+                           NG_AT86RF2XX_REG__CSMA_SEED_0,
+                           entropy[0]);
 
     uint8_t tmp = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__CSMA_SEED_1);
     tmp &= ~(NG_AT86RF2XX_CSMA_SEED_1__CSMA_SEED_1);

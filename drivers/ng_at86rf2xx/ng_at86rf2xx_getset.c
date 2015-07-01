@@ -260,8 +260,8 @@ uint8_t ng_at86rf2xx_get_csma_max_retries(ng_at86rf2xx_t *dev)
 
 void ng_at86rf2xx_set_csma_max_retries(ng_at86rf2xx_t *dev, int8_t retries)
 {
-    retries = (retries > 5) ? 5 : retries; // valid values: 0-5
-    retries = (retries < 0) ? 7 : retries; // max < 0 => disable CSMA (set to 7)
+    retries = (retries > 5) ? 5 : retries; /* valid values: 0-5 */
+    retries = (retries < 0) ? 7 : retries; /* max < 0 => disable CSMA (set to 7) */
     DEBUG("[ng_at86rf2xx] opt: Set CSMA retries to %u", retries);
 
     uint8_t tmp = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__XAH_CTRL_0);

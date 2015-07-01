@@ -262,7 +262,7 @@ void ng_at86rf2xx_set_csma_max_retries(ng_at86rf2xx_t *dev, int8_t retries)
 {
     retries = (retries > 5) ? 5 : retries; /* valid values: 0-5 */
     retries = (retries < 0) ? 7 : retries; /* max < 0 => disable CSMA (set to 7) */
-    DEBUG("[ng_at86rf2xx] opt: Set CSMA retries to %u", retries);
+    DEBUG("[ng_at86rf2xx] opt: Set CSMA retries to %u\n", retries);
 
     uint8_t tmp = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__XAH_CTRL_0);
     tmp &= ~(NG_AT86RF2XX_XAH_CTRL_0__MAX_CSMA_RETRIES);
@@ -274,7 +274,7 @@ void ng_at86rf2xx_set_csma_backoff_exp(ng_at86rf2xx_t *dev, uint8_t min, uint8_t
 {
     max = (max > 8) ? 8 : max;
     min = (min > max) ? max : min;
-    DEBUG("[ng_at86rf2xx] opt: Set min BE=%u, max BE=%u", min, max);
+    DEBUG("[ng_at86rf2xx] opt: Set min BE=%u, max BE=%u\n", min, max);
 
     ng_at86rf2xx_reg_write(dev,
             NG_AT86RF2XX_REG__CSMA_BE,
@@ -284,10 +284,10 @@ void ng_at86rf2xx_set_csma_backoff_exp(ng_at86rf2xx_t *dev, uint8_t min, uint8_t
 void ng_at86rf2xx_set_csma_seed(ng_at86rf2xx_t *dev, uint8_t entropy[2])
 {
     if(entropy == NULL) {
-        DEBUG("[ng_at86rf2xx] opt: CSMA seed entropy is nullpointer");
+        DEBUG("[ng_at86rf2xx] opt: CSMA seed entropy is nullpointer\n");
         return;
     }
-    DEBUG("[ng_at86rf2xx] opt: Set CSMA seed to 0x%x 0x%x", entropy[0], entropy[1]);
+    DEBUG("[ng_at86rf2xx] opt: Set CSMA seed to 0x%x 0x%x\n", entropy[0], entropy[1]);
 
     ng_at86rf2xx_reg_write(dev,
                            NG_AT86RF2XX_REG__CSMA_SEED_0,

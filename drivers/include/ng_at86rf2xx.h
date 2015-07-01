@@ -350,7 +350,7 @@ uint8_t ng_at86rf2xx_get_csma_max_retries(ng_at86rf2xx_t *dev);
  * @brief   Set the maximum number of channel access attempts per frame (CSMA)
  *
  * This setting specifies the number of attempts to access the channel to
- * transmit a frame. If the channel is busy *retries* times, then frame
+ * transmit a frame. If the channel is busy @p retries times, then frame
  * transmission fails.
  * Valid values: 0 to 5, -1 means CSMA disabled
  *

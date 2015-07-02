@@ -249,6 +249,56 @@ void ng_at86rf2xx_set_max_retries(ng_at86rf2xx_t *dev, uint8_t max)
     ng_at86rf2xx_reg_write(dev, NG_AT86RF2XX_REG__XAH_CTRL_0, tmp);
 }
 
+uint8_t ng_at86rf2xx_get_csma_max_retries(ng_at86rf2xx_t *dev)
+{
+    uint8_t tmp;
+    tmp  = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__XAH_CTRL_0);
+    tmp &= NG_AT86RF2XX_XAH_CTRL_0__MAX_CSMA_RETRIES;
+    tmp >>= 1;
+    return tmp;
+}
+
+void ng_at86rf2xx_set_csma_max_retries(ng_at86rf2xx_t *dev, int8_t retries)
+{
+    retries = (retries > 5) ? 5 : retries; /* valid values: 0-5 */
+    retries = (retries < 0) ? 7 : retries; /* max < 0 => disable CSMA (set to 7) */
+    DEBUG("[ng_at86rf2xx] opt: Set CSMA retries to %u\n", retries);
+
+    uint8_t tmp = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__XAH_CTRL_0);
+    tmp &= ~(NG_AT86RF2XX_XAH_CTRL_0__MAX_CSMA_RETRIES);
+    tmp |= (retries << 1);
+    ng_at86rf2xx_reg_write(dev, NG_AT86RF2XX_REG__XAH_CTRL_0, tmp);
+}
+
+void ng_at86rf2xx_set_csma_backoff_exp(ng_at86rf2xx_t *dev, uint8_t min, uint8_t max)
+{
+    max = (max > 8) ? 8 : max;
+    min = (min > max) ? max : min;
+    DEBUG("[ng_at86rf2xx] opt: Set min BE=%u, max BE=%u\n", min, max);
+
+    ng_at86rf2xx_reg_write(dev,
+            NG_AT86RF2XX_REG__CSMA_BE,
+            (max << 4) | (min));
+}
+
+void ng_at86rf2xx_set_csma_seed(ng_at86rf2xx_t *dev, uint8_t entropy[2])
+{
+    if(entropy == NULL) {
+        DEBUG("[ng_at86rf2xx] opt: CSMA seed entropy is nullpointer\n");
+        return;
+    }
+    DEBUG("[ng_at86rf2xx] opt: Set CSMA seed to 0x%x 0x%x\n", entropy[0], entropy[1]);
+
+    ng_at86rf2xx_reg_write(dev,
+                           NG_AT86RF2XX_REG__CSMA_SEED_0,
+                           entropy[0]);
+
+    uint8_t tmp = ng_at86rf2xx_reg_read(dev, NG_AT86RF2XX_REG__CSMA_SEED_1);
+    tmp &= ~(NG_AT86RF2XX_CSMA_SEED_1__CSMA_SEED_1);
+    tmp |= entropy[1] & NG_AT86RF2XX_CSMA_SEED_1__CSMA_SEED_1;
+    ng_at86rf2xx_reg_write(dev, NG_AT86RF2XX_REG__CSMA_SEED_1, tmp);
+}
+
 void ng_at86rf2xx_set_option(ng_at86rf2xx_t *dev, uint16_t option, bool state)
 {
     uint8_t tmp;
@@ -261,8 +311,12 @@ void ng_at86rf2xx_set_option(ng_at86rf2xx_t *dev, uint16_t option, bool state)
         /* trigger option specific actions */
         switch (option) {
             case NG_AT86RF2XX_OPT_CSMA:
-                DEBUG("[ng_at86rf2xx] opt: enabling CSMA mode (NOT IMPLEMENTED)\n");
-                /* TODO: en/disable csma */
+                DEBUG("[ng_at86rf2xx] opt: enabling CSMA mode" \
+                      "(4 retries, min BE: 3 max BE: 5)\n");
+                /* Initialize CSMA seed with hardware address */
+                ng_at86rf2xx_set_csma_seed(dev, dev->addr_long);
+                ng_at86rf2xx_set_csma_max_retries(dev, 4);
+                ng_at86rf2xx_set_csma_backoff_exp(dev, 3, 5);
                 break;
             case NG_AT86RF2XX_OPT_PROMISCUOUS:
                 DEBUG("[ng_at86rf2xx] opt: enabling PROMISCUOUS mode\n");
@@ -297,8 +351,9 @@ void ng_at86rf2xx_set_option(ng_at86rf2xx_t *dev, uint16_t option, bool state)
         /* trigger option specific actions */
         switch (option) {
             case NG_AT86RF2XX_OPT_CSMA:
-                DEBUG("[ng_at86rf2xx] opt: disabling CSMA mode (NOT IMPLEMENTED)\n");
-                /* TODO: en/disable csma */
+                DEBUG("[ng_at86rf2xx] opt: disabling CSMA mode\n");
+                // Setting retries to -1 means CSMA disabled
+                ng_at86rf2xx_set_csma_max_retries(dev, -1);
                 break;
             case NG_AT86RF2XX_OPT_PROMISCUOUS:
                 DEBUG("[ng_at86rf2xx] opt: disabling PROMISCUOUS mode\n");

@@ -317,6 +317,7 @@ extern "C" {
 #define NG_AT86RF2XX_CSMA_SEED_1__AACK_SET_PD                   (0x20)
 #define NG_AT86RF2XX_CSMA_SEED_1__AACK_DIS_ACK                  (0x10)
 #define NG_AT86RF2XX_CSMA_SEED_1__AACK_I_AM_COORD               (0x08)
+#define NG_AT86RF2XX_CSMA_SEED_1__CSMA_SEED_1                   (0x07)
 /** @} */
 
 /**

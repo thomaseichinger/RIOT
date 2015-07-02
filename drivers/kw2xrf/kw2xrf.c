@@ -780,7 +780,7 @@ int kw2xrf_set(ng_netdev_t *netdev, ng_netconf_opt_t opt, void *value, size_t va
                               ((bool *)value)[0]);
             return sizeof(ng_netconf_enable_t);
 
-        case NETCONF_OPT_AUTOCCA:
+        case NETCONF_OPT_CSMA:
             kw2xrf_set_option(dev, KW2XRF_OPT_CSMA,
                               ((bool *)value)[0]);
             return sizeof(ng_netconf_enable_t);

@@ -1,7 +1,7 @@
-From b5ecce21b0f3467bf5ef35b84a921bb081417764 Mon Sep 17 00:00:00 2001
+From 081b8d766117e9abc446fd94a17e156732fcb49e Mon Sep 17 00:00:00 2001
 From: Thomas Eichinger <thomas.eichinger1@gmail.com>
 Date: Tue, 25 Nov 2014 15:46:26 +0100
-Subject: [PATCH 2/5] Add RIOT adaption
+Subject: [PATCH 2/8] Add RIOT adaption
 
 ---
  bsp/boards/board_ow.h                 |  40 +++
@@ -1522,5 +1522,5 @@ index 0000000..c2bcb4f
 +}
 \ No newline at end of file
 -- 
-2.2.0
+2.4.5
 

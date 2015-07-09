@@ -1,17 +1,17 @@
-From 5bcbe4daaed320af19815f6ec949f3f9d105f4d1 Mon Sep 17 00:00:00 2001
+From b00f90de824bfcbc36241ae97ea2af950ab8ac21 Mon Sep 17 00:00:00 2001
 From: Thomas Eichinger <thomas.eichinger1@gmail.com>
 Date: Fri, 28 Nov 2014 14:02:49 +0100
-Subject: [PATCH 4/5] provide openserial dummies
+Subject: [PATCH 4/8] provide openserial dummies
 
 ---
- drivers/common/openserial.c | 836 ++++++++++++++++++++++----------------------
- 1 file changed, 418 insertions(+), 418 deletions(-)
+ drivers/common/openserial.c | 768 ++++++++++++++++++++++----------------------
+ 1 file changed, 387 insertions(+), 381 deletions(-)
 
 diff --git a/drivers/common/openserial.c b/drivers/common/openserial.c
-index edd059e..c54cfff 100644
+index 140dd70..6551372 100644
 --- a/drivers/common/openserial.c
 +++ b/drivers/common/openserial.c
-@@ -44,56 +44,56 @@ void inputHdlcClose(void);
+@@ -57,56 +57,56 @@ void inputHdlcClose(void);
  //=========================== public ==========================================
  
  void openserial_init(void) {
@@ -115,7 +115,7 @@ index edd059e..c54cfff 100644
     
     return E_SUCCESS;
  }
-@@ -105,50 +105,50 @@ owerror_t openserial_printInfoErrorCritical(
+@@ -118,50 +118,50 @@ owerror_t openserial_printInfoErrorCritical(
        errorparameter_t arg1,
        errorparameter_t arg2
     ) {
@@ -205,7 +205,7 @@ index edd059e..c54cfff 100644
     
     return E_SUCCESS;
  }
-@@ -169,7 +169,7 @@ owerror_t openserial_printError(uint8_t calling_component, uint8_t error_code,
+@@ -203,7 +203,7 @@ owerror_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                                errorparameter_t arg1,
                                errorparameter_t arg2) {
     // blink error LED, this is serious
@@ -214,25 +214,28 @@ index edd059e..c54cfff 100644
     
     return openserial_printInfoErrorCritical(
        SERFRAME_MOTE2PC_ERROR,
-@@ -184,12 +184,12 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
+@@ -218,12 +218,19 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                                errorparameter_t arg1,
                                errorparameter_t arg2) {
     // blink error LED, this is serious
 -   leds_error_blink();
 +   // leds_error_blink();
     
--   // schedule for the mote to reboot in 10s
--   opentimers_start(10000,
--                    TIMER_ONESHOT,TIME_MS,
--                    board_reset);
++<<<<<<< HEAD
+    // schedule for the mote to reboot in 10s
+    opentimers_start(10000,
+                     TIMER_ONESHOT,TIME_MS,
+                     openserial_board_reset_cb);
++=======
 +   // // schedule for the mote to reboot in 10s
 +   // opentimers_start(10000,
 +   //                  TIMER_ONESHOT,TIME_MS,
 +   //                  board_reset);
++>>>>>>> provide openserial dummies
     
     return openserial_printInfoErrorCritical(
        SERFRAME_MOTE2PC_CRITICAL,
-@@ -202,209 +202,209 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
+@@ -240,213 +247,213 @@ void openserial_board_reset_cb(opentimer_id_t id) {
  
  uint8_t openserial_getNumDataBytes(void) {
     uint8_t inputBufFill;
@@ -553,6 +556,10 @@ index edd059e..c54cfff 100644
 -            //echo function must reset input buffer after reading the data.
 -            openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
 -            break;   
+-         case SERFRAME_PC2MOTE_COMMAND_GD: 
+-             // golden image command
+-            openserial_goldenImageCommands();
+-            break;
 -         default:
 -            openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
 -                                  (errorparameter_t)cmdByte,
@@ -608,6 +615,10 @@ index edd059e..c54cfff 100644
 +   //          //echo function must reset input buffer after reading the data.
 +   //          openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
 +   //          break;
++   //       case SERFRAME_PC2MOTE_COMMAND_GD:
++   //           // golden image command
++   //          openserial_goldenImageCommands();
++   //          break;
 +   //       default:
 +   //          openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
 +   //                                (errorparameter_t)cmdByte,
@@ -626,8 +637,8 @@ index edd059e..c54cfff 100644
 +   // ENABLE_INTERRUPTS();
  }
  
- /**
-@@ -416,13 +416,13 @@ status information about several modules in the OpenWSN stack.
+ void openserial_goldenImageCommands(void){
+@@ -573,13 +580,13 @@ status information about several modules in the OpenWSN stack.
  \returns TRUE if this function printed something, FALSE otherwise.
  */
  bool debugPrint_outBufferIndexes(void) {
@@ -648,7 +659,7 @@ index edd059e..c54cfff 100644
     return TRUE;
  }
  
-@@ -434,43 +434,43 @@ bool debugPrint_outBufferIndexes(void) {
+@@ -591,43 +598,43 @@ bool debugPrint_outBufferIndexes(void) {
  \brief Start an HDLC frame in the output buffer.
  */
  port_INLINE void outputHdlcOpen(void) {
@@ -712,7 +723,7 @@ index edd059e..c54cfff 100644
  }
  
  //===== hdlc (input)
-@@ -479,158 +479,158 @@ port_INLINE void outputHdlcClose(void) {
+@@ -636,49 +643,49 @@ port_INLINE void outputHdlcClose(void) {
  \brief Start an HDLC frame in the input buffer.
  */
  port_INLINE void inputHdlcOpen(void) {
@@ -789,95 +800,16 @@ index edd059e..c54cfff 100644
  }
  
  //=========================== interrupt handlers ==============================
- 
- //executed in ISR, called from scheduler.c
- void isr_openserial_tx(void) {
--   switch (openserial_vars.mode) {
--      case MODE_INPUT:
--         openserial_vars.reqFrameIdx++;
--         if (openserial_vars.reqFrameIdx<sizeof(openserial_vars.reqFrame)) {
--            uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
--         }
--         break;
--      case MODE_OUTPUT:
--         if (openserial_vars.outputBufIdxW==openserial_vars.outputBufIdxR) {
--            openserial_vars.outputBufFilled = FALSE;
--         }
--         if (openserial_vars.outputBufFilled) {
--            uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
--         }
--         break;
--      case MODE_OFF:
--      default:
--         break;
--   }
-+   // switch (openserial_vars.mode) {
-+   //    case MODE_INPUT:
-+   //       openserial_vars.reqFrameIdx++;
-+   //       if (openserial_vars.reqFrameIdx<sizeof(openserial_vars.reqFrame)) {
-+   //          uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
-+   //       }
-+   //       break;
-+   //    case MODE_OUTPUT:
-+   //       if (openserial_vars.outputBufIdxW==openserial_vars.outputBufIdxR) {
-+   //          openserial_vars.outputBufFilled = FALSE;
-+   //       }
-+   //       if (openserial_vars.outputBufFilled) {
-+   //          uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
-+   //       }
-+   //       break;
-+   //    case MODE_OFF:
-+   //    default:
-+   //       break;
-+   // }
- }
- 
- // executed in ISR, called from scheduler.c
- void isr_openserial_rx(void) {
--   uint8_t rxbyte;
--   uint8_t inputBufFill;
--   
--   // stop if I'm not in input mode
--   if (openserial_vars.mode!=MODE_INPUT) {
--      return;
--   }
--   
--   // read byte just received
--   rxbyte = uart_readByte();
--   //keep lenght
--   inputBufFill=openserial_vars.inputBufFill;
--   
--   if        (
--                openserial_vars.busyReceiving==FALSE  &&
--                openserial_vars.lastRxByte==HDLC_FLAG &&
--                rxbyte!=HDLC_FLAG
--              ) {
--      // start of frame
-+   // uint8_t rxbyte;
-+   // uint8_t inputBufFill;
-+
-+   // // stop if I'm not in input mode
-+   // if (openserial_vars.mode!=MODE_INPUT) {
-+   //    return;
-+   // }
-+
-+   // // read byte just received
-+   // rxbyte = uart_readByte();
-+   // //keep lenght
-+   // inputBufFill=openserial_vars.inputBufFill;
-+
-+   // if        (
-+   //              openserial_vars.busyReceiving==FALSE  &&
-+   //              openserial_vars.lastRxByte==HDLC_FLAG &&
-+   //              rxbyte!=HDLC_FLAG
-+   //            ) {
-+   //    // start of frame
-       
--      // I'm now receiving
--      openserial_vars.busyReceiving         = TRUE;
+@@ -727,67 +734,66 @@ void isr_openserial_rx(void) {
+                 rxbyte!=HDLC_FLAG
+               ) {
+       // start of frame
 +   //    // I'm now receiving
 +   //    openserial_vars.busyReceiving         = TRUE;
        
+-      // I'm now receiving
+-      openserial_vars.busyReceiving         = TRUE;
+-      
 -      // create the HDLC frame
 -      inputHdlcOpen();
 +   //    // create the HDLC frame
@@ -986,5 +918,5 @@ index edd059e..c54cfff 100644
 +   //  ENABLE_INTERRUPTS();
  }
 -- 
-2.2.0
+2.4.5
 

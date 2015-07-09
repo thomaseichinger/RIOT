@@ -1,0 +1,32 @@
+From 107e6cec598650252c4b4bdf0ade707d7d626380 Mon Sep 17 00:00:00 2001
+From: Thomas Eichinger <thomas.eichinger1@gmail.com>
+Date: Thu, 9 Jul 2015 17:33:32 +0200
+Subject: [PATCH 7/8] f
+
+---
+ openapps/rrt/Makefile     | 3 +++
+ openapps/uinject/Makefile | 3 +++
+ 2 files changed, 6 insertions(+)
+ create mode 100644 openapps/rrt/Makefile
+ create mode 100644 openapps/uinject/Makefile
+
+diff --git a/openapps/rrt/Makefile b/openapps/rrt/Makefile
+new file mode 100644
+index 0000000..47289c6
+--- /dev/null
++++ b/openapps/rrt/Makefile
+@@ -0,0 +1,3 @@
++#MODULE = openwsn
++
++include $(RIOTBASE)/Makefile.base
+diff --git a/openapps/uinject/Makefile b/openapps/uinject/Makefile
+new file mode 100644
+index 0000000..47289c6
+--- /dev/null
++++ b/openapps/uinject/Makefile
+@@ -0,0 +1,3 @@
++#MODULE = openwsn
++
++include $(RIOTBASE)/Makefile.base
+--
+2.4.5

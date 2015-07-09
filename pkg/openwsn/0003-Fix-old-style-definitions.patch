@@ -1,11 +1,11 @@
-From 95db91c259883f8cedf9c90ac5b59a309f93a36d Mon Sep 17 00:00:00 2001
+From 3aa247f8d312db2f1eac69d6e422648c89cf35cc Mon Sep 17 00:00:00 2001
 From: Thomas Eichinger <thomas.eichinger1@gmail.com>
 Date: Tue, 25 Nov 2014 15:46:55 +0100
-Subject: [PATCH 3/5] Fix old style definitions
+Subject: [PATCH 3/8] Fix old style definitions
 
 ---
- Makefile                                      |  5 ++-
- bsp/boards/board.h                            | 40 -----------------
+ Makefile                                      |  5 +-
+ bsp/boards/board.h                            | 40 -------------
  bsp/boards/board_ow.h                         |  2 +-
  bsp/boards/bsp_timer.h                        |  2 +-
  bsp/boards/radiotimer.h                       |  2 +-
@@ -13,30 +13,30 @@ Subject: [PATCH 3/5] Fix old style definitions
  bsp/boards/spi.h                              |  2 +-
  bsp/boards/uart.h                             |  2 +-
  drivers/common/Makefile                       |  2 +
- drivers/common/openserial.c                   | 24 +++++-----
+ drivers/common/openserial.c                   | 24 ++++----
  drivers/common/opentimers.c                   |  4 +-
  kernel/openos/Makefile                        |  2 +-
- kernel/openos/scheduler.c                     |  6 +--
+ kernel/openos/scheduler.c                     |  6 +-
  openapps/Makefile                             |  2 +-
  openapps/c6t/Makefile                         |  2 +-
  openapps/c6t/c6t.c                            |  2 +-
- openapps/cexample/cexample.c                  |  6 +--
+ openapps/cexample/cexample.c                  |  4 +-
  openapps/cinfo/cinfo.c                        |  2 +-
  openapps/cleds/cleds.c                        |  2 +-
  openapps/cstorm/cstorm.c                      |  4 +-
  openapps/cwellknown/cwellknown.c              |  2 +-
  openapps/techo/Makefile                       |  2 +-
- openapps/techo/techo.c                        |  6 +--
- openapps/tohlone/tohlone.c                    |  8 ++--
+ openapps/techo/techo.c                        |  6 +-
+ openapps/tohlone/tohlone.c                    |  8 +--
  openapps/uecho/Makefile                       |  2 +-
  openapps/uecho/uecho.c                        |  4 +-
- openstack/02a-MAClow/IEEE802154E.c            | 64 +++++++++++++--------------
+ openstack/02a-MAClow/IEEE802154E.c            | 67 ++++++++++-----------
  openstack/02a-MAClow/Makefile                 |  2 +-
- openstack/02a-MAClow/adaptive_sync.c          |  6 +--
+ openstack/02a-MAClow/adaptive_sync.c          |  6 +-
  openstack/02b-MAChigh/Makefile                |  2 +-
- openstack/02b-MAChigh/neighbors.c             | 12 ++---
- openstack/02b-MAChigh/schedule.c              | 20 ++++-----
- openstack/02b-MAChigh/sixtop.c                | 18 ++++----
+ openstack/02b-MAChigh/neighbors.c             | 12 ++--
+ openstack/02b-MAChigh/schedule.c              | 20 +++----
+ openstack/02b-MAChigh/sixtop.c                | 14 ++---
  openstack/03a-IPHC/Makefile                   |  2 +-
  openstack/03a-IPHC/iphc.c                     |  2 +-
  openstack/03a-IPHC/openbridge.c               |  4 +-
@@ -44,20 +44,20 @@ Subject: [PATCH 3/5] Fix old style definitions
  openstack/03b-IPv6/forwarding.c               |  2 +-
  openstack/03b-IPv6/icmpv6.c                   |  2 +-
  openstack/03b-IPv6/icmpv6echo.c               |  4 +-
- openstack/03b-IPv6/icmpv6rpl.c                | 16 +++----
+ openstack/03b-IPv6/icmpv6rpl.c                | 12 ++--
  openstack/04-TRAN/Makefile                    |  2 +-
  openstack/04-TRAN/opencoap.c                  |  2 +-
- openstack/04-TRAN/opentcp.c                   |  8 ++--
+ openstack/04-TRAN/opentcp.c                   |  6 +-
  openstack/04-TRAN/openudp.c                   |  4 +-
  openstack/Makefile                            |  2 +-
  openstack/cross-layers/Makefile               |  2 +-
- openstack/cross-layers/idmanager.c            |  8 ++--
- openstack/cross-layers/openqueue.c            | 10 ++---
+ openstack/cross-layers/idmanager.c            |  8 +--
+ openstack/cross-layers/openqueue.c            | 10 ++--
  openstack/cross-layers/openrandom.c           |  4 +-
- projects/common/03oos_openwsn/03oos_openwsn.c | 35 ++++++++++++++-
- projects/common/03oos_openwsn/03oos_openwsn.h |  6 +++
+ projects/common/03oos_openwsn/03oos_openwsn.c | 84 ++++++++++++++++++---------
+ projects/common/03oos_openwsn/03oos_openwsn.h |  6 ++
  projects/common/03oos_openwsn/Makefile        |  2 +-
- 53 files changed, 192 insertions(+), 190 deletions(-)
+ 53 files changed, 210 insertions(+), 212 deletions(-)
  delete mode 100644 bsp/boards/board.h
  create mode 100644 drivers/common/Makefile
 
@@ -188,7 +188,7 @@ index fae2b79..943f94e 100644
  //=========================== define ==========================================
  
 diff --git a/bsp/boards/uart.h b/bsp/boards/uart.h
-index 4add6f7..4f02a23 100644
+index acf868e..6bf068e 100644
 --- a/bsp/boards/uart.h
 +++ b/bsp/boards/uart.h
 @@ -13,7 +13,7 @@
@@ -210,10 +210,10 @@ index 0000000..fbf6584
 +include $(RIOTBASE)/Makefile.base
 \ No newline at end of file
 diff --git a/drivers/common/openserial.c b/drivers/common/openserial.c
-index 5b02499..edd059e 100644
+index 8363e04..140dd70 100644
 --- a/drivers/common/openserial.c
 +++ b/drivers/common/openserial.c
-@@ -43,7 +43,7 @@ void inputHdlcClose(void);
+@@ -56,7 +56,7 @@ void inputHdlcClose(void);
  
  //=========================== public ==========================================
  
@@ -222,8 +222,8 @@ index 5b02499..edd059e 100644
     uint16_t crc;
     
     // reset variable
-@@ -200,7 +200,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
-    );
+@@ -238,7 +238,7 @@ void openserial_board_reset_cb(opentimer_id_t id) {
+    board_reset();
  }
  
 -uint8_t openserial_getNumDataBytes() {
@@ -231,7 +231,7 @@ index 5b02499..edd059e 100644
     uint8_t inputBufFill;
     INTERRUPT_DECLARATION();
     
-@@ -233,7 +233,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
+@@ -271,7 +271,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
     return numBytesWritten;
  }
  
@@ -240,7 +240,7 @@ index 5b02499..edd059e 100644
     INTERRUPT_DECLARATION();
     
     if (openserial_vars.inputBufFill>0) {
-@@ -265,7 +265,7 @@ void openserial_startInput() {
+@@ -303,7 +303,7 @@ void openserial_startInput() {
     ENABLE_INTERRUPTS();
  }
  
@@ -249,7 +249,7 @@ index 5b02499..edd059e 100644
     //schedule a task to get new status in the output buffer
     uint8_t debugPrintCounter;
     
-@@ -349,7 +349,7 @@ void openserial_startOutput() {
+@@ -387,7 +387,7 @@ void openserial_startOutput() {
     ENABLE_INTERRUPTS();
  }
  
@@ -258,7 +258,7 @@ index 5b02499..edd059e 100644
     uint8_t inputBufFill;
     uint8_t cmdByte;
     bool busyReceiving;
-@@ -415,7 +415,7 @@ status information about several modules in the OpenWSN stack.
+@@ -572,7 +572,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -267,7 +267,7 @@ index 5b02499..edd059e 100644
     uint16_t temp_buffer[2];
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-@@ -433,7 +433,7 @@ bool debugPrint_outBufferIndexes() {
+@@ -590,7 +590,7 @@ bool debugPrint_outBufferIndexes() {
  /**
  \brief Start an HDLC frame in the output buffer.
  */
@@ -276,7 +276,7 @@ index 5b02499..edd059e 100644
     // initialize the value of the CRC
     openserial_vars.outputCrc                          = HDLC_CRCINIT;
     
-@@ -459,7 +459,7 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
+@@ -616,7 +616,7 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
  /**
  \brief Finalize the outgoing HDLC frame.
  */
@@ -285,7 +285,7 @@ index 5b02499..edd059e 100644
     uint16_t   finalCrc;
      
     // finalize the calculation of the CRC
-@@ -478,7 +478,7 @@ port_INLINE void outputHdlcClose() {
+@@ -635,7 +635,7 @@ port_INLINE void outputHdlcClose() {
  /**
  \brief Start an HDLC frame in the input buffer.
  */
@@ -294,7 +294,7 @@ index 5b02499..edd059e 100644
     // reset the input buffer index
     openserial_vars.inputBufFill                       = 0;
     
-@@ -508,7 +508,7 @@ port_INLINE void inputHdlcWrite(uint8_t b) {
+@@ -665,7 +665,7 @@ port_INLINE void inputHdlcWrite(uint8_t b) {
  /**
  \brief Finalize the incoming HDLC frame.
  */
@@ -303,7 +303,7 @@ index 5b02499..edd059e 100644
     
     // verify the validity of the frame
     if (openserial_vars.inputCrc==HDLC_CRCGOOD) {
-@@ -527,7 +527,7 @@ port_INLINE void inputHdlcClose() {
+@@ -684,7 +684,7 @@ port_INLINE void inputHdlcClose() {
  //=========================== interrupt handlers ==============================
  
  //executed in ISR, called from scheduler.c
@@ -312,7 +312,7 @@ index 5b02499..edd059e 100644
     switch (openserial_vars.mode) {
        case MODE_INPUT:
           openserial_vars.reqFrameIdx++;
-@@ -550,7 +550,7 @@ void isr_openserial_tx() {
+@@ -707,7 +707,7 @@ void isr_openserial_tx() {
  }
  
  // executed in ISR, called from scheduler.c
@@ -322,7 +322,7 @@ index 5b02499..edd059e 100644
     uint8_t inputBufFill;
     
 diff --git a/drivers/common/opentimers.c b/drivers/common/opentimers.c
-index f361faf..5c6ba4f 100644
+index bfe17f4..bc0659e 100644
 --- a/drivers/common/opentimers.c
 +++ b/drivers/common/opentimers.c
 @@ -30,7 +30,7 @@ void opentimers_timer_callback(void);
@@ -404,7 +404,7 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openapps/c6t/c6t.c b/openapps/c6t/c6t.c
-index 74206ae..cdb037c 100644
+index 830b616..c4b964d 100644
 --- a/openapps/c6t/c6t.c
 +++ b/openapps/c6t/c6t.c
 @@ -34,7 +34,7 @@ void    c6t_sendDone(
@@ -417,7 +417,7 @@ index 74206ae..cdb037c 100644
     
     // prepare the resource descriptor for the /6t path
 diff --git a/openapps/cexample/cexample.c b/openapps/cexample/cexample.c
-index ee8bfb4..719e1f0 100644
+index 8f388a8..df92a8a 100644
 --- a/openapps/cexample/cexample.c
 +++ b/openapps/cexample/cexample.c
 @@ -39,7 +39,7 @@ void    cexample_sendDone(OpenQueueEntry_t* msg,
@@ -429,12 +429,7 @@ index ee8bfb4..719e1f0 100644
     
     // prepare the resource descriptor for the /ex path
     cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
-@@ -67,11 +67,11 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
- 
- //timer fired, but we don't want to execute task in ISR mode
- //instead, push task to scheduler with COAP priority, and let scheduler take care of it
--void cexample_timer_cb(){
-+void cexample_timer_cb(void) {
+@@ -72,7 +72,7 @@ void cexample_timer_cb(opentimer_id_t id){
     scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
  }
  
@@ -442,9 +437,9 @@ index ee8bfb4..719e1f0 100644
 +void cexample_task_cb(void) {
     OpenQueueEntry_t*    pkt;
     owerror_t            outcome;
-    uint8_t              numOptions;
+    uint8_t              i;
 diff --git a/openapps/cinfo/cinfo.c b/openapps/cinfo/cinfo.c
-index a143d92..4ea853a 100644
+index a4ce20f..512ef8a 100644
 --- a/openapps/cinfo/cinfo.c
 +++ b/openapps/cinfo/cinfo.c
 @@ -37,7 +37,7 @@ void          cinfo_sendDone(
@@ -457,7 +452,7 @@ index a143d92..4ea853a 100644
     if(idmanager_getIsDAGroot()==TRUE) return; 
     
 diff --git a/openapps/cleds/cleds.c b/openapps/cleds/cleds.c
-index 74bd91a..5aea308 100644
+index 8ffb115..7edf09c 100644
 --- a/openapps/cleds/cleds.c
 +++ b/openapps/cleds/cleds.c
 @@ -30,7 +30,7 @@ void     cleds_sendDone(
@@ -470,10 +465,10 @@ index 74bd91a..5aea308 100644
     // prepare the resource descriptor for the /l path
     cleds_vars.desc.path0len            = sizeof(cleds_path0)-1;
 diff --git a/openapps/cstorm/cstorm.c b/openapps/cstorm/cstorm.c
-index 6366d18..ffcf106 100644
+index 09a9039..5277247 100644
 --- a/openapps/cstorm/cstorm.c
 +++ b/openapps/cstorm/cstorm.c
-@@ -140,11 +140,11 @@ owerror_t cstorm_receive(
+@@ -141,11 +141,11 @@ owerror_t cstorm_receive(
  \note timer fired, but we don't want to execute task in ISR mode instead, push
     task to scheduler with CoAP priority, and let scheduler take care of it.
  */
@@ -488,7 +483,7 @@ index 6366d18..ffcf106 100644
     owerror_t            outcome;
     uint8_t              numOptions;
 diff --git a/openapps/cwellknown/cwellknown.c b/openapps/cwellknown/cwellknown.c
-index b38445c..3b45da5 100644
+index 370b797..00d5cae 100644
 --- a/openapps/cwellknown/cwellknown.c
 +++ b/openapps/cwellknown/cwellknown.c
 @@ -28,7 +28,7 @@ void    cwellknown_sendDone(
@@ -580,7 +575,7 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openapps/uecho/uecho.c b/openapps/uecho/uecho.c
-index b7fb405..1141c51 100644
+index a8491b7..4f5151c 100644
 --- a/openapps/uecho/uecho.c
 +++ b/openapps/uecho/uecho.c
 @@ -11,7 +11,7 @@
@@ -592,7 +587,7 @@ index b7fb405..1141c51 100644
  }
  
  void uecho_receive(OpenQueueEntry_t* request) {
-@@ -55,7 +55,7 @@ void uecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+@@ -56,7 +56,7 @@ void uecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
  }
  
@@ -602,10 +597,10 @@ index b7fb405..1141c51 100644
  }
  
 diff --git a/openstack/02a-MAClow/IEEE802154E.c b/openstack/02a-MAClow/IEEE802154E.c
-index 6720529..461a8bd 100644
+index 7b148c3..00198d7 100644
 --- a/openstack/02a-MAClow/IEEE802154E.c
 +++ b/openstack/02a-MAClow/IEEE802154E.c
-@@ -99,7 +99,7 @@ void     isr_ieee154e_timer(void);
+@@ -106,7 +106,7 @@ void     isr_ieee154e_timer(void);
  Call this function once before any other function in this module, possibly
  during boot-up.
  */
@@ -614,7 +609,7 @@ index 6720529..461a8bd 100644
     
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
-@@ -166,7 +166,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
+@@ -183,7 +183,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
  
  This function executes in ISR mode, when the new slot timer fires.
  */
@@ -623,7 +618,7 @@ index 6720529..461a8bd 100644
     radio_setTimerPeriod(TsSlotDuration);
     if (ieee154e_vars.isSync==FALSE) {
        if (idmanager_getIsDAGroot()==TRUE) {
-@@ -187,7 +187,7 @@ void isr_ieee154e_newSlot() {
+@@ -209,7 +209,7 @@ void isr_ieee154e_newSlot() {
  
  This function executes in ISR mode, when the FSM timer fires.
  */
@@ -632,7 +627,7 @@ index 6720529..461a8bd 100644
     switch (ieee154e_vars.state) {
        case S_TXDATAOFFSET:
           activity_ti2();
-@@ -354,7 +354,7 @@ status information about several modules in the OpenWSN stack.
+@@ -376,7 +376,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -641,7 +636,7 @@ index 6720529..461a8bd 100644
     asn_t output;
     output.byte4         =  ieee154e_vars.asn.byte4;
     output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
-@@ -371,7 +371,7 @@ status information about several modules in the OpenWSN stack.
+@@ -393,7 +393,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -650,7 +645,7 @@ index 6720529..461a8bd 100644
     uint8_t output=0;
     output = ieee154e_vars.isSync;
     openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
-@@ -386,7 +386,7 @@ status information about several modules in the OpenWSN stack.
+@@ -408,7 +408,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -659,7 +654,7 @@ index 6720529..461a8bd 100644
     // send current stats over serial
     openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
     return TRUE;
-@@ -396,7 +396,7 @@ bool debugPrint_macStats() {
+@@ -418,7 +418,7 @@ bool debugPrint_macStats() {
  
  //======= SYNCHRONIZING
  
@@ -668,7 +663,7 @@ index 6720529..461a8bd 100644
     // I'm in the middle of receiving a packet
     if (ieee154e_vars.state==S_SYNCRX) {
        return;
-@@ -747,7 +747,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
+@@ -795,7 +795,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
  
  //======= TX
  
@@ -677,16 +672,17 @@ index 6720529..461a8bd 100644
     cellType_t  cellType;
     open_addr_t neighbor;
     uint8_t     i;
-@@ -915,7 +915,7 @@ port_INLINE void activity_ti1ORri1() {
+@@ -954,8 +954,7 @@ port_INLINE void activity_ti1ORri1() {
     }
  }
  
 -port_INLINE void activity_ti2() {
+-   
 +port_INLINE void activity_ti2(void) {
     // change state
     changeState(S_TXDATAPREPARE);
-    
-@@ -940,7 +940,7 @@ port_INLINE void activity_ti2() {
+ 
+@@ -996,7 +995,7 @@ port_INLINE void activity_ti2() {
     changeState(S_TXDATAREADY);
  }
  
@@ -695,7 +691,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXDATAPREPARE_OVERFLOW,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -950,7 +950,7 @@ port_INLINE void activity_tie1() {
+@@ -1006,7 +1005,7 @@ port_INLINE void activity_tie1() {
     endSlot();
  }
  
@@ -704,7 +700,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_TXDATADELAY);
     
-@@ -961,7 +961,7 @@ port_INLINE void activity_ti3() {
+@@ -1017,7 +1016,7 @@ port_INLINE void activity_ti3() {
     radio_txNow();
  }
  
@@ -713,7 +709,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -986,7 +986,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1042,7 +1041,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(DURATION_tt4);
  }
  
@@ -722,7 +718,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1034,7 +1034,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1090,7 +1089,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
     }
  }
  
@@ -731,7 +727,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_RXACKPREPARE);
     
-@@ -1056,7 +1056,7 @@ port_INLINE void activity_ti6() {
+@@ -1112,7 +1111,7 @@ port_INLINE void activity_ti6() {
     changeState(S_RXACKREADY);
  }
  
@@ -740,7 +736,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1066,7 +1066,7 @@ port_INLINE void activity_tie4() {
+@@ -1122,7 +1121,7 @@ port_INLINE void activity_tie4() {
     endSlot();
  }
  
@@ -749,7 +745,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_RXACKLISTEN);
     
-@@ -1077,7 +1077,7 @@ port_INLINE void activity_ti7() {
+@@ -1133,7 +1132,7 @@ port_INLINE void activity_ti7() {
     radiotimer_schedule(DURATION_tt7);
  }
  
@@ -758,7 +754,7 @@ index 6720529..461a8bd 100644
     // indicate transmit failed to schedule to keep stats
     schedule_indicateTx(&ieee154e_vars.asn,FALSE);
     
-@@ -1113,7 +1113,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1169,7 +1168,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(DURATION_tt8);
  }
  
@@ -767,7 +763,7 @@ index 6720529..461a8bd 100644
     // abort
     endSlot();
  }
-@@ -1248,7 +1248,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1305,7 +1304,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
  
  //======= RX
  
@@ -776,7 +772,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_RXDATAPREPARE);
     
-@@ -1270,7 +1270,7 @@ port_INLINE void activity_ri2() {
+@@ -1327,7 +1326,7 @@ port_INLINE void activity_ri2() {
     changeState(S_RXDATAREADY);
  }
  
@@ -785,7 +781,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXDATAPREPARE_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1280,7 +1280,7 @@ port_INLINE void activity_rie1() {
+@@ -1337,7 +1336,7 @@ port_INLINE void activity_rie1() {
     endSlot();
  }
  
@@ -794,7 +790,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_RXDATALISTEN);
     
-@@ -1291,7 +1291,7 @@ port_INLINE void activity_ri3() {
+@@ -1348,7 +1347,7 @@ port_INLINE void activity_ri3() {
     radiotimer_schedule(DURATION_rt3);
  }
  
@@ -803,7 +799,7 @@ index 6720529..461a8bd 100644
     // abort
     endSlot();
  }
-@@ -1313,7 +1313,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1370,7 +1369,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(DURATION_rt4);
  }
  
@@ -812,16 +808,17 @@ index 6720529..461a8bd 100644
       
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
-@@ -1465,7 +1465,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1532,8 +1531,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
     endSlot();
  }
  
 -port_INLINE void activity_ri6() {
+-   
 +port_INLINE void activity_ri6(void) {
-    PORT_SIGNED_INT_WIDTH timeCorrection;
-    header_IE_ht header_desc;
+    // change state
+    changeState(S_TXACKPREPARE);
     
-@@ -1546,7 +1546,7 @@ port_INLINE void activity_ri6() {
+@@ -1609,7 +1607,7 @@ port_INLINE void activity_ri6() {
     changeState(S_TXACKREADY);
  }
  
@@ -830,7 +827,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXACKPREPARE_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1556,7 +1556,7 @@ port_INLINE void activity_rie4() {
+@@ -1619,7 +1617,7 @@ port_INLINE void activity_rie4() {
     endSlot();
  }
  
@@ -839,7 +836,7 @@ index 6720529..461a8bd 100644
     // change state
     changeState(S_TXACKDELAY);
     
-@@ -1567,7 +1567,7 @@ port_INLINE void activity_ri7() {
+@@ -1630,7 +1628,7 @@ port_INLINE void activity_ri7() {
     radio_txNow(); 
  }
  
@@ -848,7 +845,7 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIOTX_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1591,7 +1591,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
+@@ -1654,7 +1652,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(DURATION_rt8);
  }
  
@@ -857,16 +854,18 @@ index 6720529..461a8bd 100644
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDACKDURATION_OVERFLOWS,
                           (errorparameter_t)ieee154e_vars.state,
-@@ -1695,7 +1695,7 @@ port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueE
+@@ -1758,9 +1756,8 @@ port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueE
  
  //======= ASN handling
  
 -port_INLINE void incrementAsnOffset() {
 +port_INLINE void incrementAsnOffset(void) {
+    frameLength_t frameLength;
+-   
     // increment the asn
     ieee154e_vars.asn.bytes0and1++;
     if (ieee154e_vars.asn.bytes0and1==0) {
-@@ -1890,7 +1890,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
+@@ -2040,7 +2037,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
  
  //======= stats
  
@@ -875,7 +874,7 @@ index 6720529..461a8bd 100644
     ieee154e_stats.numSyncPkt      =    0;
     ieee154e_stats.numSyncAck      =    0;
     ieee154e_stats.minCorrection   =  127;
-@@ -1997,7 +1997,7 @@ have been sent to the upper layer. Similarly, in a Tx slot, the sendDone
+@@ -2151,7 +2148,7 @@ have been sent to the upper layer. Similarly, in a Tx slot, the sendDone
  function should already have been done. If this is not the case, this function
  will do that for you, but assume that something went wrong.
  */
@@ -884,7 +883,7 @@ index 6720529..461a8bd 100644
    
     // turn off the radio
     radio_rfOff();
-@@ -2079,6 +2079,6 @@ void endSlot() {
+@@ -2233,6 +2230,6 @@ void endSlot() {
     changeState(S_SLEEP);
  }
  
@@ -942,7 +941,7 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openstack/02b-MAChigh/neighbors.c b/openstack/02b-MAChigh/neighbors.c
-index 7e136e9..ba465ef 100644
+index 9cc4e96..74df2fd 100644
 --- a/openstack/02b-MAChigh/neighbors.c
 +++ b/openstack/02b-MAChigh/neighbors.c
 @@ -31,7 +31,7 @@ bool isThisRowMatching(
@@ -972,7 +971,7 @@ index 7e136e9..ba465ef 100644
     uint8_t i;
     uint8_t returnVal;
     
-@@ -494,7 +494,7 @@ routing decisions to change. Examples are:
+@@ -504,7 +504,7 @@ routing decisions to change. Examples are:
    very low DAGrank, I may want to change by routing parent.
  - I became a DAGroot, so my DAGrank should be 0.
  */
@@ -981,7 +980,7 @@ index 7e136e9..ba465ef 100644
     uint8_t   i;
     uint16_t  rankIncrease;
     uint32_t  tentativeDAGrank; // 32-bit since is used to sum
-@@ -550,7 +550,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
+@@ -563,7 +563,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
  
  //===== maintenance
  
@@ -990,7 +989,7 @@ index 7e136e9..ba465ef 100644
     uint8_t    i;
     uint16_t   timeSinceHeard;
     
-@@ -574,7 +574,7 @@ status information about several modules in the OpenWSN stack.
+@@ -587,7 +587,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1000,19 +999,19 @@ index 7e136e9..ba465ef 100644
     neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
     temp.row=neighbors_vars.debugRow;
 diff --git a/openstack/02b-MAChigh/schedule.c b/openstack/02b-MAChigh/schedule.c
-index c2e2394..fafb6f6 100644
+index 797d63b..6229ec1 100644
 --- a/openstack/02b-MAChigh/schedule.c
 +++ b/openstack/02b-MAChigh/schedule.c
-@@ -22,7 +22,7 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
+@@ -23,7 +23,7 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
  
  \post Call this function before calling any other function in this module.
  */
 -void schedule_init() {
 +void schedule_init(void) {
-    uint8_t         i;
+    slotOffset_t    start_slotOffset;
     slotOffset_t    running_slotOffset;
     open_addr_t     temp_neighbor;
-@@ -87,7 +87,7 @@ status information about several modules in the OpenWSN stack.
+@@ -96,7 +96,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1021,7 +1020,7 @@ index c2e2394..fafb6f6 100644
     debugScheduleEntry_t temp;
     
     // increment the row just printed
-@@ -138,7 +138,7 @@ status information about several modules in the OpenWSN stack.
+@@ -147,7 +147,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1030,7 +1029,7 @@ index c2e2394..fafb6f6 100644
     uint8_t temp[2];
     
     // gather status data
-@@ -417,7 +417,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+@@ -494,7 +494,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
  /**
  \brief advance to next active slot
  */
@@ -1039,7 +1038,7 @@ index c2e2394..fafb6f6 100644
     
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-@@ -430,7 +430,7 @@ void schedule_advanceSlot() {
+@@ -507,7 +507,7 @@ void schedule_advanceSlot() {
  /**
  \brief return slotOffset of next active slot
  */
@@ -1048,7 +1047,7 @@ index c2e2394..fafb6f6 100644
     slotOffset_t res;   
     
     INTERRUPT_DECLARATION();
-@@ -448,7 +448,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
+@@ -525,7 +525,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
  
  \returns The frame length.
  */
@@ -1057,7 +1056,7 @@ index c2e2394..fafb6f6 100644
     frameLength_t returnVal;
     
     INTERRUPT_DECLARATION();
-@@ -466,7 +466,7 @@ frameLength_t schedule_getFrameLength() {
+@@ -578,7 +578,7 @@ uint8_t schedule_getFrameNumber() {
  
  \returns The type of the current schedule entry.
  */
@@ -1066,7 +1065,7 @@ index c2e2394..fafb6f6 100644
     cellType_t returnVal;
     
     INTERRUPT_DECLARATION();
-@@ -499,7 +499,7 @@ void schedule_getNeighbor(open_addr_t* addrToWrite) {
+@@ -611,7 +611,7 @@ void schedule_getNeighbor(open_addr_t* addrToWrite) {
  
  \returns The channel offset of the current schedule entry.
  */
@@ -1075,7 +1074,7 @@ index c2e2394..fafb6f6 100644
     channelOffset_t returnVal;
     
     INTERRUPT_DECLARATION();
-@@ -524,7 +524,7 @@ Note that the backoff counter is global, not per slot.
+@@ -636,7 +636,7 @@ Note that the backoff counter is global, not per slot.
  
  \returns TRUE if it is OK to send on this slot, FALSE otherwise.
  */
@@ -1084,7 +1083,7 @@ index c2e2394..fafb6f6 100644
     bool returnVal;
     
     INTERRUPT_DECLARATION();
-@@ -558,7 +558,7 @@ bool schedule_getOkToSend() {
+@@ -670,7 +670,7 @@ bool schedule_getOkToSend() {
  /**
  \brief Reset the backoff and backoffExponent.
  */
@@ -1094,7 +1093,7 @@ index c2e2394..fafb6f6 100644
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 diff --git a/openstack/02b-MAChigh/sixtop.c b/openstack/02b-MAChigh/sixtop.c
-index 6913957..8abc76c 100644
+index 03eda7e..b811118 100644
 --- a/openstack/02b-MAChigh/sixtop.c
 +++ b/openstack/02b-MAChigh/sixtop.c
 @@ -115,7 +115,7 @@ bool          sixtop_areAvailableCellsToBeScheduled(
@@ -1106,7 +1105,7 @@ index 6913957..8abc76c 100644
     
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
     sixtop_vars.busySendingKA      = FALSE;
-@@ -337,7 +337,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
+@@ -490,7 +490,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
  
  //======= from lower layer
  
@@ -1115,7 +1114,7 @@ index 6913957..8abc76c 100644
     OpenQueueEntry_t* msg;
     
     // get recently-sent packet from openqueue
-@@ -410,7 +410,7 @@ void task_sixtopNotifSendDone() {
+@@ -563,7 +563,7 @@ void task_sixtopNotifSendDone() {
     }
  }
  
@@ -1124,7 +1123,7 @@ index 6913957..8abc76c 100644
     OpenQueueEntry_t* msg;
     uint16_t          lenIE;
     
-@@ -495,7 +495,7 @@ status information about several modules in the OpenWSN stack.
+@@ -648,7 +648,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1133,7 +1132,7 @@ index 6913957..8abc76c 100644
     uint16_t output;
     
     output = 0;
-@@ -513,7 +513,7 @@ status information about several modules in the OpenWSN stack.
+@@ -666,7 +666,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1142,30 +1141,16 @@ index 6913957..8abc76c 100644
     uint16_t output;
     
     output = sixtop_vars.kaPeriod;
-@@ -582,11 +582,11 @@ owerror_t sixtop_send_internal(
- 
- // timer interrupt callbacks
- 
--void sixtop_maintenance_timer_cb() {
-+void sixtop_maintenance_timer_cb(void) {
-    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
- }
- 
--void sixtop_timeout_timer_cb() {
-+void sixtop_timeout_timer_cb(void) {
-    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
- }
- 
-@@ -626,7 +626,7 @@ This is one of the MAC management tasks. This function inlines in the
+@@ -785,7 +785,7 @@ This is one of the MAC management tasks. This function inlines in the
  timers_res_fired() function, but is declared as a separate function for better
  readability of the code.
  */
 -port_INLINE void sixtop_sendEB() {
 +port_INLINE void sixtop_sendEB(void) {
-    OpenQueueEntry_t* adv;
+    OpenQueueEntry_t* eb;
     uint8_t len;
     
-@@ -695,7 +695,7 @@ This is one of the MAC management tasks. This function inlines in the
+@@ -862,7 +862,7 @@ This is one of the MAC management tasks. This function inlines in the
  timers_res_fired() function, but is declared as a separate function for better
  readability of the code.
  */
@@ -1184,10 +1169,10 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openstack/03a-IPHC/iphc.c b/openstack/03a-IPHC/iphc.c
-index 3ff5bd1..2b25466 100644
+index 6b11b04..63ce4c2 100644
 --- a/openstack/03a-IPHC/iphc.c
 +++ b/openstack/03a-IPHC/iphc.c
-@@ -48,7 +48,7 @@ void iphc_retrieveIPv6HopByHopHeader(
+@@ -47,7 +47,7 @@ void iphc_retrieveIPv6HopByHopHeader(
  
  //=========================== public ==========================================
  
@@ -1197,7 +1182,7 @@ index 3ff5bd1..2b25466 100644
  
  // send from upper layer: I need to add 6LoWPAN header
 diff --git a/openstack/03a-IPHC/openbridge.c b/openstack/03a-IPHC/openbridge.c
-index 6ee4ba3..eaf672f 100644
+index 92a7488..361555b 100644
 --- a/openstack/03a-IPHC/openbridge.c
 +++ b/openstack/03a-IPHC/openbridge.c
 @@ -11,10 +11,10 @@
@@ -1223,10 +1208,10 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openstack/03b-IPv6/forwarding.c b/openstack/03b-IPv6/forwarding.c
-index 532e14c..25a3094 100644
+index 3903579..b39f48a 100644
 --- a/openstack/03b-IPv6/forwarding.c
 +++ b/openstack/03b-IPv6/forwarding.c
-@@ -45,7 +45,7 @@ void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags);
+@@ -45,7 +45,7 @@ void      forwarding_createRplOption(
  /**
  \brief Initialize this module.
  */
@@ -1268,7 +1253,7 @@ index 3967969..24f8eab 100644
     uint8_t input_buffer[16];
     OpenQueueEntry_t* msg;
 diff --git a/openstack/03b-IPv6/icmpv6rpl.c b/openstack/03b-IPv6/icmpv6rpl.c
-index cd422be..32c3e7d 100644
+index bd07be3..32abe20 100644
 --- a/openstack/03b-IPv6/icmpv6rpl.c
 +++ b/openstack/03b-IPv6/icmpv6rpl.c
 @@ -31,7 +31,7 @@ void sendDAO(void);
@@ -1289,25 +1274,16 @@ index cd422be..32c3e7d 100644
     return icmpv6rpl_vars.dao.rplinstanceId;
  }
  
-@@ -248,7 +248,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
- \note This function is executed in interrupt context, and should only push a 
-    task.
- */
--void icmpv6rpl_timer_DIO_cb() {
-+void icmpv6rpl_timer_DIO_cb(void) {
-    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
- }
- 
-@@ -257,7 +257,7 @@ void icmpv6rpl_timer_DIO_cb() {
+@@ -257,7 +257,7 @@ void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
  
  \note This function is executed in task context, called by the scheduler.
  */
 -void icmpv6rpl_timer_DIO_task() {
 +void icmpv6rpl_timer_DIO_task(void) {
-    
-    // update the delayDIO
-    icmpv6rpl_vars.delayDIO = (icmpv6rpl_vars.delayDIO+1)%5;
-@@ -283,7 +283,7 @@ void icmpv6rpl_timer_DIO_task() {
+       
+     // send DIO
+     sendDIO();
+@@ -273,7 +273,7 @@ void icmpv6rpl_timer_DIO_task() {
  /**
  \brief Prepare and a send a RPL DIO.
  */
@@ -1316,25 +1292,16 @@ index cd422be..32c3e7d 100644
     OpenQueueEntry_t*    msg;
     
     // stop if I'm not sync'ed
-@@ -369,7 +369,7 @@ void sendDIO() {
- \note This function is executed in interrupt context, and should only push a
-    task.
- */
--void icmpv6rpl_timer_DAO_cb() {
-+void icmpv6rpl_timer_DAO_cb(void) {
-    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
- }
- 
-@@ -378,7 +378,7 @@ void icmpv6rpl_timer_DAO_cb() {
+@@ -372,7 +372,7 @@ void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
  
  \note This function is executed in task context, called by the scheduler.
  */
 -void icmpv6rpl_timer_DAO_task() {
 +void icmpv6rpl_timer_DAO_task(void) {
-    
-    // update the delayDAO
-    icmpv6rpl_vars.delayDAO = (icmpv6rpl_vars.delayDAO+1)%5;
-@@ -404,7 +404,7 @@ void icmpv6rpl_timer_DAO_task() {
+     
+    // send DAO
+    sendDAO();
+@@ -388,7 +388,7 @@ void icmpv6rpl_timer_DAO_task() {
  /**
  \brief Prepare and a send a RPL DAO.
  */
@@ -1354,10 +1321,10 @@ index 013e4fb..e8c21c9 100644
  INCLUDES += -I$(OPENWSN_ROOT)/openapps/techo \
  			-I$(OPENWSN_ROOT)/openapps/uecho
 diff --git a/openstack/04-TRAN/opencoap.c b/openstack/04-TRAN/opencoap.c
-index 13d490f..050fb40 100644
+index 2900023..c93496a 100644
 --- a/openstack/04-TRAN/opencoap.c
 +++ b/openstack/04-TRAN/opencoap.c
-@@ -26,7 +26,7 @@ opencoap_vars_t opencoap_vars;
+@@ -24,7 +24,7 @@ opencoap_vars_t opencoap_vars;
  /**
  \brief Initialize this module.
  */
@@ -1367,10 +1334,10 @@ index 13d490f..050fb40 100644
     opencoap_vars.resources     = NULL;
     
 diff --git a/openstack/04-TRAN/opentcp.c b/openstack/04-TRAN/opentcp.c
-index 4285e53..3444e6d 100644
+index 63c49d6..76b5b34 100644
 --- a/openstack/04-TRAN/opentcp.c
 +++ b/openstack/04-TRAN/opentcp.c
-@@ -24,7 +24,7 @@ void opentcp_timer_cb(void);
+@@ -24,7 +24,7 @@ void opentcp_timer_cb(opentimer_id_t id);
  
  //=========================== public ==========================================
  
@@ -1397,19 +1364,11 @@ index 4285e53..3444e6d 100644
     tcp_change_state(TCP_STATE_CLOSED);
     tcp_vars.mySeqNum            = TCP_INITIAL_SEQNUM; 
     tcp_vars.hisNextSeqNum       = 0;
-@@ -694,6 +694,6 @@ void tcp_change_state(uint8_t new_tcp_state) {
-    }
- }
- 
--void opentcp_timer_cb() {
-+void opentcp_timer_cb(void) {
-    scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
- }
 diff --git a/openstack/04-TRAN/openudp.c b/openstack/04-TRAN/openudp.c
-index 079c2b1..3100f70 100644
+index c886375..81aa68e 100644
 --- a/openstack/04-TRAN/openudp.c
 +++ b/openstack/04-TRAN/openudp.c
-@@ -14,7 +14,7 @@
+@@ -16,7 +16,7 @@
  
  //=========================== public ==========================================
  
@@ -1418,7 +1377,7 @@ index 079c2b1..3100f70 100644
  }
  
  owerror_t openudp_send(OpenQueueEntry_t* msg) {
-@@ -106,7 +106,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
+@@ -125,7 +125,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
     }
  }
  
@@ -1447,10 +1406,10 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 diff --git a/openstack/cross-layers/idmanager.c b/openstack/cross-layers/idmanager.c
-index a0a276c..a6f5e2c 100644
+index 560fee0..8a49df3 100644
 --- a/openstack/cross-layers/idmanager.c
 +++ b/openstack/cross-layers/idmanager.c
-@@ -13,7 +13,7 @@ idmanager_vars_t idmanager_vars;
+@@ -14,7 +14,7 @@ idmanager_vars_t idmanager_vars;
  
  //=========================== public ==========================================
  
@@ -1459,7 +1418,7 @@ index a0a276c..a6f5e2c 100644
     
     // reset local variables
     memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
-@@ -53,7 +53,7 @@ void idmanager_init() {
+@@ -54,7 +54,7 @@ void idmanager_init() {
     packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
  }
  
@@ -1468,7 +1427,7 @@ index a0a276c..a6f5e2c 100644
     bool res;
     INTERRUPT_DECLARATION();
     
-@@ -171,7 +171,7 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
+@@ -173,7 +173,7 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
     }
  }
  
@@ -1477,7 +1436,7 @@ index a0a276c..a6f5e2c 100644
     uint8_t         number_bytes_from_input_buffer;
     uint8_t         input_buffer[9];
     open_addr_t     myPrefix;
-@@ -230,7 +230,7 @@ status information about several modules in the OpenWSN stack.
+@@ -232,7 +232,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1487,10 +1446,10 @@ index a0a276c..a6f5e2c 100644
     
     output.isDAGroot = idmanager_vars.isDAGroot;
 diff --git a/openstack/cross-layers/openqueue.c b/openstack/cross-layers/openqueue.c
-index 74de9db..28ad4a6 100644
+index d901da0..9f928f1 100644
 --- a/openstack/cross-layers/openqueue.c
 +++ b/openstack/cross-layers/openqueue.c
-@@ -19,7 +19,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
+@@ -20,7 +20,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
  /**
  \brief Initialize this module.
  */
@@ -1499,7 +1458,7 @@ index 74de9db..28ad4a6 100644
     uint8_t i;
     for (i=0;i<QUEUELENGTH;i++){
        openqueue_reset_entry(&(openqueue_vars.queue[i]));
-@@ -34,7 +34,7 @@ status information about several modules in the OpenWSN stack.
+@@ -35,7 +35,7 @@ status information about several modules in the OpenWSN stack.
  
  \returns TRUE if this function printed something, FALSE otherwise.
  */
@@ -1508,7 +1467,7 @@ index 74de9db..28ad4a6 100644
     debugOpenQueueEntry_t output[QUEUELENGTH];
     uint8_t i;
     for (i=0;i<QUEUELENGTH;i++) {
-@@ -155,7 +155,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
+@@ -156,7 +156,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
  
  //======= called by RES
  
@@ -1517,7 +1476,7 @@ index 74de9db..28ad4a6 100644
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-@@ -170,7 +170,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
+@@ -171,7 +171,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
     return NULL;
  }
  
@@ -1526,11 +1485,11 @@ index 74de9db..28ad4a6 100644
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-@@ -221,7 +221,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
+@@ -222,7 +222,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
     return NULL;
  }
  
--OpenQueueEntry_t* openqueue_macGetAdvPacket() {
+-OpenQueueEntry_t* openqueue_macGetEBPacket() {
 +OpenQueueEntry_t* openqueue_macGetAdvPacket(void) {
     uint8_t i;
     INTERRUPT_DECLARATION();
@@ -1557,28 +1516,56 @@ index ca25b09..8ddcd78 100644
     uint16_t random_value;
     random_value = 0;
 diff --git a/projects/common/03oos_openwsn/03oos_openwsn.c b/projects/common/03oos_openwsn/03oos_openwsn.c
-index 31021d4..3f4b36e 100644
+index dcc506e..ba1a779 100644
 --- a/projects/common/03oos_openwsn/03oos_openwsn.c
 +++ b/projects/common/03oos_openwsn/03oos_openwsn.c
-@@ -4,11 +4,44 @@
- \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
- */
- 
+@@ -1,26 +1,58 @@
+-/**
+-\brief This project runs the full OpenWSN stack.
+-
+-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+-*/
+-
 -#include "board.h"
-+#include "thread.h"
+-#include "crypto_engine.h"
+-#include "scheduler.h"
+-#include "openstack.h"
+-#include "opendefs.h"
+-
+-int mote_main(void) {
+-   
+-   // initialize
+-   board_init();
+-   CRYPTO_ENGINE.init();
+-   scheduler_init();
+-   openstack_init();
+-   
+-   // indicate
+-   
+-   // start
+-   scheduler_start();
+-   return 0; // this line should never be reached
+-}
++/**
++\brief This project runs the full OpenWSN stack.
 +
++\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
++*/
++#include "thread.h"
 +#include "board_ow.h"
++#include "crypto_engine.h"
++
 +#include "leds.h"
- #include "scheduler.h"
- #include "openstack.h"
- #include "opendefs.h"
- 
++#include "scheduler.h"
++#include "openstack.h"
++#include "opendefs.h"
++
 +#include "03oos_openwsn.h"
 +
 +#define ENABLE_DEBUG (0)
 +#include "debug.h"
 +
-+static char openwsn_stack[THREAD_STACKSIZE_MAIN];
++static char openwsn_stack[KERNEL_CONF_STACKSIZE_MAIN];
 +int openwsn_pid = -1;
 +
 +void openwsn_init(void);
@@ -1586,7 +1573,7 @@ index 31021d4..3f4b36e 100644
 +
 +void openwsn_start_thread(void) {
 +    DEBUG("%s\n",__PRETTY_FUNCTION__);
-+    openwsn_pid = thread_create(openwsn_stack, THREAD_STACKSIZE_MAIN,
++    openwsn_pid = thread_create(openwsn_stack, KERNEL_CONF_STACKSIZE_MAIN,
 +                                PRIORITY_OPENWSN-2, CREATE_STACKTEST,
 +                                openwsn_start, NULL, "openwsn thread");
 +}
@@ -1603,9 +1590,20 @@ index 31021d4..3f4b36e 100644
 +    return NULL;
 +}
 +
- int mote_main(void) {
-    
-    // initialize
++int mote_main(void) {
++
++   // initialize
++   board_init();
++   CRYPTO_ENGINE.init();
++   scheduler_init();
++   openstack_init();
++
++   // indicate
++
++   // start
++   scheduler_start();
++   return 0; // this line should never be reached
++}
 diff --git a/projects/common/03oos_openwsn/03oos_openwsn.h b/projects/common/03oos_openwsn/03oos_openwsn.h
 index 138cb12..5a9f1fa 100644
 --- a/projects/common/03oos_openwsn/03oos_openwsn.h
@@ -1618,7 +1616,7 @@ index 138cb12..5a9f1fa 100644
 +
 +//=========================== define ==========================================
 +
-+#define PRIORITY_OPENWSN            THREAD_PRIORITY_MAIN-1
++#define PRIORITY_OPENWSN            PRIORITY_MAIN-1
 +
  #endif
 diff --git a/projects/common/03oos_openwsn/Makefile b/projects/common/03oos_openwsn/Makefile
@@ -1631,5 +1629,5 @@ index 694bb09..47289c6 100644
  
  include $(RIOTBASE)/Makefile.base
 -- 
-2.2.0
+2.4.5
 

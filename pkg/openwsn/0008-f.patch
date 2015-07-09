@@ -1,0 +1,25 @@
+From 6740dd86b1a0830bab5608f57d80251baebfacb8 Mon Sep 17 00:00:00 2001
+From: Thomas Eichinger <thomas.eichinger1@gmail.com>
+Date: Thu, 9 Jul 2015 17:38:43 +0200
+Subject: [PATCH 8/8] f
+
+---
+ openstack/02a-MAClow/IEEE802154E.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/openstack/02a-MAClow/IEEE802154E.c b/openstack/02a-MAClow/IEEE802154E.c
+index 00a1cf4..fa0349c 100644
+--- a/openstack/02a-MAClow/IEEE802154E.c
++++ b/openstack/02a-MAClow/IEEE802154E.c
+@@ -882,7 +882,8 @@ port_INLINE void activity_ti1ORri1(void) {
+             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+                couldSendEB=TRUE;
+                // look for an EB packet in the queue
+-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
++               /* undefined reference!!! */
++               // ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+             }
+          }
+          if (ieee154e_vars.dataToSend==NULL) {
+--
+2.4.5

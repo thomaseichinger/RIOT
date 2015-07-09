@@ -1,7 +1,7 @@
-From 740dc78ea84dceea25670c94faf6a81ef845fc39 Mon Sep 17 00:00:00 2001
+From e4c5fe4e4f736e28627da47bb85a6e5c136e98fd Mon Sep 17 00:00:00 2001
 From: Thomas Eichinger <thomas.eichinger1@gmail.com>
 Date: Tue, 25 Nov 2014 15:45:36 +0100
-Subject: [PATCH 1/5] Add RIOT Makefiles
+Subject: [PATCH 1/8] Add RIOT Makefiles
 
 ---
  Makefile                               | 16 ++++++++++++++++
@@ -261,5 +261,5 @@ index 0000000..694bb09
 +
 +include $(RIOTBASE)/Makefile.base
 -- 
-2.2.0
+2.4.5
 

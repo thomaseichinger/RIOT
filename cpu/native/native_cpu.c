@@ -119,7 +119,7 @@ char *thread_stack_init(thread_task_func_t task_func, void *arg, void *stack_sta
         err(EXIT_FAILURE, "thread_stack_init: getcontext");
     }
 
-    p->uc_stack.ss_sp = stk;
+    p->uc_stack.ss_sp = (char*) stk;
     p->uc_stack.ss_size = stacksize;
     p->uc_stack.ss_flags = 0;
     p->uc_link = &end_context;

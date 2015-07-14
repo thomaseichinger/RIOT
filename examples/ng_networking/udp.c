@@ -86,7 +86,7 @@ static void send(char *addr_str, char *port_str, char *data)
         ng_netapi_send(sendto->pid, ip);
         sendto = ng_netreg_getnext(sendto);
     }
-    printf("Success: send %i byte to %s:%u\n", payload->size, addr_str, tmp);
+    printf("Success: send %zu byte to %s:%u\n", payload->size, addr_str, tmp);
 }
 
 static void start_server(char *port_str)

@@ -358,14 +358,18 @@ void ng_at86rf2xx_set_state(ng_at86rf2xx_t *dev, uint8_t state)
            old_state == NG_AT86RF2XX_STATE_BUSY_TX_ARET) {
         old_state = ng_at86rf2xx_get_state(dev);
     }
+    
     /* check if we need to wake up from sleep mode */
     if (old_state == NG_AT86RF2XX_STATE_SLEEP) {
         DEBUG("at86rf2xx: waking up from sleep mode\n");
         gpio_clear(dev->sleep_pin);
         while (ng_at86rf2xx_get_state(dev) != NG_AT86RF2XX_STATE_TRX_OFF);
     }
-    /* go to neutral TRX_OFF state */
-    _set_state(dev, NG_AT86RF2XX_STATE_TRX_OFF);
+    else {
+        /* go to neutral TRX_OFF state */
+        _set_state(dev, NG_AT86RF2XX_STATE_TRX_OFF);
+    }
+
     if (state == NG_AT86RF2XX_STATE_RX_AACK_ON ||
         state == NG_AT86RF2XX_STATE_TX_ARET_ON) {
         _set_state(dev, state);

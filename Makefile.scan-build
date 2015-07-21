@@ -77,7 +77,7 @@ scan-build-view:
 else
 	@echo "Showing most recent report in your web browser..."
 	@REPORT_FILE="$$(find "$${SCANBUILD_OUTPUTDIR}" -maxdepth 2 -mindepth 2 \
-	            -type f -name 'index.html' | sort | tail -n 1)"; \
+	            -type f -name 'index.html' 2>/dev/null | sort | tail -n 1)"; \
 	  if [ -n "$${REPORT_FILE}" ]; then \
 	    echo "$(OPEN) $${REPORT_FILE}"; \
 	    $(OPEN) "$${REPORT_FILE}"; \

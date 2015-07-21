@@ -66,8 +66,9 @@ scan-build-analyze:
 	  $(COLOR_ECHO) '$(COLOR_YELLOW)Recommend using TOOLCHAIN=llvm for best results.$(COLOR_RESET)'; \
 	  $(COLOR_ECHO) '$(COLOR_YELLOW)Ignore any "error: unknown register name '\''rX'\'' in asm" messages.$(COLOR_RESET)'; \
 	fi
+	$(AD)mkdir -p '$(SCANBUILD_OUTPUTDIR)'
 	$(AD)env -i $(ENVVARS) \
-	    scan-build $(SCANBUILD_ARGS) -o "$${SCANBUILD_OUTPUTDIR}" \
+	    scan-build -o '$(SCANBUILD_OUTPUTDIR)' $(SCANBUILD_ARGS) \
 	      make -C $(CURDIR) all $(strip $(CMDVARS));
 endif # BUILD_IN_DOCKER
 
@@ -76,7 +77,7 @@ scan-build-view:
 	@
 else
 	@echo "Showing most recent report in your web browser..."
-	@REPORT_FILE="$$(find "$${SCANBUILD_OUTPUTDIR}" -maxdepth 2 -mindepth 2 \
+	@REPORT_FILE="$$(find '$(SCANBUILD_OUTPUTDIR)' -maxdepth 2 -mindepth 2 \
 	            -type f -name 'index.html' 2>/dev/null | sort | tail -n 1)"; \
 	  if [ -n "$${REPORT_FILE}" ]; then \
 	    echo "$(OPEN) $${REPORT_FILE}"; \

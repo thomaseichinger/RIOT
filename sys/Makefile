@@ -49,9 +49,6 @@ endif
 ifneq (,$(filter sixlowpan,$(USEMODULE)))
     DIRS += net/network_layer/sixlowpan
 endif
-ifneq (,$(filter hwtimer_compat,$(USEMODULE)))
-    DIRS += compat/hwtimer
-endif
 ifneq (,$(filter log_%,$(USEMODULE)))
     DIRS += log
 endif

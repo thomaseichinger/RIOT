@@ -50,7 +50,7 @@
 #include "net/dev_eth.h"
 #include "dev_eth_tap.h"
 
-#define ENABLE_DEBUG 0
+#define ENABLE_DEBUG 1
 #include "debug.h"
 
 /* support one tap interface for now */
@@ -115,14 +115,14 @@ static int _recv(dev_eth_t *dev_eth, char *buf, int len) {
     dev_eth_tap_t *dev = (dev_eth_tap_t*)dev_eth;
 
     int nread = real_read(dev->tap_fd, buf, len);
-    DEBUG("ng_tapnet: read %d bytes\n", nread);
+    printf("ng_tapnet: read %d bytes\n", nread);
 
     if (nread > 0) {
         ng_ethernet_hdr_t *hdr = (ng_ethernet_hdr_t *)buf;
         if (!(dev->promiscous) && !_is_addr_multicast(hdr->dst) &&
             !_is_addr_broadcast(hdr->dst) &&
             (memcmp(hdr->dst, dev->addr, NG_ETHERNET_ADDR_LEN) != 0)) {
-            DEBUG("ng_eth_dev: received for %02x:%02x:%02x:%02x:%02x:%02x\n"
+            printf("ng_eth_dev: received for %02x:%02x:%02x:%02x:%02x:%02x\n"
                   "That's not me => Dropped\n",
                   hdr->dst[0], hdr->dst[1], hdr->dst[2],
                   hdr->dst[3], hdr->dst[4], hdr->dst[5]);
@@ -146,20 +146,22 @@ static int _recv(dev_eth_t *dev_eth, char *buf, int len) {
             extern ssize_t (*real_write)(int fd, const void * buf, size_t count);
             real_write(_sig_pipefd[1], &sig, sizeof(int));
             _native_sigpend++;
-            DEBUG("dev_eth_tap: sigpend++\n");
+            printf("dev_eth_tap: sigpend++\n");
         }
         else {
 #ifdef __MACH__
         kill(_sigio_child_pid, SIGCONT);
 #endif
         }
-
         _native_in_syscall--;
-
+#ifdef __MACH__
+            kill(_sigio_child_pid, SIGCONT);
+#endif
         return nread;
     }
     else if (nread == -1) {
         if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+            DEBUG("lkajsdld\n");
         }
         else {
             err(EXIT_FAILURE, "dev_eth_tap: read");
@@ -171,13 +173,17 @@ static int _recv(dev_eth_t *dev_eth, char *buf, int len) {
     else {
         errx(EXIT_FAILURE, "internal error _rx_event");
     }
-
+#ifdef __MACH__
+            kill(_sigio_child_pid, SIGCONT);
+#endif
     return -1;
 }
 
 static int _send(dev_eth_t *ethdev, char* buf, int n) {
     dev_eth_tap_t *dev = (dev_eth_tap_t*)ethdev;
-    return _native_write(dev->tap_fd, buf, n);
+    int t = _native_write(dev->tap_fd, buf, n);
+    DEBUG("SENT %d bytes\n", t);
+    return t;
 }
 
 void dev_eth_tap_setup(dev_eth_tap_t *dev, const char *name) {
@@ -311,9 +317,11 @@ static void _sigio_child(dev_eth_tap_t *dev)
         err(EXIT_FAILURE, "sigio_child: fork");
     }
     if (_sigio_child_pid > 0) {
+        DEBUG("sigio_child pid: %d\n", _sigio_child_pid);
         /* return in parent process */
         return;
     }
+    
     /* watch tap interface and signal parent process if data is
      * available */
     fd_set rfds;

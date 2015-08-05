@@ -28,20 +28,20 @@ extern "C" {
  * @{
  */
 #ifdef __MACH__ /* OSX */
-#define THREAD_STACKSIZE_DEFAULT            (163840)
-#define THREAD_STACKSIZE_IDLE               (163840)
-#define THREAD_EXTRA_STACKSIZE_PRINTF       (163840)
-#define THREAD_EXTRA_STACKSIZE_PRINTF_FLOAT (163840)
+#define THREAD_STACKSIZE_DEFAULT            (163840*3)
+#define THREAD_STACKSIZE_IDLE               (163840*3)
+#define THREAD_EXTRA_STACKSIZE_PRINTF       (163840*3)
+#define THREAD_EXTRA_STACKSIZE_PRINTF_FLOAT (163840*3)
 /* for core/include/thread.h */
-#define THREAD_STACKSIZE_MINIMUM            (163840)
+#define THREAD_STACKSIZE_MINIMUM            (163840*3)
 /* undefine the TRANSCEIVER_STACK_SIZE (2048 or 512) defined in transceiver.h */
 #ifdef TRANSCEIVER_STACK_SIZE
 #undef TRANSCEIVER_STACK_SIZE
 #endif
-#define TRANSCEIVER_STACK_SIZE              (163840)
+#define TRANSCEIVER_STACK_SIZE              (163840*3)
 /* native internal */
-#define THREAD_STACKSIZE_MINIMUM            (163840)
-#define NATIVE_ISR_STACKSIZE                (163840)
+#define THREAD_STACKSIZE_MINIMUM            (163840*3)
+#define NATIVE_ISR_STACKSIZE                (163840*3)
 
 #else /* Linux etc. */
 #define THREAD_STACKSIZE_DEFAULT            (8192)

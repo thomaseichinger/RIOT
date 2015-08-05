@@ -44,7 +44,7 @@
 #include <linux/if_ether.h>
 #endif
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    (1)
 #include "debug.h"
 
 #include "cpu.h"

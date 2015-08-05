@@ -38,7 +38,7 @@
 #define NETDEV_ETH_MAC_STACKSIZE     (THREAD_STACKSIZE_DEFAULT)
 #define NETDEV_ETH_MAC_PRIO          (THREAD_PRIORITY_MAIN - 4)
 
-static char _nomac_stack[NETDEV_ETH_MAC_STACKSIZE];
+static char _nomac_stack[NETDEV_ETH_MAC_STACKSIZE*2];
 
 void auto_init_ng_netdev_eth(void)
 {

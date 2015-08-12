@@ -192,7 +192,7 @@ do_debug() {
     test_ports
     test_tui
     # temporary file that saves openocd pid
-    tmp=/tmp/openocd_`date +%s`.pid
+    tmp=openocd_`date +%s`.pid
     # start OpenOCD as GDB server
     setsid sh -c "${OPENOCD} -f '${OPENOCD_CONFIG}' \
             ${OPENOCD_EXTRA_INIT} \

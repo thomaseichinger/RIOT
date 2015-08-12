@@ -192,7 +192,7 @@ do_debug() {
     test_ports
     test_tui
     # start OpenOCD as GDB server
-    sh -c "${OPENOCD} -f '${OPENOCD_CONFIG}' \
+    setsid sh -c "${OPENOCD} -f '${OPENOCD_CONFIG}' \
             ${OPENOCD_EXTRA_INIT} \
             -c 'tcl_port ${TCL_PORT}' \
             -c 'telnet_port ${TELNET_PORT}' \
@@ -202,7 +202,7 @@ do_debug() {
             -c 'halt' \
             -l /dev/null" &
     # save PID for terminating the server afterwards
-    OCD_PID=$?
+    OCD_PID=$(($!+2))
     # connect to the GDB server
     ${DBG} ${TUI} -ex "tar ext :${GDB_PORT}" ${ELFFILE}
     # clean up

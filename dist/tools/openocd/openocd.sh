@@ -191,6 +191,8 @@ do_debug() {
     test_elffile
     test_ports
     test_tui
+    # temporary file that saves openocd pid
+    tmp=/tmp/openocd_`date +%s`.pid
     # start OpenOCD as GDB server
     setsid sh -c "${OPENOCD} -f '${OPENOCD_CONFIG}' \
             ${OPENOCD_EXTRA_INIT} \
@@ -200,13 +202,15 @@ do_debug() {
             -c 'init' \
             -c 'targets' \
             -c 'halt' \
-            -l /dev/null" &
-    # save PID for terminating the server afterwards
-    OCD_PID=$(($!+2))
+            -l /dev/null &> /dev/null & \
+            echo \$! > $tmp" &
     # connect to the GDB server
     ${DBG} ${TUI} -ex "tar ext :${GDB_PORT}" ${ELFFILE}
+
     # clean up
+    OCD_PID="$(cat $tmp)"
     kill ${OCD_PID}
+    rm $tmp
 }
 
 do_debugserver() {

@@ -129,7 +129,7 @@ do_flash() {
     test_config
     test_hexfile
     # clear any existing contents in burn file
-    echo -n "" > ${BINDIR}/burn.seg
+    /bin/echo -n "" > ${BINDIR}/burn.seg
     # create temporary burn file
     if [ ! -z "${JLINK_PRE_FLASH}" ]; then
         echo "${JLINK_PRE_FLASH}" >> ${BINDIR}/burn.segg

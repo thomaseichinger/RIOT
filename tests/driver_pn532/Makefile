@@ -30,13 +30,14 @@ QUIET ?= 0
 FEATURES_REQUIRED = periph_spi periph_gpio
 #FEATURES_PROVIDED += periph_uart periph_gpio periph_spi periph_random cpp
 
-USEMODULE += uart0
+#USEMODULE += uart0
 #USEMODULE += shell
 #USEMODULE += shell_commands
 #USEMODULE += ps
 #USEMODULE += lib
 #USEMODULE += vtimer
 #USEMODULE += defaulttransceiver
+USEMODULE += xtimer
 USEMODULE += pn532
 
 #USEMODULE += auto_init

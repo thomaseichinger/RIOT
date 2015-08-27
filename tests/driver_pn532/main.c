@@ -24,16 +24,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "board.h"
 #include "pn532.h"
+#include "pn532_params.h"
+#include "xtimer.h"
 
 int main(void){
-	sleep(10);
+	xtimer_usleep(10);
 	(void) printf("\nWelcome to RIOT!\n");
 
 	/* Initialize SPI communication by pn532_init_master function. Set register MSTR=1 CPOL=0 e NCPHA=0 */
 
 	printf("Initialize pin MOSI, MISO e SCK.\n");
-	pn532_init_master();
+	pn532_t dev;
+	const pn532_params_t *p = &pn532_params[0];
+	pn532_init_master(&dev, p->spi, p->spi_speed, p->cs_pin);
 	printf("End initialize!\n");
 
 	printf("Begin. I'll wake up the PN532\n");
@@ -132,7 +137,7 @@ while(1){
 						printf("\n");
 
 						// Wait a bit before reading the card again
-						sleep(1);
+						xtimer_sleep(1);
 					}
 					else{
 						printf("Ooops ... unable to read the requested block.  Try another key?");
@@ -153,7 +158,7 @@ while(1){
 					// Data seems to have been read ... spit it out
 					pn532_print_hex(data, 4);
 						// Wait a bit before reading the card again
-						sleep(1);
+						xtimer_sleep(1);
 					}
 				else{
 					printf("Ooops ... unable to read the requested page!?");

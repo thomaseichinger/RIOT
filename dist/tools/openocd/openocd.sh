@@ -191,8 +191,8 @@ do_debug() {
     test_elffile
     test_ports
     test_tui
-    # setsid needed on Linux so that Ctrl+C in GDB doesn't kill OpenOCD
-    [ "$(uname)" = 'Linux' ] && SETSID=setsid
+    # setsid is needed so that Ctrl+C in GDB doesn't kill OpenOCD
+    [ -n "$(which setsid)" ] && SETSID=setsid
     # temporary file that saves OpenOCD pid
     OCD_PIDFILE=$(mktemp -t "openocd_pid.XXXXXXXXXX")
     # cleanup after script terminates

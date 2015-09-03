@@ -32,6 +32,11 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame->type = data;
                 ctx->frame->header_crc = mstp_acc_hdr_crc(data);
+                /* Remember if payload octets are encoded */
+                /* TODO: This also includes proprietary frames */
+                if (ctx->frame->type >= MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY) {
+                    ctx->frame->encoded = 1;
+                }
             }
             else if (ctx->frame->hdr_index == MSTP_FRAME_INDEX_DEST_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
@@ -84,6 +89,7 @@ void mstp_receive_frame(void *arg, char data)
                 msg_send(&msg, ctx->mac_pid);
             }
             else {
+                /* Proceed to receive payload */
                 ctx->state = MSTP_STATE_DATA;
             }
             break;
@@ -126,6 +132,5 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame->hdr_index = 0;
                 mstp_recv_frame_data_index = 0;
             }
-
     }
 }

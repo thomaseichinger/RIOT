@@ -4,9 +4,11 @@
 #define MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER       (0x02)
 #define MSTP_FRAME_TYPE_TEST_REQUEST                (0x03)
 #define MSTP_FRAME_TYPE_TEST_RESPONSE               (0x04)
-#define MSTP_FRAME_TYPE_DATA_EXPECTING_REPLY        (0x05)
-#define MSTP_FRAME_TYPE_DATA_NOT_EXPECTING_REPLY    (0x06)
+#define MSTP_FRAME_TYPE_DATA_EXP_REPLY              (0x05)
+#define MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY          (0x06)
 #define MSTP_FRAME_TYPE_REPLY_POSTPONED             (0x07)
+#define MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY          (0x20)
+#define MSTP_FRAME_TYPE_EXT_DATA_EXP_NO_REPLY       (0x21)
 
 typedef struct
 {

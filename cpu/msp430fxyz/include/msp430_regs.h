@@ -111,6 +111,17 @@ typedef struct {
     REG8    BTXBUF;     /**< B transmit buffer */
 } msp_usci_t;
 
+typedef struct {
+    REG8    CTL0;      /**< control 0 */
+    REG8    CTL1;      /**< control 1 */
+    REG8    BR0;       /**< baud rate 0 */
+    REG8    BR1;       /**< baud rate 1 */
+    REG8    reserved;  /**< reserved */
+    REG8    STAT;      /**< status */
+    REG8    RXBUF;     /**< receive buffer */
+    REG8    TXBUF;     /**< transmit buffer */
+} msp_usci_spi_t;
+
 /**
  * @brief   Timer interrupt status registers
  */
@@ -244,6 +255,22 @@ typedef struct {
 /** @} */
 
 /**
+ * @brief   USCI control register 0 bitmap SPI mode
+ * @{
+ */
+#define USCI_SPI_CTL0_UCSYNC           (0x01)
+#define USCI_SPI_CTL0_MODE_3           (0x06)
+#define USCI_SPI_CTL0_MODE_0           (0x00)
+#define USCI_SPI_CTL0_MODE_1           (0x02)
+#define USCI_SPI_CTL0_MODE_2           (0x04)
+#define USCI_SPI_CTL0_MST              (0x08)
+#define USCI_SPI_CTL0_7BIT             (0x10)
+#define USCI_SPI_CTL0_MSB              (0x20)
+#define USCI_SPI_CTL0_CKPL             (0x40)
+#define USCI_SPI_CTL0_CKPH             (0x80)
+/** @} */
+
+/**
  * @brief   USCI control A register 1 bitmap
  * @{
  */
@@ -257,6 +284,17 @@ typedef struct {
 #define USCI_ACTL1_SSEL_UCLK        (0x00)
 #define USCI_ACTL1_SSEL_ACLK        (0x40)
 #define USCI_ACTL1_SSEL_SMCLK       (0xc0)
+/** @} */
+
+/**
+ * @brief   USCI control register 1 bitmap SPI mode
+ * @{
+ */
+#define USCI_SPI_CTL1_SWRST            (0x01)
+#define USCI_SPI_CTL1_SSEL_MASK        (0xc0)
+#define USCI_SPI_CTL1_SSEL_NA          (0x00)
+#define USCI_SPI_CTL1_SSEL_ACLK        (0x40)
+#define USCI_SPI_CTL1_SSEL_SMCLK       (0xc0)
 /** @} */
 
 /**
@@ -353,7 +391,11 @@ typedef struct {
 #define TIMER_B_BASE            ((uint16_t)0x0180)
 #define WD_BASE                 ((uint16_t)0x0120)
 #define USCI_0_BASE             ((uint16_t)0x005d)
+#define USCI_0_A_BASE           ((uint16_t)0x0060)
+#define USCI_0_B_BASE           ((uint16_t)0x0068)
 #define USCI_1_BASE             ((uint16_t)0x00cd)
+#define USCI_1_A_BASE           ((uint16_t)0x00d0)
+#define USCI_1_B_BASE           ((uint16_t)0x00d8)
 /** @} */
 
 /**
@@ -376,6 +418,10 @@ typedef struct {
 #define WD                      ((msp_wd_t *)WD_BASE)
 #define USCI_0                  ((msp_usci_t *)USCI_0_BASE)
 #define USCI_1                  ((msp_usci_t *)USCI_1_BASE)
+#define USCI_0_A_SPI            ((msp_usci_spi_t *)USCI_0_A_BASE)
+#define USCI_0_B_SPI            ((msp_usci_spi_t *)USCI_0_B_BASE)
+#define USCI_1_A                ((msp_usci_t *)USCI_1_A_BASE)
+#define USCI_1_B                ((msp_usci_t *)USCI_1_B_BASE)
 /** @} */
 
 #ifdef __cplusplus

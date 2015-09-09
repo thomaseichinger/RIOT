@@ -26,6 +26,15 @@
 #include "periph/gpio.h"
 
 /**
+ * @brief   Struct holding ISR context information
+ */
+typedef struct {
+    uart_rx_cb_t rx_cb;
+    uart_tx_cb_t tx_cb;
+    void *arg;
+} uart_isr_ctx_t;
+
+/**
  * @brief   Allocate memory to store the callback functions
  */
 static uart_isr_ctx_t isr_ctx[UART_NUMOF];
@@ -87,15 +96,17 @@ void uart_tx_begin(uart_t dev)
     _uart(dev)->IEN |= USART_IEN_TXBL;
 }
 
-void uart_write(uart_t dev, char data)
+int uart_write(uart_t dev, char data)
 {
     _uart(dev)->TXDATA = (uint8_t)data;
+    return 1;
 }
 
-void uart_write_blocking(uart_t dev, char data)
+int uart_write_blocking(uart_t dev, char data)
 {
     while (!(_uart(dev)->STATUS & USART_STATUS_TXBL));
     _uart(dev)->TXDATA = (uint32_t)data;
+    return 1;
 }
 
 void uart_poweron(uart_t dev)

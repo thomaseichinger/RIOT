@@ -83,7 +83,11 @@ static const uart_conf_t uart_config[] = {
 
 #define UART_0_ISR_TX       isr_usart2_tx
 #define UART_0_ISR_RX       isr_usart2_rx
+/* TODO: un-comment once the updated UART interface is merged
 #define UART_NUMOF          (sizeof(uart_config) / sizeof(uart_config[0]))
+*/
+#define UART_NUMOF          (1U)
+#define UART_0_EN           (1U)
 /** @} */
 
 #ifdef __cplusplus

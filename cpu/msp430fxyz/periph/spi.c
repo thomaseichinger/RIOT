@@ -33,6 +33,8 @@
  */
 static mutex_t spi_lock = MUTEX_INIT;
 
+/* per default, we use the legacy MSP430 USART module for UART functionality */
+#ifndef SPI_USE_USIC
 
 int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
 {
@@ -92,6 +94,71 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
     return 0;
 }
 
+/* we use alternative SPI code in case the board used the USIC module for SPI
+ * instead of the (older) USART module */
+#else   /* SPI_USE_USIC */
+
+int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
+{
+    if (dev != 0) {
+        return -2;
+    }
+
+    /* reset SPI device */
+    SPI_DEV->CTL1 |= USCI_SPI_CTL1_SWRST;
+    /* configure pins */
+    spi_conf_pins(dev);
+    /* configure USART to SPI mode with SMCLK driving it */
+    SPI_DEV->CTL0 |= (USCI_SPI_CTL0_UCSYNC | USCI_SPI_CTL0_MST
+                      | USCI_SPI_CTL0_MODE_0 | USCI_SPI_CTL0_MSB);
+    SPI_DEV->CTL1 |= (USCI_SPI_CTL1_SSEL_SMCLK);
+
+    /* set polarity and phase */
+    switch (conf) {
+        case SPI_CONF_FIRST_RISING:
+            SPI_DEV->CTL0 |= (USCI_SPI_CTL0_CKPH & ~(USCI_SPI_CTL0_CKPL));
+            break;
+        case SPI_CONF_SECOND_RISING:
+            SPI_DEV->CTL0 |= (~(USCI_SPI_CTL0_CKPH) & ~(USCI_SPI_CTL0_CKPL));
+            break;
+        case SPI_CONF_FIRST_FALLING:
+            SPI_DEV->CTL0 |= (USCI_SPI_CTL0_CKPH & USCI_SPI_CTL0_CKPL);
+            break;
+        case SPI_CONF_SECOND_FALLING:
+            SPI_DEV->CTL0 |= (~(USCI_SPI_CTL0_CKPH) & USCI_SPI_CTL0_CKPL);
+            break;
+        default:
+            /* do nothing */
+            break;
+    }
+    /* configure clock - we use no modulation for now */
+    uint32_t br = CLOCK_CMCLK;
+    switch (speed) {
+        case SPI_SPEED_100KHZ:
+            br /= 100000;
+        case SPI_SPEED_400KHZ:
+            br /= 400000;
+        case SPI_SPEED_1MHZ:
+            br /= 1000000;
+        case SPI_SPEED_5MHZ:
+            br /= 5000000;
+            if (br < 2) {       /* make sure the is not smaller then 2 */
+                br = 2;
+            }
+            break;
+        default:
+            /* other clock speeds are not supported */
+            return -1;
+    }
+    SPI_DEV->BR0 = (uint8_t)br;
+    SPI_DEV->BR1 = (uint8_t)(br >> 8);
+    /* release from software reset */
+    SPI_DEV->CTL1 &= ~(USCI_SPI_CTL1_SWRST);
+    return 0;
+}
+
+#endif  /* UART_USE_USIC */
+
 int spi_init_slave(spi_t dev, spi_conf_t conf, char (*cb)(char data))
 {
     /* not supported so far */
@@ -135,9 +202,9 @@ int spi_transfer_byte(spi_t dev, char out, char *in)
 {
     (void)dev;
     char tmp;
-    while (!(SPI_IE & SPI_IE_TX_BIT));
+    while (!(SPI_IF & SPI_IE_TX_BIT));
     SPI_DEV->TXBUF = (uint8_t)out;
-    while (!(SPI_IE & SPI_IE_RX_BIT));
+    while (!(SPI_IF & SPI_IE_RX_BIT));
     tmp = (char)SPI_DEV->RXBUF;
     if (in) {
         *in = tmp;

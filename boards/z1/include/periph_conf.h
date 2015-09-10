@@ -74,13 +74,12 @@ extern "C" {
 #define SPI_0_EN            (1U)
 
 /* SPI configuration */
-#define SPI_DEV             (USART_0)
-#define SPI_IE              (SFR->IE1)
-#define SPI_IF              (SFR->IFG1)
-#define SPI_IE_RX_BIT       (1 << 6)
-#define SPI_IE_TX_BIT       (1 << 7)
-#define SPI_ME              (SFR->ME1)
-#define SPI_ME_BIT          (1 << 6)
+#define SPI_USE_USIC
+#define SPI_DEV             (USCI_0_B_SPI)
+#define SPI_IE              (SFR->IE2)
+#define SPI_IF              (SFR->IFG2)
+#define SPI_IE_RX_BIT       (1 << 2)
+#define SPI_IE_TX_BIT       (1 << 3)
 #define SPI_PIN_MISO        GPIO(P3,2)
 #define SPI_PIN_MOSI        GPIO(P3,1)
 #define SPI_PIN_CLK         GPIO(P3,3)

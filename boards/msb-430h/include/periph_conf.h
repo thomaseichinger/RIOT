@@ -68,7 +68,7 @@ extern "C" {
 #define UART_TX_ISR         (USART1TX_VECTOR)
 /** @} */
 
- /**
+/**
  * @brief   SPI configuration
  * @{
  */

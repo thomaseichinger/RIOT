@@ -1,0 +1,30 @@
+# define the cpu used by the xmc-2go
+export CPU = xmc1000
+export CPU_MODEL = xmc1100
+
+# define the default port depending on the host OS
+PORT_LINUX ?= /dev/ttyACM0
+
+export JLINK_OPTS  = -if SWD -speed 3000 -device XMC1100-0064
+export BIN_ADDR    = 10001000
+
+export FLASHER = $(RIOTBOARD)/$(BOARD)/dist/jlink.sh
+export DEBUGGER = $(RIOTBOARD)/$(BOARD)/dist/jlink.sh
+export DEBUGSERVER = $(RIOTBOARD)/$(BOARD)/dist/jlink.sh
+export RESET = $(RIOTBOARD)/$(BOARD)/dist/jlink.sh
+
+export OFLAGS ?= -O binary
+export HEXFILE = $(ELFFILE:.elf=.bin)
+export BINFILE = $(HEXFILE)
+export FFLAGS ?= flash
+export DEBUGGER_FLAGS ?= debug
+export DEBUGSERVER_FLAGS ?= debug-server
+export RESET_FLAGS ?= reset
+
+
+
+# setup serial terminal
+include $(RIOTBOARD)/Makefile.include.serial
+
+# include cortex defaults
+include $(RIOTBOARD)/Makefile.include.cortexm_common

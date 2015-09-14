@@ -81,11 +81,11 @@ typedef enum {
 } gpio_flank_t;
 
 typedef struct {
-    USIC_CH_TypeDef *usic;      /* pointer to USIC location */
-    gpio_t tx;                  /* output pin */
-    gpio_t rx;                  /* input pin */
-    uint8_t icr_idx;            /* input control register offset */
-    uint8_t icr_val;            /* value of input control register (data input) */
+    USIC_CH_TypeDef *usic;   /**< pointer to USIC/Channel */
+    gpio_t tx;               /**< transmit pin */
+    gpio_t rx;               /**< receive pin */
+    uint8_t dsel;            /**< data selection for input stage DX0 */
+    gpio_alt_output_t asel;  /**< alternative function selection for tx pin */
 } uart_conf_t;
 
 /**

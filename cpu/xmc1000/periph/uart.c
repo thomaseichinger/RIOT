@@ -137,13 +137,13 @@ int uart_init(uart_t uart, uint32_t baudrate,
     _usic(uart)->CCR |= (2 << USIC_CH_CCR_MODE_Pos);
 
     /* Data selection for input signal */
-    *(&_usic(uart)->DX0CR + uart_dev[uart].icr_idx) |= uart_dev[uart].icr_val;
+    _usic(uart)->DX0CR |= uart_dev[uart].dsel;
 
     /* P2.2 as input */
     gpio_init(uart_rx, GPIO_DIR_IN, GPIO_NOPULL);
 
     /* Initialize UART_TX */
-    gpio_init(uart_tx, (GPIO_DIR_OUT | GPIO_ALT_OUT_6), GPIO_NOPULL);
+    gpio_init(uart_tx, (GPIO_DIR_OUT | uart_dev[uart].asel), GPIO_NOPULL);
 
     /* register callbacks */
     uart_ctx[uart].rx_cb = rx_cb;

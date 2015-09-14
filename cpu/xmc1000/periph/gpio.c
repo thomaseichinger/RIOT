@@ -150,6 +150,19 @@ int gpio_read(gpio_t gpio)
     return *(IN(gpio)) & (1 << PIN(gpio));
 }
 
+void gpio_irq_enable(gpio_t gpio)
+{
+    uint8_t exs = eru_mapping[PIN(gpio)].exs;
+    NVIC_EnableIRQ(ERU0_0_IRQn + exs);
+}
+
+void gpio_irq_disable(gpio_t gpio)
+{
+    uint8_t exs = eru_mapping[PIN(gpio)].exs;
+    NVIC_DisableIRQ(ERU0_0_IRQn + exs);
+}
+
+
 void isr_eru(int ogu)
 {
     gpio_ints[ogu].cb(gpio_ints[ogu].arg);

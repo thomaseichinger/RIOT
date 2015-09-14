@@ -80,11 +80,11 @@ extern "C" {
 
 static const uart_conf_t uart_dev[] = {
     {
-        USIC0_CH0,                             // USIC
-        GPIO(P2, 1),                           // TX pin
-        GPIO(P2, 2),                           // RX pin
-        0,                                     // configure input control register 0
-        6,                                     // to use data input DXnG (see page 451)
+        .usic = USIC0_CH0,     // USIC
+        .tx = GPIO(P2, 1),     // TX pin
+        .rx = GPIO(P2, 2),     // RX pin
+        .dsel = 6,             // configure input control register 0
+        .asel = GPIO_ALT_OUT_6 // to use data input DXnG (see page 451)
     }
 };
 /** @} */

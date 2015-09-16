@@ -4,6 +4,7 @@ export CPU_MODEL = xmc1100
 
 # define the default port depending on the host OS
 PORT_LINUX ?= /dev/ttyACM0
+PORT_DARWIN ?= $(shell ls -1 /dev/tty.usbmodem* | head -n 1)
 
 export JLINK_OPTS  = -if SWD -speed 3000 -device XMC1100-0064
 export BIN_ADDR    = 10001000

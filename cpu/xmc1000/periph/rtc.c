@@ -29,9 +29,6 @@
 /* guard file in case no RTC device was specified */
 #if RTC_NUMOF
 
-/* RTC runs of the internal 32.768kHz standby oscillator */
-#define RTC_DIVIDER (0x7fff)
-
 /* Wait for mirror transfers for this register to finish */
 #define RTC_WAIT(Reg)                                   \
     do {} while (SCU_GENERAL->MIRRSTS &                 \
@@ -44,7 +41,7 @@ static void *callback_arg;
 static inline void _rtc_disable(void)
 {
     RTC_WAIT(CTR);
-    RTC->CTR = (RTC_DIVIDER << RTC_CTR_DIV_Pos);
+    RTC->CTR &= ~RTC_CTR_ENB_Msk;
 }
 
 static inline void _rtc_enable(void)

@@ -32,6 +32,7 @@ extern "C" {
  */
 #define RTC_NUMOF          (1U)
 #define RTC_IRQ_PRIO       CPU_DEFAULT_IRQ_PRIO
+#define RTC_DIVIDER        (0x7fff)
 /** @} */
 
 /**

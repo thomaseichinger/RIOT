@@ -26,9 +26,18 @@
 #include "periph/adc.h"
 #include "periph_conf.h"
 
-/* Sample Time Control for Standard Conversions Number of additional
- * clock cycles to be added to the minimum sample phase of 2 analog
- * clock cycles: Coding and resulting sample time see Table 15-3. */
+/* These refer to addresses and values to be written according to
+ * the Errata notices ADC_AI.003 & ADC_AI.004 of the XMC1100 */
+#define ERRATA_AI003   (0x40010500)
+#define ERRATA_AI003_V (1UL)
+#define ERRATA_AI004_1 (0x480340E0)
+#define ERRATA_AI004_2 (0x480340E4)
+#define ERRATA_AI004_V (0x80008000)
+
+/* "Sample Time Control for Standard Conversions": Number of
+ * additional clock cycles to be added to the minimum sample phase of
+ * 2 analog clock cycles: Coding and resulting sample time see Table
+ * 15-3. */
 #ifndef ADC_STCS
 #define ADC_STCS (17)           /* 32 additional clock cycles */
 #endif
@@ -124,7 +133,7 @@ void adc_poweron(adc_t dev)
      * Workaround: To enable the analog section of the ADC, write
      * value 00000001H to register address 40010500H in addition to
      * the setup as mentioned above.  */
-    *((uint32_t *)0x40010500) = 1UL;
+    *((uint32_t *)ERRATA_AI003) = ERRATA_AI003_V;
 
     /* then the startup calibration can be initiated by setting bit
      * SUCAL in register GLOBCFG. Conversions may be started after the
@@ -148,8 +157,8 @@ void adc_poweron(adc_t dev)
     while (SHS0->SHSCFG & SHS_SHSCFG_STATE_Msk);
 
     /* Write value 80008000H to register address 480340E0H and 480340E4H */
-    *((uint32_t *)0x480340E0) = 0x80008000;
-    *((uint32_t *)0x480340E4) = 0x80008000;
+    *((uint32_t *)ERRATA_AI004_1) = ERRATA_AI004_V;
+    *((uint32_t *)ERRATA_AI004_2) = ERRATA_AI004_V;
 }
 
 void adc_poweroff(adc_t dev)

@@ -27,11 +27,6 @@ extern "C" {
 #endif
 
 /**
- * @name Clock system configuration
- * @{
- */
-
-/**
  * @name RTC configuration
  * @{
  */

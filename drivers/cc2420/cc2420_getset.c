@@ -215,8 +215,8 @@ void cc2420_set_option(cc2420_t *dev, uint16_t option, bool state)
 
 inline uint8_t cc2420_get_state(cc2420_t *dev)
 {
-    uint16_t state = 0;
-    state = cc2420_reg_read(dev, CC2420_REG_FSMSTATE);
+    // uint16_t state = 0;
+    // state = cc2420_reg_read(dev, CC2420_REG_FSMSTATE);
     return dev->state;
 }
 

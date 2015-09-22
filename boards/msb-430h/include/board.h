@@ -69,6 +69,16 @@ extern "C" {
 #define LED_RED_OFF         LEDS_PxOUT |= LEDS_CONF_RED
 #define LED_RED_TOGGLE      LEDS_PxOUT ^= LEDS_CONF_RED
 
+
+#define CC2420_SPI          SPI_0
+#define CC2420_RESET        GPIO(P4,6)
+#define CC2420_CS           GPIO(P3,0)
+#define CC2420_SPI_CLK      SPI_SPEED_1MHZ
+#define CC2420_FIFO_INT     GPIO(P1,3)
+#define CC2420_FIFOP_INT    GPIO(P1,2)
+#define CC2420_POWER        GPIO(P4,5)
+#define CC2420_GIO1         GPIO(P1,4)
+
 #ifdef __cplusplus
 }
 #endif

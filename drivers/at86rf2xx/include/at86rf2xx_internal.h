@@ -78,10 +78,26 @@ void at86rf2xx_sram_write(const at86rf2xx_t *dev,
                           const size_t len);
 
 /**
+ * @brief   Initiate a frame buffer read transaction.
+ * 
+ * @param[in] dev           device to aquire to read from
+ */
+void at86rf2xx_fb_read_start(const at86rf2xx_t *dev);
+
+/**
+ * @brief   End a frame buffer read transaction.
+ * 
+ * @param[in] dev           device to release again.
+ */
+void at86rf2xx_fb_read_stop(const at86rf2xx_t *dev);
+
+/**
  * @brief   Read the internal frame buffer of the given device
  *
  * Reading the frame buffer returns some extra bytes that are not accessible
- * through reading the RAM directly.
+ * through reading the RAM directly. Has to be used in combination with
+ * `at86rf2xx_fb_read_start` and `at86rf2xx_fb_read_stop`. Allows consecutive
+ * read access on frame buffer, including LQI value.
  *
  * @param[in]  dev      device to read from
  * @param[out] data     buffer to copy the data to

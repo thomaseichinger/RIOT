@@ -285,15 +285,16 @@ static void _receive_data(at86rf2xx_t *dev)
         return;
     }
 
+    at86rf2xx_fb_read_start(dev);
     /* get FCF field and compute 802.15.4 header length */
-    at86rf2xx_rx_read(dev, mhr, 2, 0);
+    at86rf2xx_fb_read(dev, mhr, 2);
     hdr_len = _get_frame_hdr_len(mhr);
     if (hdr_len == 0) {
         DEBUG("[at86rf2xx] error: unable parse incoming frame header\n");
         return;
     }
     /* read the rest of the header and parse the netif header from it */
-    at86rf2xx_rx_read(dev, &(mhr[2]), hdr_len - 2, 2);
+    at86rf2xx_fb_read(dev, &(mhr[2]), hdr_len - 2);
     hdr = _make_netif_hdr(mhr);
     if (hdr == NULL) {
         DEBUG("[at86rf2xx] error: unable to allocate netif header\n");
@@ -302,7 +303,6 @@ static void _receive_data(at86rf2xx_t *dev)
     /* fill missing fields in netif header */
     netif = (gnrc_netif_hdr_t *)hdr->data;
     netif->if_pid = dev->mac_pid;
-    at86rf2xx_rx_read(dev, &(netif->lqi), 1, pkt_len);
     netif->rssi = at86rf2xx_reg_read(dev, AT86RF2XX_REG__PHY_ED_LEVEL);
 
     /* allocate payload */
@@ -313,7 +313,9 @@ static void _receive_data(at86rf2xx_t *dev)
         return;
     }
     /* copy payload */
-    at86rf2xx_rx_read(dev, payload->data, payload->size, hdr_len);
+    at86rf2xx_fb_read(dev, payload->data, payload->size);
+    at86rf2xx_fb_read(dev, &(netif->lqi), 1);
+    at86rf2xx_fb_read_stop(dev);
     /* finish up and send data to upper layers */
     dev->event_cb(NETDEV_EVENT_RX_COMPLETE, payload);
 }

@@ -1,4 +1,7 @@
 
+#include <stdio.h>
+#include <stdint.h>
+
 #define MSTP_COBS_RESERVED_VALUE    (0x00)
 /*
  * StuffData byte stuffs "length" bytes of
@@ -42,7 +45,7 @@ void mstp_cobs_unstuff_data(const uint8_t *src, size_t length, uint8_t *dst)
 {
     const uint8_t *end = src + length;
     while (src < end) {
-        int code = *ptr++;
+        int code = *src++;
         for(int i = 1; src<end && i<code; i++) {
             *dst++ = *src++;
         }

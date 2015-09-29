@@ -133,5 +133,8 @@ endif
 ifneq (,$(filter gnrc_tftp,$(USEMODULE)))
     DIRS += application_layer/tftp
 endif
+ifneq (,$(filter mstp,$(USEMODULE)))
+	DIRS += link_layer/mstp
+endif
 
 include $(RIOTBASE)/Makefile.base

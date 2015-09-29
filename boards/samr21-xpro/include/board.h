@@ -49,9 +49,18 @@ extern "C" {
                                      .int_pin = GPIO_PIN(PB, 0), \
                                      .sleep_pin = GPIO_PIN(PA, 20), \
                                      .reset_pin = GPIO_PIN(PB, 15)}
+/**
+ * @brief   MSTP definitions
+ * @name Define UART device and baudrate for MSTP
+ * @{
+ */
+#define GNRC_MSTP_UART      UART_1
+#define GNRC_MSTP_BAUDRATE  (115200U)
+/** @} */
 
 /**
  * @brief   LED pin definitions and handlers
+ * @name LED pin definitions
  * @{
  */
 #define LED0_PIN            GPIO_PIN(0, 19)

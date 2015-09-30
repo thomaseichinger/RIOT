@@ -31,7 +31,7 @@
 #if UART_NUMOF
 
 /**
- * @brief Allocate memory to store the callback functions.
+ * @brief Allocate memory to store the rx callback.
  */
 static uart_isr_ctx_t uart_ctx[UART_NUMOF];
 
@@ -41,7 +41,7 @@ static inline USIC_CH_TypeDef *_usic(uart_t uart)
 }
 
 int uart_init(uart_t uart, uint32_t baudrate,
-              uart_rx_cb_t rx_cb, uart_tx_cb_t tx_cb, void *arg)
+              uart_rx_cb_t rx_cb, void *arg)
 {
     USIC_CH_TypeDef *usic = _usic(uart);
     gpio_t uart_tx = uart_dev[uart].tx;
@@ -64,11 +64,11 @@ int uart_init(uart_t uart, uint32_t baudrate,
     uint32_t fdr_step = 811;
 
     /* clear register */
-    _usic(uart)->FDR &= ~(USIC_CH_FDR_DM_Msk | USIC_CH_FDR_STEP_Msk);
+    usic->FDR &= ~(USIC_CH_FDR_DM_Msk | USIC_CH_FDR_STEP_Msk);
 
     /* enable fractional divider mode (2) and set step value. */
     /* f_FD = f_PB * (frd_step / 1024) */
-    _usic(uart)->FDR |= (2 << USIC_CH_FDR_DM_Pos) | (fdr_step << USIC_CH_FDR_STEP_Pos);
+    usic->FDR |= (2 << USIC_CH_FDR_DM_Pos) | (fdr_step << USIC_CH_FDR_STEP_Pos);
 
     /* Pre-Divider for Time Quanta Counter (2 Bits) */
     uint8_t brg_pctq = (115200 / baudrate);
@@ -80,29 +80,29 @@ int uart_init(uart_t uart, uint32_t baudrate,
 
     /* clear CLKSEL -> fractional divider is used */
     /* clear PPEN   -> 2:1 divider is disabled */
-    _usic(uart)->BRG &= ~(USIC_CH_BRG_PCTQ_Msk | USIC_CH_BRG_DCTQ_Msk  |
-                          USIC_CH_BRG_PDIV_Msk | USIC_CH_BRG_PPPEN_Msk |
-                          USIC_CH_BRG_CLKSEL_Msk);
+    usic->BRG &= ~(USIC_CH_BRG_PCTQ_Msk | USIC_CH_BRG_DCTQ_Msk  |
+                   USIC_CH_BRG_PDIV_Msk | USIC_CH_BRG_PPPEN_Msk |
+                   USIC_CH_BRG_CLKSEL_Msk);
 
-    _usic(uart)->BRG |= (((brg_pctq - 1) << USIC_CH_BRG_PCTQ_Pos) |
-                         ((brg_dctq - 1) << USIC_CH_BRG_DCTQ_Pos) |
-                         ((brg_pdiv - 1) << USIC_CH_BRG_PDIV_Pos));
+    usic->BRG |= (((brg_pctq - 1) << USIC_CH_BRG_PCTQ_Pos) |
+                  ((brg_dctq - 1) << USIC_CH_BRG_DCTQ_Pos) |
+                  ((brg_pdiv - 1) << USIC_CH_BRG_PDIV_Pos));
 
     /* baudrate = f_FD / brg_pdiv / brg_pctq / brg_dctq */
 
     /* clear shift control register */
-    _usic(uart)->SCTR &= ~(USIC_CH_SCTR_TRM_Msk | USIC_CH_SCTR_FLE_Msk |
-                           USIC_CH_SCTR_WLE_Msk);
+    usic->SCTR &= ~(USIC_CH_SCTR_TRM_Msk | USIC_CH_SCTR_FLE_Msk |
+                    USIC_CH_SCTR_WLE_Msk);
 
     /* configure the shift register: FLE = frame length, WLE = word
        length, TRM = transmission mode, PDL = passive data level. */
-    _usic(uart)->SCTR |= ((1 << USIC_CH_SCTR_TRM_Pos) |
+    usic->SCTR |= ((1 << USIC_CH_SCTR_TRM_Pos) |
                           (7 << USIC_CH_SCTR_FLE_Pos) |
                           (7 << USIC_CH_SCTR_WLE_Pos) |
                           (1 << USIC_CH_SCTR_PDL_Pos));
 
     /* clear transmit control/status register */
-    _usic(uart)->TCSR &= ~(USIC_CH_TCSR_TDEN_Msk);
+    usic->TCSR &= ~(USIC_CH_TCSR_TDEN_Msk);
 
     /* configure the transmit control register */
     /* TDEN: "This bit field controls the gating of the transmission start of
@@ -110,12 +110,12 @@ int uart_init(uart_t uart, uint32_t baudrate,
        data word in TBUF can be started if TDV = 1" */
     /* TDSSM: 1 -> "The data word in TBUF is considered as invalid after it has
        been loaded into the shift register." */
-    _usic(uart)->TCSR |= USIC_CH_TCSR_TDSSM_Msk | (1 << USIC_CH_TCSR_TDEN_Pos);
+    usic->TCSR |= USIC_CH_TCSR_TDSSM_Msk | (1 << USIC_CH_TCSR_TDEN_Pos);
 
     /* clear protocol control register */
-    _usic(uart)->PCR &= ~(USIC_CH_PCR_ASCMode_SP_Msk |
-                          USIC_CH_PCR_ASCMode_PL_Msk |
-                          USIC_CH_PCR_ASCMode_STPB_Msk);
+    usic->PCR &= ~(USIC_CH_PCR_ASCMode_SP_Msk |
+                   USIC_CH_PCR_ASCMode_PL_Msk |
+                   USIC_CH_PCR_ASCMode_STPB_Msk);
 
     /* configure the protocol control register */
     /* SMD: 1 -> "Three samples are taken per bit time and a majority decision
@@ -125,19 +125,19 @@ int uart_init(uart_t uart, uint32_t baudrate,
        point must not be located outside the programmed bit timing (PCR.SP ≤
        BRG.DCTQ). */
     /* PL: 0 -> "Pulse Length is equal to the bit length" */
-    _usic(uart)->PCR |= ((USIC_CH_PCR_ASCMode_SMD_Msk) |
-                         (4 << USIC_CH_PCR_ASCMode_SP_Pos));
+    usic->PCR |= ((USIC_CH_PCR_ASCMode_SMD_Msk) |
+                  (4 << USIC_CH_PCR_ASCMode_SP_Pos));
 
     /* clear the channel control register */
     /* PM: 0 -> no parity */
-    _usic(uart)->CCR &= ~(USIC_CH_CCR_PM_Msk | USIC_CH_CCR_MODE_Msk);
+    usic->CCR &= ~(USIC_CH_CCR_PM_Msk | USIC_CH_CCR_MODE_Msk);
 
     /* configure the channel control register */
     /* MODE: 2 -> ASC mode */
-    _usic(uart)->CCR |= (2 << USIC_CH_CCR_MODE_Pos);
+    usic->CCR |= (2 << USIC_CH_CCR_MODE_Pos);
 
     /* Data selection for input signal */
-    _usic(uart)->DX0CR |= uart_dev[uart].dsel;
+    usic->DX0CR |= uart_dev[uart].dsel;
 
     /* P2.2 as input */
     gpio_init(uart_rx, GPIO_DIR_IN, GPIO_NOPULL);
@@ -145,10 +145,9 @@ int uart_init(uart_t uart, uint32_t baudrate,
     /* Initialize UART_TX */
     gpio_init(uart_tx, (GPIO_DIR_OUT | uart_dev[uart].asel), GPIO_NOPULL);
 
-    /* register callbacks */
+    /* register callback */
     uart_ctx[uart].rx_cb = rx_cb;
-    uart_ctx[uart].tx_cb = tx_cb;
-    uart_ctx[uart].arg = _usic(uart);
+    uart_ctx[uart].arg = usic;
 
     /* enable corresponding IRQ (both USICs use the same set of 6
      * IRQs, so we could route each UART receive interrupt to its own
@@ -157,15 +156,15 @@ int uart_init(uart_t uart, uint32_t baudrate,
     NVIC_EnableIRQ(USIC0_5_IRQn);
 
     /* set receive interrupt pointer to SR5 */
-    _usic(uart)->INPR &= ~USIC_CH_INPR_RINP_Msk;
-    _usic(uart)->INPR |= 0x5 << USIC_CH_INPR_RINP_Pos;
+    usic->INPR &= ~USIC_CH_INPR_RINP_Msk;
+    usic->INPR |= 0x5 << USIC_CH_INPR_RINP_Pos;
 
     /* set transmit shift interrupt pointer to SR5 */
-    _usic(uart)->INPR &= ~USIC_CH_INPR_TSINP_Msk;
-    _usic(uart)->INPR |= 0x5 << USIC_CH_INPR_TSINP_Pos;
+    usic->INPR &= ~USIC_CH_INPR_TSINP_Msk;
+    usic->INPR |= 0x5 << USIC_CH_INPR_TSINP_Pos;
 
     /* enable receive interrupt on peripheral */
-    _usic(uart)->CCR |= 1 << USIC_CH_CCR_RIEN_Pos;
+    usic->CCR |= 1 << USIC_CH_CCR_RIEN_Pos;
 
     return 0;
 }
@@ -175,10 +174,14 @@ void uart_tx(uart_t uart)
     _usic(uart)->CCR |= 1 << USIC_CH_CCR_TSIEN_Pos;
 }
 
-int uart_write(uart_t uart, char data)
+void uart_write(uart_t uart, const char* data, size_t len)
 {
-    _usic(uart)->TBUF[0] = data;
-    return 1;
+    USIC_CH_TypeDef *usic = _usic(uart);
+    for (int i = 0; i < len; i++) {
+        /* wait for transmission to be ready */
+        while (_usic(uart)->TCSR & USIC_CH_TCSR_TDV_Msk);
+        usic->TBUF[0] = data[i];
+    }
 }
 
 int uart_read_blocking(uart_t uart, char *data)
@@ -193,9 +196,7 @@ int uart_read_blocking(uart_t uart, char *data)
 
 void uart_write_blocking(uart_t uart, char data)
 {
-    /* wait for transmission to be ready */
-    while (_usic(uart)->TCSR & USIC_CH_TCSR_TDV_Msk);
-    uart_write(uart, data);
+    uart_write(uart, (const char *)&data, 1);
 }
 
 void uart_poweron(uart_t uart)
@@ -212,20 +213,22 @@ void uart_poweron(uart_t uart)
 
 void uart_poweroff(uart_t uart)
 {
+    USIC_CH_TypeDef *usic = _usic(uart);
+    
     /* disable BUSY reporting for receive */
-    _usic(uart)->PCR &= ~USIC_CH_PCR_ASCMode_RSTEN_Msk;
+    usic->PCR &= ~USIC_CH_PCR_ASCMode_RSTEN_Msk;
     /* enable BUSY reporting for transmit */
-    _usic(uart)->PCR |=  USIC_CH_PCR_ASCMode_TSTEN_Msk;
+    usic->PCR |=  USIC_CH_PCR_ASCMode_TSTEN_Msk;
     /* request stop mode 1 */
-    _usic(uart)->KSCFG |= ((0x3 << USIC_CH_KSCFG_NOMCFG_Pos) |
-                           USIC_CH_KSCFG_BPNOM_Msk);
+    usic->KSCFG |= ((0x3 << USIC_CH_KSCFG_NOMCFG_Pos) |
+                    USIC_CH_KSCFG_BPNOM_Msk);
     /* wait for transmissions to finish */
-    while (_usic(uart)->PSR & USIC_CH_PSR_ASCMode_BUSY_Msk);
+    while (usic->PSR & USIC_CH_PSR_ASCMode_BUSY_Msk);
     /* disable BUSY reporting for transmit */
-    _usic(uart)->PCR &= ~USIC_CH_PCR_ASCMode_TSTEN_Msk;
+    usic->PCR &= ~USIC_CH_PCR_ASCMode_TSTEN_Msk;
     /* disable USIC module */
-    _usic(uart)->KSCFG |= ((0 << USIC_CH_KSCFG_MODEN_Pos) |
-                           USIC_CH_KSCFG_BPMODEN_Msk);
+    usic->KSCFG |= ((0 << USIC_CH_KSCFG_MODEN_Pos) |
+                    USIC_CH_KSCFG_BPMODEN_Msk);
     /* gate clock */
     GATING_SET(USIC0);
 }
@@ -233,19 +236,12 @@ void uart_poweroff(uart_t uart)
 #if UART_0_EN
 void isr_usic5(void)
 {
-    if (_usic(0)->PSR & USIC_CH_PSR_RIF_Msk) {
-        char data = (char)_usic(0)->RBUF;
-        uart_ctx[UART_0].rx_cb(uart_ctx[UART_0].arg, data);
-        _usic(0)->PSR |= USIC_CH_PSR_RIF_Msk;
-    }
-
-    if (uart_ctx[UART_0].tx_cb &&  /* dear compiler, please notice my hint */
-        (_usic(0)->CCR & USIC_CH_CCR_TSIEN_Msk) &
-        (_usic(0)->PSR & USIC_CH_PSR_TSIF_Msk)) {
-        if (uart_ctx[UART_0].tx_cb(uart_ctx[UART_0].arg) == 0) {
-            _usic(0)->CCR &= ~USIC_CH_CCR_TSIEN_Msk;
-        }
-        _usic(0)->PSR |= USIC_CH_PSR_RIF_Msk;
+    USIC_CH_TypeDef *usic = _usic(0);
+    
+    if (usic->PSR & USIC_CH_PSR_RIF_Msk) {
+        char data = (char)usic->RBUF;
+        uart_ctx[0].rx_cb(uart_ctx[0].arg, data);
+        usic->PSR |= USIC_CH_PSR_RIF_Msk;
     }
 
     if (sched_context_switch_request) {

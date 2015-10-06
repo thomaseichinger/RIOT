@@ -1,0 +1,7 @@
+export CPU_ARCH = cortex-m0
+
+# only xmc1100 supported for now
+MODEL = $(shell echo $(CPU_MODEL)|tr 'a-z' 'A-Z')
+export CFLAGS += -DCPU_$(MODEL)
+
+include $(RIOTCPU)/Makefile.include.cortexm_common

@@ -2,6 +2,7 @@
 
 #include "periph/uart.h"
 #include "thread.h"
+#include "xtimer.h"
 #include "net/gnrc.h"
 #include "net/gnrc/ipv6/netif.h"
 #include "net/gnrc/netif.h"
@@ -156,18 +157,27 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
 
     /* mstp header */
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.type);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.src_addr);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.header_crc);
+    xtimer_usleep(MSTP_T_SEND_WAIT);
 
     /* load packet data into FIFO */
     while (snip) {
         for (uint16_t i = 0; i < snip->size; i++) {
             uart_write_blocking(ctx->uart, ((char *)snip->data)[i]);
+            xtimer_usleep(MSTP_T_SEND_WAIT);
         }
         snip = snip->next;
     }
@@ -176,6 +186,7 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
     gnrc_pktbuf_release(pkt);
 
     uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
+    xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
     return 0;
 }

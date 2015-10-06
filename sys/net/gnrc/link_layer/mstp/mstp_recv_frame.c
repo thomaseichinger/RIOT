@@ -19,7 +19,7 @@ void mstp_receive_frame(void *arg, char data)
 {
     gnrc_mstp_t *ctx = (gnrc_mstp_t *)arg;
     msg_t msg;
-
+    printf("St: %02x Rx: %02x\n", ctx->state, data);
     switch (ctx->state) {
         case MSTP_STATE_IDLE:
             if (data == MSTP_DATA_PREAMBLE_1) {
@@ -45,6 +45,7 @@ void mstp_receive_frame(void *arg, char data)
             if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_FRAME_TYPE) {
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
+                ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_acc_hdr_crc(data);
                 /* Remember if payload octets are encoded */
                 /* TODO: This also includes proprietary frames */
@@ -55,21 +56,25 @@ void mstp_receive_frame(void *arg, char data)
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_DEST_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.dst_addr = data;
+                ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_acc_hdr_crc(data);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_SRC_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.src_addr = data;
+                ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_acc_hdr_crc(data);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_1){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.length = (data<<8);
+                ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_acc_hdr_crc(data);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_2){
                 ctx->state = MSTP_STATE_HEADER_CRC;
                 ctx->frame.length |= data;
+                ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_acc_hdr_crc(data);
             }
             else {

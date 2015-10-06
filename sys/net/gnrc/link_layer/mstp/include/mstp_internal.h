@@ -41,8 +41,8 @@ extern "C" {
 
 #define MSTP_BROADCAST_ADDR     (0xff)
 
-#define MSTP_DATA_PREAMBLE_1    (0x11)
-#define MSTP_DATA_PREAMBLE_2    (0x22)
+#define MSTP_DATA_PREAMBLE_1    (0x55)
+#define MSTP_DATA_PREAMBLE_2    (0xff)
 
 #define MSTP_FRAME_INDEX_DEST_ADDR (0x03)
 #define MSTP_FRAME_INDEX_SRC_ADDR  (0x04)
@@ -65,6 +65,8 @@ extern "C" {
 #define MSTP_EV_RECEIVED_VALID_FRAME            (0xaa)
 #define MSTP_EV_SUCCESSFULL_RECEPTION           (0xbb)
 #define MSTP_EV_SEND_FRAME                      (0xcc)
+
+#define MSTP_T_SEND_WAIT        (600)   /**< interval to wait between bytes sent */
 
 
 

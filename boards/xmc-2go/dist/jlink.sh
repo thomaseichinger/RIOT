@@ -6,7 +6,7 @@
 
 # The script supports the following actions:
 #
-# flash:        flash a given bin file 
+# flash:        flash a given bin file
 #               binfile is expected in binary format and is pointed to
 #               by BINFILE environment variable
 #
@@ -29,7 +29,7 @@
 # reset:        triggers a hardware reset of the target board
 #
 #
-# @author       Sebastian Sontberg <sebastian@sontberg.de> 
+# @author       Sebastian Sontberg <sebastian@sontberg.de>
 
 # default GDB port
 if [ -z "${GDB_PORT}" ]; then
@@ -66,7 +66,7 @@ test_binfile() {
 
 do_flash() {
     test_binfile
-    
+
     if [ -n "${PRE_FLASH_CHECK_SCRIPT}" ]; then
         sh -c "${PRE_FLASH_CHECK_SCRIPT} '${BINFILE}'"
         RETVAL=$?
@@ -75,7 +75,7 @@ do_flash() {
             exit $RETVAL
         fi
     fi
-    
+
     # flash device
     sh -c "${JLINK_EXE} ${JLINK_OPTS} ${JLINK_EXTRA_OPTS}" <<EOF
 loadbin $BINFILE $BIN_ADDR

@@ -37,7 +37,7 @@ static  size_t _seed_from_temperature(uint16_t *buf, size_t size);
 
 #define RANDOM_WAIT()                           \
     do { /* wait for random bits */ }           \
-    while (!PRNG->CHK & PRNG_CHK_RDV_Msk)
+    while (!(PRNG->CHK & PRNG_CHK_RDV_Msk))
 
 void random_init(void)
 {

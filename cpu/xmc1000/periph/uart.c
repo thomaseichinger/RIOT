@@ -97,9 +97,9 @@ int uart_init(uart_t uart, uint32_t baudrate,
     /* configure the shift register: FLE = frame length, WLE = word
        length, TRM = transmission mode, PDL = passive data level. */
     usic->SCTR |= ((1 << USIC_CH_SCTR_TRM_Pos) |
-                          (7 << USIC_CH_SCTR_FLE_Pos) |
-                          (7 << USIC_CH_SCTR_WLE_Pos) |
-                          (1 << USIC_CH_SCTR_PDL_Pos));
+                   (7 << USIC_CH_SCTR_FLE_Pos) |
+                   (7 << USIC_CH_SCTR_WLE_Pos) |
+                   (1 << USIC_CH_SCTR_PDL_Pos));
 
     /* clear transmit control/status register */
     usic->TCSR &= ~(USIC_CH_TCSR_TDEN_Msk);
@@ -174,7 +174,7 @@ void uart_tx(uart_t uart)
     _usic(uart)->CCR |= 1 << USIC_CH_CCR_TSIEN_Pos;
 }
 
-void uart_write(uart_t uart, const char* data, size_t len)
+void uart_write(uart_t uart, const char *data, size_t len)
 {
     USIC_CH_TypeDef *usic = _usic(uart);
     for (int i = 0; i < len; i++) {
@@ -214,7 +214,7 @@ void uart_poweron(uart_t uart)
 void uart_poweroff(uart_t uart)
 {
     USIC_CH_TypeDef *usic = _usic(uart);
-    
+
     /* disable BUSY reporting for receive */
     usic->PCR &= ~USIC_CH_PCR_ASCMode_RSTEN_Msk;
     /* enable BUSY reporting for transmit */
@@ -237,7 +237,7 @@ void uart_poweroff(uart_t uart)
 void isr_usic5(void)
 {
     USIC_CH_TypeDef *usic = _usic(0);
-    
+
     if (usic->PSR & USIC_CH_PSR_RIF_Msk) {
         char data = (char)usic->RBUF;
         uart_ctx[0].rx_cb(uart_ctx[0].arg, data);

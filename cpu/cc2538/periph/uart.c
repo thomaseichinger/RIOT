@@ -72,7 +72,6 @@ enum {
  */
 typedef struct {
     uart_rx_cb_t rx_cb;
-    uart_tx_cb_t tx_cb;
     void *arg;
 } uart_conf_t;
 
@@ -108,8 +107,7 @@ static void reset(cc2538_uart_t *u)
 }
 /*---------------------------------------------------------------------------*/
 
-int uart_init(uart_t uart, uint32_t baudrate,
-              uart_rx_cb_t rx_cb, uart_tx_cb_t tx_cb, void *arg)
+int uart_init(uart_t uart, uint32_t baudrate, uart_rx_cb_t rx_cb, void *arg)
 {
     cc2538_uart_t *u;
 
@@ -239,7 +237,6 @@ int uart_init(uart_t uart, uint32_t baudrate,
 
     /* register callbacks */
     uart_config[uart].rx_cb = rx_cb;
-    uart_config[uart].tx_cb = tx_cb;
     uart_config[uart].arg = arg;
 
     /* configure interrupts and enable RX interrupt */
@@ -259,6 +256,7 @@ int uart_init(uart_t uart, uint32_t baudrate,
     }
 
     return 0;
+#endif /* UART_0_EN || UART_1_EN */
 }
 
 void uart_tx(uart_t uart)

@@ -60,13 +60,13 @@ extern "C" {
  * @name Macros for controlling the on-board LEDs.
  * @{
  */
-#define LED_1_ON              (PORT1->OUT |= LED_L_PIN)
-#define LED_1_OFF             (PORT1->OUT &= ~LED_L_PIN)
-#define LED_1_TOGGLE          (PORT1->OUT ^= LED_L_PIN)
+#define LED_1_ON              (PORT1->OUT |= LED_1_PIN)
+#define LED_1_OFF             (PORT1->OUT &= ~LED_1_PIN)
+#define LED_1_TOGGLE          (PORT1->OUT ^= LED_1_PIN)
 
-#define LED_2_ON              (PORT1->OUT |= LED_R_PIN)
-#define LED_2_OFF             (PORT1->OUT &= ~LED_R_PIN)
-#define LED_2_TOGGLE          (PORT1->OUT ^= LED_R_PIN)
+#define LED_2_ON              (PORT1->OUT |= LED_2_PIN)
+#define LED_2_OFF             (PORT1->OUT &= ~LED_2_PIN)
+#define LED_2_TOGGLE          (PORT1->OUT ^= LED_2_PIN)
 /** @} */
 
 /**

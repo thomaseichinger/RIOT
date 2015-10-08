@@ -93,6 +93,10 @@ int mstp_snipify_pkt(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt);
 
 void mstp_receive_frame(void *arg, char data);
 
+uint8_t mstp_crc_header_update(uint8_t data, uint8_t crc_in);
+
+uint16_t mstp_crc_data_update(uint8_t data, uint16_t crc_in);
+
 #ifdef __cplusplus
 }
 #endif

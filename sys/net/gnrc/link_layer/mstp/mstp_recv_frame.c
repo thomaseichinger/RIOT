@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2015 Freie Universität Berlin
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @ingroup     net_gnrc_mstp
+ * @{
+ *
+ * @file
+ * @brief       Recieve Frame FSM for the MS/TP MAC layer
+ *
+ * @author      Thomas Eichinger <thomas.eichinger@fu-berlin.de>
+ */
+
+
 #include "msg.h"
 
 #include "periph/uart.h"
@@ -5,15 +24,6 @@
 msg_t mstp_recv_frame_msg;
 uint16_t mstp_recv_frame_data_index;
 
-static uint32_t mstp_acc_hdr_crc(uint8_t data)
-{
-    return 0;
-}
-
-static uint32_t mstp_acc_data_crc(uint8_t data)
-{
-    return 0;
-}
 
 void mstp_receive_frame(void *arg, char data)
 {
@@ -46,7 +56,7 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_acc_hdr_crc(data);
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 /* Remember if payload octets are encoded */
                 /* TODO: This also includes proprietary frames */
                 if (ctx->frame.type >= MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY) {
@@ -57,29 +67,30 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.dst_addr = data;
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_acc_hdr_crc(data);
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_SRC_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.src_addr = data;
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_acc_hdr_crc(data);
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_1){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.length = (data<<8);
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_acc_hdr_crc(data);
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_2){
                 ctx->state = MSTP_STATE_HEADER_CRC;
                 ctx->frame.length |= data;
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_acc_hdr_crc(data);
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else {
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
+                ctx->frame.header_crc = 0xff;
             }
             /* HEADER CRC byte should be read in header_crc state */
             break;
@@ -116,17 +127,17 @@ void mstp_receive_frame(void *arg, char data)
             if (mstp_recv_frame_data_index < ctx->frame.length) {
                 /* receive n=length bytes */
                 ctx->frame.data[mstp_recv_frame_data_index++] = (uint8_t) data;
-                ctx->frame.data_crc = mstp_acc_data_crc(data);
+                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
                 break;
             }
             else if (mstp_recv_frame_data_index == ctx->frame.length) {
                 /* receive first crc octet */
-                ctx->frame.data_crc = mstp_acc_data_crc(data);
+                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
                 break;
             }
             else if (mstp_recv_frame_data_index == (ctx->frame.length + 1)) {
                 /* receive second CRC octet */
-                ctx->frame.data_crc = mstp_acc_data_crc(data);
+                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
                 ctx->state = MSTP_STATE_DATA_CRC;
             }
         case MSTP_STATE_DATA_CRC:
@@ -136,6 +147,8 @@ void mstp_receive_frame(void *arg, char data)
             }
             ctx->state = MSTP_STATE_IDLE;
             ctx->frame.hdr_index = 0;
+            ctx->frame.header_crc = 0xff;
+            ctx->frame.data_crc = 0xffff;
             mstp_recv_frame_data_index = 0;
             mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_VALID_FRAME;
             msg_send(&msg, ctx->mac_pid);
@@ -149,6 +162,7 @@ void mstp_receive_frame(void *arg, char data)
                 /* done consuming */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
+                ctx->frame.header_crc = 0xff;
                 mstp_recv_frame_data_index = 0;
             }
     }

@@ -138,6 +138,8 @@ static size_t _make_data_frame_hdr(gnrc_mstp_t *ctx, gnrc_netif_hdr_t *hdr)
         ctx->frame.src_addr = ctx->addr;
     }
 
+    ctx->frame.header_crc = 0x55;
+
     /* set sequence number */
     // buf[2] = dev->seq_nr++;
     /* return actual header length */
@@ -166,7 +168,7 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
     }
     /* check if packet (header + payload + FCS) fits into FIFO */
     snip = pkt->next;
-    ctx->frame.length = gnrc_pkt_len(snip) + len + 2;
+    ctx->frame.length = gnrc_pkt_len(snip);
     if (ctx->frame.length > 1500) {
         printf("[mstp] error: packet too large (%u byte) to be send\n",
                ctx->frame.length);
@@ -195,8 +197,10 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
     /* load packet data into FIFO */
     while (snip) {
         for (uint16_t i = 0; i < snip->size; i++) {
+            ctx->frame.data_crc = mstp_crc_data_update(((uint8_t *)snip->data)[i],
+                                                      ctx->frame.data_crc);
             uart_write_blocking(ctx->uart, ((char *)snip->data)[i]);
-            xtimer_usleep(MSTP_T_SEND_WAIT);
+            xtimer_usleep(MSTP_T_SEND_WAIT*4);
         }
         snip = snip->next;
     }
@@ -204,9 +208,13 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
     /* release packet */
     gnrc_pktbuf_release(pkt);
 
-    uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
+    // uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
+    uart_write_blocking(ctx->uart, 0xf0);
     xtimer_usleep(MSTP_T_SEND_WAIT);
-    uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
+    // uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
+    uart_write_blocking(ctx->uart, 0xb8);
+    ctx->frame.header_crc = 0xff;
+    ctx->frame.data_crc = 0xffff;
     return 0;
 }
 

@@ -38,20 +38,21 @@ void mstp_receive_frame(void *arg, char data)
             }
             break;
         case MSTP_STATE_PREAMBLE:
-            if (data == MSTP_DATA_PREAMBLE_1) {
-                ctx->state = MSTP_STATE_PREAMBLE;
+            if (data == MSTP_DATA_PREAMBLE_2) {
+                ctx->state = MSTP_STATE_HEADER;
                 /* set timeout to return to IDLE here */
             }
-            else if (data == MSTP_DATA_PREAMBLE_2) {
-                ctx->state = MSTP_STATE_HEADER;
-                // ctx->buffer[ctx->buffer_possition++] = data;
-            }
+            // else if (data == MSTP_DATA_PREAMBLE_2) {
+            //     ctx->state = MSTP_STATE_HEADER;
+            //     // ctx->buffer[ctx->buffer_possition++] = data;
+            // }
             else {
                 ctx->state = MSTP_STATE_IDLE;
                 // ctx->buffer_possition = 0;
             }
             break;
         case MSTP_STATE_HEADER:
+            printf("hdri: %d\n", ctx->frame.hdr_index);
             if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_FRAME_TYPE) {
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
@@ -82,9 +83,9 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_2){
-                ctx->state = MSTP_STATE_HEADER_CRC;
+                ctx->state = MSTP_STATE_VALIDATE_HEADER;
                 ctx->frame.length |= data;
-                ctx->frame.hdr_index++;
+                ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
             }
             else {
@@ -95,13 +96,15 @@ void mstp_receive_frame(void *arg, char data)
             /* HEADER CRC byte should be read in header_crc state */
             break;
         case MSTP_STATE_VALIDATE_HEADER:
-            if (ctx->frame.header_crc != 0x55) {
+            printf("calc hdr_crc: %02x\n", ctx->frame.header_crc);
+            if (data != 0x55) {
                 /* Bad CRC */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
             }
             else if ((ctx->frame.dst_addr != ctx->addr) && (ctx->frame.dst_addr != MSTP_BROADCAST_ADDR)) {
                 /* Not for us */
+                puts("not for us");
                 if (ctx->frame.length != 0) {
                     ctx->state = MSTP_STATE_SKIP_DATA;
                 }
@@ -112,6 +115,7 @@ void mstp_receive_frame(void *arg, char data)
             }
             else if (ctx->frame.length == 0) {
                 /* For us, no data, signal valid frame */
+                puts("for us but no data");
                 ctx->frame.valid = 1;
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
@@ -119,31 +123,41 @@ void mstp_receive_frame(void *arg, char data)
                 msg_send(&msg, ctx->mac_pid);
             }
             else {
+                puts("DATA!!!!");
                 /* Proceed to receive payload */
                 ctx->state = MSTP_STATE_DATA;
             }
             break;
         case MSTP_STATE_DATA:
             if (mstp_recv_frame_data_index < ctx->frame.length) {
+                printf("%d < %d\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive n=length bytes */
                 ctx->frame.data[mstp_recv_frame_data_index++] = (uint8_t) data;
                 ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
                 break;
             }
             else if (mstp_recv_frame_data_index == ctx->frame.length) {
+                printf("%d == %d\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive first crc octet */
-                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+                mstp_recv_frame_data_index++;
+                // ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+
                 break;
             }
             else if (mstp_recv_frame_data_index == (ctx->frame.length + 1)) {
+                printf("%d == %d+1\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive second CRC octet */
-                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+                // ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
                 ctx->state = MSTP_STATE_DATA_CRC;
             }
         case MSTP_STATE_DATA_CRC:
-            if (ctx->frame.data_crc == 0xf0b8) {
+            if ((ctx->frame.data_crc) == 0xf0b8) {
                 /* valid CRC, signal valid frame */
                 ctx->frame.valid = 1;
+            }
+            else {
+                puts("ALARM!!!! WRONG DATA CRC!");
+                printf("was %04x\n", ctx->frame.data_crc);
             }
             ctx->state = MSTP_STATE_IDLE;
             ctx->frame.hdr_index = 0;

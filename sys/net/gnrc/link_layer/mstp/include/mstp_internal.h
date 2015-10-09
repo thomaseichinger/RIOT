@@ -44,11 +44,11 @@ extern "C" {
 #define MSTP_DATA_PREAMBLE_1    (0x55)
 #define MSTP_DATA_PREAMBLE_2    (0xff)
 
-#define MSTP_FRAME_INDEX_DEST_ADDR (0x03)
-#define MSTP_FRAME_INDEX_SRC_ADDR  (0x04)
-#define MSTP_FRAME_INDEX_LEN_1     (0x05)
-#define MSTP_FRAME_INDEX_LEN_2     (0x06)
-#define MSTP_FRAME_INDEX_FRAME_TYPE     (0x07)
+#define MSTP_FRAME_INDEX_FRAME_TYPE     (0x00)
+#define MSTP_FRAME_INDEX_DEST_ADDR (0x01)
+#define MSTP_FRAME_INDEX_SRC_ADDR  (0x02)
+#define MSTP_FRAME_INDEX_LEN_1     (0x03)
+#define MSTP_FRAME_INDEX_LEN_2     (0x04)
 
 #define MSTP_STATE_IDLE         (0x00)
 #define MSTP_STATE_PREAMBLE     (0x01)
@@ -66,7 +66,7 @@ extern "C" {
 #define MSTP_EV_SUCCESSFULL_RECEPTION           (0xbb)
 #define MSTP_EV_SEND_FRAME                      (0xcc)
 
-#define MSTP_T_SEND_WAIT        (600)   /**< interval to wait between bytes sent */
+#define MSTP_T_SEND_WAIT        (1000)   /**< interval to wait between bytes sent */
 
 
 

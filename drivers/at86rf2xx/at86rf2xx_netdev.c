@@ -334,7 +334,12 @@ static void _receive_data(at86rf2xx_t *dev)
     at86rf2xx_fb_read(dev, NULL, 2);
 
     at86rf2xx_fb_read(dev, &(netif->lqi), 1);
+
+#ifndef MODULE_AT86RF231
     at86rf2xx_fb_read(dev, &(netif->rssi), 1);
+#else
+    netif->rssi = at86rf2xx_reg_read(dev, AT86RF2XX_REG__PHY_ED_LEVEL);
+#endif
 
     at86rf2xx_fb_stop(dev);
 

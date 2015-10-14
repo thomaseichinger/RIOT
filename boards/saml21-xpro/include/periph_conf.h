@@ -53,7 +53,7 @@ extern "C" {
  * @{
  */
 static const uart_conf_t uart_config[] = {
-    {&SERCOM3->USART, GPIO(PA,23), GPIO(PA,22)},    /* device, RX pin, TX pin */
+    {&SERCOM3->USART, GPIO_PIN(PA,23), GPIO_PIN(PA,22)},    /* device, RX pin, TX pin */
 };
 
 #define UART_0_ISR          isr_sercom3

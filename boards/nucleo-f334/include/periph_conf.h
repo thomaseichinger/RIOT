@@ -70,7 +70,7 @@ extern "C" {
  */
 static const uart_conf_t uart_config[] = {
     /* device, RCC mask, RX pin, TX pin, pin AF, IRQ channel */
-    {USART2, RCC_APB1ENR_USART2EN, GPIO(PORT_A,3), GPIO(PORT_A,2), GPIO_AF7, USART2_IRQn},
+    {USART2, RCC_APB1ENR_USART2EN, GPIO_PIN(PORT_A,3), GPIO_PIN(PORT_A,2), GPIO_AF7, USART2_IRQn},
 };
 
 #define UART_0_ISR          isr_usart2

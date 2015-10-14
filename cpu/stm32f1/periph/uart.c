@@ -31,74 +31,61 @@
 #include "thread.h"
 
 /**
- * @brief Each UART device has to store two callbacks.
- */
-typedef struct {
-    uart_rx_cb_t rx_cb;
-    uart_tx_cb_t tx_cb;
-    void *arg;
-} uart_conf_t;
-
-/**
  * @brief Allocate memory to store the callback functions.
  */
-static uart_conf_t config[UART_NUMOF];
+static uart_isr_ctx_t uart_ctx[UART_NUMOF];
 
+/**
+ * @brief   Get the base register for the given UART device
+ */
+static inline USART_TypeDef *_dev(uart_t uart)
+{
+    return uart_config[uart].dev;
+}
 
 int uart_init(uart_t uart, uint32_t baudrate,
               uart_rx_cb_t rx_cb, uart_tx_cb_t tx_cb, void *arg)
 {
-    USART_TypeDef *dev;
-    uint32_t bus_freq;
-    gpio_t rx_pin, tx_pin;
+    USART_TypeDef *dev = 0;
+    float divider;
     uint16_t mantissa;
     uint8_t fraction;
 
-    /* enable UART and port clocks and select devices */
-    switch (uart) {
-#if UART_0_EN
-        case UART_0:
-            dev = UART_0_DEV;
-            rx_pin = UART_0_RX_PIN;
-            tx_pin = UART_0_TX_PIN;
-            bus_freq = UART_0_BUS_FREQ;
-            /* enable clocks */
-            UART_0_CLKEN();
-            break;
-#endif
-#if UART_1_EN
-        case UART_1:
-            dev = UART_1_DEV;
-            tx_pin = UART_1_TX_PIN;
-            rx_pin = UART_1_RX_PIN;
-            bus_freq = UART_1_BUS_FREQ;
-            /* enable clocks */
-            UART_1_CLKEN();
-            break;
-#endif
-        default:
-            return -2;
+    /* check if given UART device is valid */
+    if (uart < 0 || uart >= UART_NUMOF) {
+        return -1;
     }
+
+    /* get UART device address */
+    dev = _dev(uart);
+    /* remember the context */
+    uart_ctx[uart].rx_cb = rx_cb;
+    uart_ctx[uart].tx_cb = tx_cb;
+    uart_ctx[uart].arg = arg;
+
     /* configure RX and TX pin */
-    gpio_init_af(tx_pin, GPIO_AF_OUT_PP);
-    gpio_init(rx_pin, GPIO_DIR_IN, GPIO_NOPULL);
+    gpio_init_af(uart_config[uart].tx_pin, uart_config[uart].af);
+    gpio_init(uart_config[uart].rx_pin, GPIO_DIR_IN, GPIO_NOPULL);
+
+    /* power on device */
+    uart_poweron(uart);
 
     /* configure UART to mode 8N1 with given baudrate */
-    bus_freq /= baudrate;
-    mantissa = (uint16_t)(bus_freq / 16);
-    fraction = (uint8_t)(bus_freq - (mantissa * 16));
-    dev->BRR = 0;
-    dev->BRR |= ((mantissa & 0x0fff) << 4) | (0x0f & fraction);
+    if (_bus(uart) == 1) {
+        divider = CLOCK_APB1 / (16 * baudrate);
+    }
+    else {
+        divider = CLOCK_APB2 / (16 * baudrate);
+    }
+    mantissa = (uint16_t)(divider);
+    fraction = (uint8_t)(divider - mantissa) * 16));
+    dev->BRR = ((mantissa & 0x0fff) << 4) | (0x0f & fraction);
 
     /* enable receive and transmit mode */
     dev->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;
 
-    /* register callbacks */
-    config[uart].rx_cb = rx_cb;
-    config[uart].tx_cb = tx_cb;
-    config[uart].arg = arg;
-
     /* enable global interrupt and configure the interrupts priority */
+    NVIC_SetPriority(uart_ctx[uart].)
     switch (uart) {
 #if UART_0_EN
         case UART_0:

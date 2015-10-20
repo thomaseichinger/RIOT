@@ -148,7 +148,7 @@ static const timer_conf_t timer_config[] = {
 #define I2C_0_SDA_PIN       9
 #define I2C_0_SDA_AF        4
 
-/* I2C 1 device configuration [ST VL6180X, ST LSM6DS3, ST LIS3MDL, ST SLPS25H] */
+/* I2C 1 device configuration [ST VL6180X, ST LSM6DS3, ST LIS3MDL, ST SLPS25H]*/
 #define I2C_1_EVT_IRQ       I2C2_EV_IRQn
 #define I2C_1_EVT_ISR       isr_i2c2_ev
 #define I2C_1_ERR_ISR       isr_i2c2_er

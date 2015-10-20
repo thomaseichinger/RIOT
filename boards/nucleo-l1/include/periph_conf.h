@@ -244,20 +244,24 @@ static const timer_conf_t timer_config[] = {
 #define I2C_APBCLK          (36000000U)
 
 /* I2C 0 device configuration */
-#define I2C_0_DEV           I2C1
-#define I2C_0_CLKEN()       (RCC->APB1ENR |= RCC_APB1ENR_I2C1EN)
-#define I2C_0_CLKDIS()      (RCC->APB1ENR &= ~(RCC_APB1ENR_I2C1EN))
 #define I2C_0_EVT_IRQ       I2C1_EV_IRQn
 #define I2C_0_EVT_ISR       isr_i2c1_ev
-#define I2C_0_ERR_IRQ       I2C1_ER_IRQn
 #define I2C_0_ERR_ISR       isr_i2c1_er
 /* I2C 0 pin configuration */
-#define I2C_0_PORT_CLKEN()  (RCC->AHBENR |= RCC_AHBENR_GPIOBEN)
-#define I2C_0_PORT          GPIOB
 #define I2C_0_SCL_PIN       8
 #define I2C_0_SCL_AF        4
 #define I2C_0_SDA_PIN       9
 #define I2C_0_SDA_AF        4
+
+/* I2C 1 device configuration */
+#define I2C_1_EVT_IRQ       I2C2_EV_IRQn
+#define I2C_1_EVT_ISR       isr_i2c2_ev
+#define I2C_1_ERR_ISR       isr_i2c2_er
+/* I2C 1 pin configuration */
+#define I2C_1_SCL_PIN       10
+#define I2C_1_SCL_AF        4
+#define I2C_1_SDA_PIN       11
+#define I2C_1_SDA_AF        4
 /** @} */
 
 #ifdef __cplusplus

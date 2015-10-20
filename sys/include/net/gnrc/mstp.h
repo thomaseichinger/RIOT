@@ -23,6 +23,8 @@
 
 #include "periph/uart.h"
 #include "kernel.h"
+#include "msg.h"
+#include "xtimer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,9 +56,12 @@ typedef struct
     uart_t uart;
     kernel_pid_t mac_pid;
     uint8_t state;
+    uint8_t has_token;
     uint8_t addr;
     mstp_frame_t frame;
     uint16_t options;
+    xtimer_t timer_fa;
+    msg_t msg_fa;
 } gnrc_mstp_t;
 
 /**

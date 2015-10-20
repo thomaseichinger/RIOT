@@ -62,11 +62,14 @@ extern "C" {
 #define MSTP_SLAVE_IDLE (0x00)
 #define MSTP_SLAVE_ANSWER_DATA (0x01)
 
-#define MSTP_EV_RECEIVED_VALID_FRAME            (0xaa)
-#define MSTP_EV_SUCCESSFULL_RECEPTION           (0xbb)
-#define MSTP_EV_SEND_FRAME                      (0xcc)
+#define MSTP_EV_RECEIVED_VALID_FRAME            (0xa0)
+#define MSTP_EV_SUCCESSFULL_RECEPTION           (0xa1)
+#define MSTP_EV_SEND_FRAME                      (0xa2)
+#define MSTP_EV_RECEIVED_INVALID_FRAME          (0xa3)
+#define MSTP_EV_T_FRAME_ABORT                   (0xb0)
 
-#define MSTP_T_SEND_WAIT        (1000)   /**< interval to wait between bytes sent */
+#define MSTP_T_FRAME_ABORT      (10000)  /**< max interval between rx bytes befor frame abort */
+#define MSTP_T_SEND_WAIT        (1000)   /**< interval to wait between bytes sent in us*/
 
 
 

@@ -20,7 +20,12 @@
 #include "msg.h"
 
 #include "periph/uart.h"
+#include "xtimer.h"
 #include "mstp_internal.h"
+
+#define ENABLE_DEBUG    (0)
+#include "debug.h"
+
 msg_t mstp_recv_frame_msg;
 uint16_t mstp_recv_frame_data_index;
 
@@ -29,30 +34,29 @@ void mstp_receive_frame(void *arg, char data)
 {
     gnrc_mstp_t *ctx = (gnrc_mstp_t *)arg;
     msg_t msg;
-    printf("St: %02x Rx: %02x\n", ctx->state, data);
+
     switch (ctx->state) {
         case MSTP_STATE_IDLE:
             if (data == MSTP_DATA_PREAMBLE_1) {
                 ctx->state = MSTP_STATE_PREAMBLE;
-                // ctx->buffer[ctx->buffer_possition++] = data;
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             break;
         case MSTP_STATE_PREAMBLE:
             if (data == MSTP_DATA_PREAMBLE_2) {
                 ctx->state = MSTP_STATE_HEADER;
                 /* set timeout to return to IDLE here */
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
-            // else if (data == MSTP_DATA_PREAMBLE_2) {
-            //     ctx->state = MSTP_STATE_HEADER;
-            //     // ctx->buffer[ctx->buffer_possition++] = data;
-            // }
             else {
                 ctx->state = MSTP_STATE_IDLE;
-                // ctx->buffer_possition = 0;
+                xtimer_remove(&(ctx->timer_fa));
             }
             break;
         case MSTP_STATE_HEADER:
-            printf("hdri: %d\n", ctx->frame.hdr_index);
+            DEBUG("hdri: %d\n", ctx->frame.hdr_index);
             if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_FRAME_TYPE) {
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
@@ -63,114 +67,139 @@ void mstp_receive_frame(void *arg, char data)
                 if (ctx->frame.type >= MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY) {
                     ctx->frame.encoded = 1;
                 }
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_DEST_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.dst_addr = data;
                 ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_SRC_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.src_addr = data;
                 ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_1){
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.length = (data<<8);
                 ctx->frame.hdr_index++;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_2){
                 ctx->state = MSTP_STATE_VALIDATE_HEADER;
                 ctx->frame.length |= data;
                 ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else {
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = 0xff;
+                xtimer_remove(&(ctx->timer_fa));
             }
             /* HEADER CRC byte should be read in header_crc state */
             break;
         case MSTP_STATE_VALIDATE_HEADER:
-            printf("calc hdr_crc: %02x\n", ctx->frame.header_crc);
+            DEBUG("calc hdr_crc: %02x\n", ctx->frame.header_crc);
             if (data != 0x55) {
                 /* Bad CRC */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
+                xtimer_remove(&(ctx->timer_fa));
             }
             else if ((ctx->frame.dst_addr != ctx->addr) && (ctx->frame.dst_addr != MSTP_BROADCAST_ADDR)) {
                 /* Not for us */
-                puts("not for us");
+                DEBUG("not for us");
                 if (ctx->frame.length != 0) {
                     ctx->state = MSTP_STATE_SKIP_DATA;
+                    xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                                   &(ctx->msg_fa), ctx->mac_pid);
                 }
                 else {
                     ctx->state = MSTP_STATE_IDLE;
                     ctx->frame.hdr_index = 0;
+                    xtimer_remove(&(ctx->timer_fa));
                 }
             }
             else if (ctx->frame.length == 0) {
                 /* For us, no data, signal valid frame */
-                puts("for us but no data");
+                DEBUG("for us but no data");
                 ctx->frame.valid = 1;
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
-                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_VALID_FRAME;
+                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_INVALID_FRAME;
+                xtimer_remove(&(ctx->timer_fa));
                 msg_send(&msg, ctx->mac_pid);
             }
             else {
-                puts("DATA!!!!");
+                DEBUG("DATA!!!!");
                 /* Proceed to receive payload */
                 ctx->state = MSTP_STATE_DATA;
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             break;
         case MSTP_STATE_DATA:
             if (mstp_recv_frame_data_index < ctx->frame.length) {
-                printf("%d < %d\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive n=length bytes */
                 ctx->frame.data[mstp_recv_frame_data_index++] = (uint8_t) data;
                 ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
                 break;
             }
             else if (mstp_recv_frame_data_index == ctx->frame.length) {
-                printf("%d == %d\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive first crc octet */
                 mstp_recv_frame_data_index++;
+                ctx->frame.data_crc = (data<<8);
                 // ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
-
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
                 break;
             }
             else if (mstp_recv_frame_data_index == (ctx->frame.length + 1)) {
-                printf("%d == %d+1\n", mstp_recv_frame_data_index, ctx->frame.length);
                 /* receive second CRC octet */
                 // ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+                ctx->frame.data_crc += data;
                 ctx->state = MSTP_STATE_DATA_CRC;
+                xtimer_remove(&(ctx->timer_fa));
             }
         case MSTP_STATE_DATA_CRC:
             if ((ctx->frame.data_crc) == 0xf0b8) {
                 /* valid CRC, signal valid frame */
                 ctx->frame.valid = 1;
+                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_INVALID_FRAME;
             }
             else {
-                puts("ALARM!!!! WRONG DATA CRC!");
-                printf("was %04x\n", ctx->frame.data_crc);
+                DEBUG("ALARM!!!! WRONG DATA CRC!");
+                DEBUG("was %04x\n", ctx->frame.data_crc);
+                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_VALID_FRAME;
             }
             ctx->state = MSTP_STATE_IDLE;
             ctx->frame.hdr_index = 0;
             ctx->frame.header_crc = 0xff;
             ctx->frame.data_crc = 0xffff;
             mstp_recv_frame_data_index = 0;
-            mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_VALID_FRAME;
+            mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_INVALID_FRAME;
             msg_send(&msg, ctx->mac_pid);
             break;
         case MSTP_STATE_SKIP_DATA:
             if (mstp_recv_frame_data_index <= ctx->frame.length) {
                 /* consume data not for us */
                 mstp_recv_frame_data_index++;
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
             }
             else {
                 /* done consuming */
@@ -178,6 +207,8 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = 0xff;
                 mstp_recv_frame_data_index = 0;
+                xtimer_remove(&(ctx->timer_fa));
             }
     }
+    DEBUG("St: %02x Rx: %02x\n", ctx->state, data);
 }

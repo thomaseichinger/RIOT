@@ -30,11 +30,13 @@
 #include "net/ieee802154.h"
 #include "mstp_internal.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    (1)
 #include "debug.h"
 
 
 #define GNRC_MSTP_MASTER_MSG_QUEUE_SIZE      (8)
+
+msg_t mstp_master_msg;
 
 static void mstp_master_intialize(gnrc_mstp_t *ctx)
 {
@@ -68,6 +70,19 @@ static int _get(gnrc_mstp_t *ctx, netopt_t opt, void *val, size_t max_len)
 
 static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
 {
+    if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
+        puts("Sorry, event no have!");
+        return -1;
+    }
+
+    if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
+        DEBUG("MSTP: f_t: d e r\n");
+        if (ctx->frame.valid) {
+            mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
+            msg_send(&mstp_master_msg, ctx->mac_pid);
+        }
+    }
+
     return 0;
 }
 
@@ -96,23 +111,17 @@ static size_t _make_data_frame_hdr(gnrc_mstp_t *ctx, gnrc_netif_hdr_t *hdr)
         (GNRC_NETIF_HDR_FLAGS_BROADCAST | GNRC_NETIF_HDR_FLAGS_MULTICAST)) {
         ctx->frame.dst_addr = MSTP_BROADCAST_ADDR;
     }
-    else if (hdr->dst_l2addr_len == 2) {
+    else if (hdr->dst_l2addr_len == 1) {
         uint8_t *dst_addr = gnrc_netif_hdr_get_dst_addr(hdr);
-        // buf[1] |= IEEE802154_FCF_DST_ADDR_SHORT;
-        // buf[pos++] = dst_addr[1];
-        // buf[pos++] = dst_addr[0];
         ctx->frame.dst_addr = dst_addr[0];
     }
     else if (hdr->dst_l2addr_len == 8) {
-        // buf[1] |= IEEE802154_FCF_DST_ADDR_LONG;
         uint8_t *dst_addr = gnrc_netif_hdr_get_dst_addr(hdr);
-        // for (int i = 7;  i >= 0; i--) {
-        //     buf[pos++] = dst_addr[i];
-        // }
         ctx->frame.dst_addr = dst_addr[0];
     }
     else {
         /* unsupported address length */
+        DEBUG("mstp: unsupported address length.");
         return 0;
     }
 
@@ -247,7 +256,7 @@ static void *_mstp_master_thread(void *args)
         /* dispatch NETDEV and NETAPI messages */
         switch (msg.type) {
             case GNRC_NETAPI_MSG_TYPE_SND:
-                DEBUG("mstp master: GNRC_NETAPI_MSG_TYPE_SND received (NOT IMPLEMENTED)\n");
+                DEBUG("mstp master: GNRC_NETAPI_MSG_TYPE_SND received.\n");
                 // dev->driver->send_data(dev, (gnrc_pktsnip_t *)msg.content.ptr);
                 mstp_send_frame(ctx, (gnrc_pktsnip_t *)msg.content.ptr);
                 break;
@@ -292,9 +301,13 @@ static void *_mstp_master_thread(void *args)
                     DEBUG("mstp master: unable to forward packet of type %i\n", pkt->type);
                     gnrc_pktbuf_release(pkt);
                 }
-
+            case MSTP_EV_T_FRAME_ABORT:
+                puts("mstp master: frame abort timer fired, take care of it!");
+                ctx->state = MSTP_STATE_IDLE;
+                memset(&(ctx->frame), 0, sizeof(mstp_frame_t));
+                break;
             default:
-                DEBUG("mstp master: Unknown command %" PRIu16 "\n", msg.type);
+                DEBUG("mstp master: Unknown command %" PRIu16 " from %" PRIkernel_pid "\n", msg.type, msg.sender_pid);
                 break;
         }
     }
@@ -307,6 +320,7 @@ int gnrc_mstp_init(gnrc_mstp_t *ctx, const gnrc_mstp_params_t *p)
     ctx->uart = p->uart;
 
     uart_init(ctx->uart, p->baudrate, mstp_receive_frame, NULL, (void *)ctx);
+    ctx->msg_fa.type = MSTP_EV_T_FRAME_ABORT;
 
     return 0;
 }

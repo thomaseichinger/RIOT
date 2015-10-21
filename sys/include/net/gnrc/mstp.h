@@ -57,11 +57,12 @@ typedef struct
     kernel_pid_t mac_pid;
     uint8_t state;
     uint8_t has_token;
-    uint8_t addr;
+    uint8_t ll_addr;
     mstp_frame_t frame;
     uint16_t options;
     xtimer_t timer_fa;
     msg_t msg_fa;
+    msg_t msg_frame;
 } gnrc_mstp_t;
 
 /**

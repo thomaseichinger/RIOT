@@ -20,6 +20,7 @@
 #include "msg.h"
 
 #include "periph/uart.h"
+#include "periph/gpio.h"
 #include "xtimer.h"
 #include "mstp_internal.h"
 
@@ -28,12 +29,13 @@
 
 msg_t mstp_recv_frame_msg;
 uint16_t mstp_recv_frame_data_index;
-
+int i;
 
 void mstp_receive_frame(void *arg, char data)
 {
+    gpio_set(GPIO(PA, 5));
+
     gnrc_mstp_t *ctx = (gnrc_mstp_t *)arg;
-    msg_t msg;
 
     switch (ctx->state) {
         case MSTP_STATE_IDLE:
@@ -61,7 +63,7 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
                 ctx->frame.hdr_index++;
-                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                ctx->frame.header_crc = mstp_crc_header_update(data, 0xff);
                 /* Remember if payload octets are encoded */
                 /* TODO: This also includes proprietary frames */
                 if (ctx->frame.type >= MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY) {
@@ -69,6 +71,7 @@ void mstp_receive_frame(void *arg, char data)
                 }
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
+                break;
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_DEST_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
@@ -77,6 +80,7 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
+                break;
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_SRC_ADDR){
                 ctx->state = MSTP_STATE_HEADER;
@@ -85,6 +89,7 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
+                break;
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_1){
                 ctx->state = MSTP_STATE_HEADER;
@@ -93,10 +98,19 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
+                break;
             }
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_LEN_2){
-                ctx->state = MSTP_STATE_VALIDATE_HEADER;
+                ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.length |= data;
+                ctx->frame.hdr_index++;
+                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
+                               &(ctx->msg_fa), ctx->mac_pid);
+                break;
+            }
+            else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_HDR_CRC) {
+                ctx->state = MSTP_STATE_VALIDATE_HEADER;
                 ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
@@ -107,18 +121,18 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.hdr_index = 0;
                 ctx->frame.header_crc = 0xff;
                 xtimer_remove(&(ctx->timer_fa));
+                break;
             }
-            /* HEADER CRC byte should be read in header_crc state */
-            break;
         case MSTP_STATE_VALIDATE_HEADER:
             DEBUG("calc hdr_crc: %02x\n", ctx->frame.header_crc);
-            if (data != 0x55) {
+            if (ctx->frame.header_crc != 0x55) {
+                puts("!HCRC");
                 /* Bad CRC */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
                 xtimer_remove(&(ctx->timer_fa));
             }
-            else if ((ctx->frame.dst_addr != ctx->addr) && (ctx->frame.dst_addr != MSTP_BROADCAST_ADDR)) {
+            else if ((ctx->frame.dst_addr != ctx->ll_addr) && (ctx->frame.dst_addr != MSTP_BROADCAST_ADDR)) {
                 /* Not for us */
                 DEBUG("not for us");
                 if (ctx->frame.length != 0) {
@@ -138,9 +152,9 @@ void mstp_receive_frame(void *arg, char data)
                 ctx->frame.valid = 1;
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
-                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_INVALID_FRAME;
+                mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_VALID_FRAME;
                 xtimer_remove(&(ctx->timer_fa));
-                msg_send(&msg, ctx->mac_pid);
+                msg_send(&mstp_recv_frame_msg, ctx->mac_pid);
             }
             else {
                 DEBUG("DATA!!!!");
@@ -192,7 +206,7 @@ void mstp_receive_frame(void *arg, char data)
             ctx->frame.data_crc = 0xffff;
             mstp_recv_frame_data_index = 0;
             mstp_recv_frame_msg.type = MSTP_EV_RECEIVED_INVALID_FRAME;
-            msg_send(&msg, ctx->mac_pid);
+            msg_send(&mstp_recv_frame_msg, ctx->mac_pid);
             break;
         case MSTP_STATE_SKIP_DATA:
             if (mstp_recv_frame_data_index <= ctx->frame.length) {
@@ -211,4 +225,7 @@ void mstp_receive_frame(void *arg, char data)
             }
     }
     DEBUG("St: %02x Rx: %02x\n", ctx->state, data);
+    gpio_clear(GPIO(PA, 5));
+    // printf("Rx: %02x i: %02x\n", data, i++);
+
 }

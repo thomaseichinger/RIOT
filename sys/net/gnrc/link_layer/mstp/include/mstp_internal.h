@@ -49,6 +49,7 @@ extern "C" {
 #define MSTP_FRAME_INDEX_SRC_ADDR  (0x02)
 #define MSTP_FRAME_INDEX_LEN_1     (0x03)
 #define MSTP_FRAME_INDEX_LEN_2     (0x04)
+#define MSTP_FRAME_INDEX_HDR_CRC   (0x05)
 
 #define MSTP_STATE_IDLE         (0x00)
 #define MSTP_STATE_PREAMBLE     (0x01)
@@ -68,7 +69,7 @@ extern "C" {
 #define MSTP_EV_RECEIVED_INVALID_FRAME          (0xa3)
 #define MSTP_EV_T_FRAME_ABORT                   (0xb0)
 
-#define MSTP_T_FRAME_ABORT      (10000)  /**< max interval between rx bytes befor frame abort */
+#define MSTP_T_FRAME_ABORT      (100000)  /**< max interval between rx bytes befor frame abort */
 #define MSTP_T_SEND_WAIT        (1000)   /**< interval to wait between bytes sent in us*/
 
 

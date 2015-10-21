@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "periph/uart.h"
+#include "periph/gpio.h"
 #include "thread.h"
 #include "xtimer.h"
 #include "net/gnrc.h"
@@ -30,7 +31,7 @@
 #include "net/ieee802154.h"
 #include "mstp_internal.h"
 
-#define ENABLE_DEBUG    (1)
+#define ENABLE_DEBUG    (0)
 #include "debug.h"
 
 
@@ -51,6 +52,12 @@ static int _set(gnrc_mstp_t *ctx, netopt_t opt, void *val, size_t max_len)
     }
 
     switch (opt) {
+        case NETOPT_ADDRESS:
+            if (max_len > sizeof(uint8_t)) {
+                return -EOVERFLOW;
+            }
+            ctx->ll_addr = *((uint8_t *) val);
+            return sizeof(uint8_t);
         default:
             return -ENOTSUP;
     }
@@ -63,26 +70,79 @@ static int _get(gnrc_mstp_t *ctx, netopt_t opt, void *val, size_t max_len)
     }
 
     switch (opt) {
+        case NETOPT_ADDRESS:
+            if (max_len < sizeof(uint8_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint8_t *)val) = ctx->ll_addr;
+            return sizeof(uint8_t);
         default:
             return -ENOTSUP;
     }
 }
 
+static void _send_reply_pfm(gnrc_mstp_t *ctx) {
+    gpio_set(GPIO(PA, 22));
+    gpio_set(GPIO(PB, 3));
+    /* mstp header */
+    uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, ctx->frame.type);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.type, 0xff);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.dst_addr,
+                                                   ctx->frame.header_crc);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, ctx->frame.src_addr);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.src_addr,
+                                                   ctx->frame.header_crc);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
+    ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length>>8),
+                                                   ctx->frame.header_crc);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
+    ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length&0xff),
+                                                   ctx->frame.header_crc);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
+    uart_write_blocking(ctx->uart, ctx->frame.header_crc);
+    xtimer_usleep(120);
+    gpio_clear(GPIO(PB, 3));
+    gpio_clear(GPIO(PA, 22));
+}
+
 static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
 {
+    gpio_set(GPIO(PA, 22));
     if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
         puts("Sorry, event no have!");
         return -1;
     }
+    // printf("EV: %02x FT: %02x\n", ev, ctx->frame.type);
 
-    if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
+    if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
+        puts("PFM");
+        ctx->frame.dst_addr = ctx->frame.src_addr;
+        ctx->frame.src_addr = ctx->ll_addr;
+        ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
+        _send_reply_pfm(ctx);
+        return 0;
+    }
+    else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
         DEBUG("MSTP: f_t: d e r\n");
         if (ctx->frame.valid) {
             mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
             msg_send(&mstp_master_msg, ctx->mac_pid);
         }
     }
-
+    else {
+        puts("unhandled");
+        // printf("t: %02x\n", ctx->frame.type);
+    }
+    gpio_clear(GPIO(PA, 22));
     return 0;
 }
 
@@ -138,13 +198,13 @@ static size_t _make_data_frame_hdr(gnrc_mstp_t *ctx, gnrc_netif_hdr_t *hdr)
         // buf[1] |= IEEE802154_FCF_SRC_ADDR_LONG;
         // memcpy(&(buf[pos]), dev->addr_long, 8);
         // pos += 8;
-        ctx->frame.src_addr = ctx->addr;
+        ctx->frame.src_addr = ctx->ll_addr;
     }
     else {
         // buf[1] |= IEEE802154_FCF_SRC_ADDR_SHORT;
         // buf[pos++] = dev->addr_short[0];
         // buf[pos++] = dev->addr_short[1];
-        ctx->frame.src_addr = ctx->addr;
+        ctx->frame.src_addr = ctx->ll_addr;
     }
 
     ctx->frame.header_crc = 0x55;
@@ -184,24 +244,24 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
         gnrc_pktbuf_release(pkt);
         return -EOVERFLOW;
     }
-
+    gpio_set(GPIO(PB, 3));
     /* mstp header */
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.type);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.src_addr);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.header_crc);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+    // xtimer_usleep(MSTP_T_SEND_WAIT);
 
     /* load packet data into FIFO */
     while (snip) {
@@ -209,21 +269,23 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
             ctx->frame.data_crc = mstp_crc_data_update(((uint8_t *)snip->data)[i],
                                                       ctx->frame.data_crc);
             uart_write_blocking(ctx->uart, ((char *)snip->data)[i]);
-            xtimer_usleep(MSTP_T_SEND_WAIT*4);
+            // xtimer_usleep(MSTP_T_SEND_WAIT*4);
         }
         snip = snip->next;
     }
-
+    uart_write_blocking(ctx->uart, 0xf0);
+    uart_write_blocking(ctx->uart, 0xb8);
     /* release packet */
     gnrc_pktbuf_release(pkt);
 
     // uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
-    uart_write_blocking(ctx->uart, 0xf0);
-    xtimer_usleep(MSTP_T_SEND_WAIT);
+
+    xtimer_usleep(120);
     // uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
-    uart_write_blocking(ctx->uart, 0xb8);
+
     ctx->frame.header_crc = 0xff;
     ctx->frame.data_crc = 0xffff;
+    gpio_clear(GPIO(PB, 3));
     return 0;
 }
 
@@ -307,7 +369,7 @@ static void *_mstp_master_thread(void *args)
                 memset(&(ctx->frame), 0, sizeof(mstp_frame_t));
                 break;
             default:
-                DEBUG("mstp master: Unknown command %" PRIu16 " from %" PRIkernel_pid "\n", msg.type, msg.sender_pid);
+                printf("mstp master: Unknown command %" PRIu16 " from %" PRIkernel_pid "\n", msg.type, msg.sender_pid);
                 break;
         }
     }
@@ -320,6 +382,8 @@ int gnrc_mstp_init(gnrc_mstp_t *ctx, const gnrc_mstp_params_t *p)
     ctx->uart = p->uart;
 
     uart_init(ctx->uart, p->baudrate, mstp_receive_frame, NULL, (void *)ctx);
+    gpio_init(GPIO(PB, 3), GPIO_DIR_OUT, GPIO_NOPULL);
+    gpio_init(GPIO(PA, 22), GPIO_DIR_OUT, GPIO_NOPULL);
     ctx->msg_fa.type = MSTP_EV_T_FRAME_ABORT;
 
     return 0;

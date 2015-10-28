@@ -239,9 +239,10 @@ static const timer_conf_t timer_config[] = {
  * @{
  */
 static const i2c_conf_t i2c_cfg[] = {
-    {I2C1, GPIO(PORT_B, 8), GPIO(PORT_B, 9), 4,
+    /* Device, SCL-, SDA-Pin, AF, Event-, Error-IRQ, Clock enable */
+    {I2C1, GPIO_PIN(PORT_B, 8), GPIO_PIN(PORT_B, 9), 4,
      I2C1_EV_IRQn, I2C1_ER_IRQn, RCC_APB1ENR_I2C1EN},
-    {I2C2, GPIO(PORT_B, 10), GPIO(PORT_B, 11), 4,
+    {I2C2, GPIO_PIN(PORT_B, 10), GPIO_PIN(PORT_B, 11), 4,
      I2C2_EV_IRQn, I2C2_ER_IRQn, RCC_APB1ENR_I2C2EN},
 };
 

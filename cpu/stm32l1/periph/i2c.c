@@ -34,6 +34,9 @@
 #define ENABLE_DEBUG    (0)
 #include "debug.h"
 
+#define I2C_0           (0)
+#define I2C_1           (1)
+
 /* static function definitions */
 static void _i2c_init(I2C_TypeDef *i2c, int ccr);
 static void _toggle_pins(GPIO_TypeDef *port, int pin_scl, int pin_sda);
@@ -47,8 +50,8 @@ static inline void _stop(I2C_TypeDef *dev);
  * @brief Array holding one pre-initialized mutex for each I2C device
  */
 static mutex_t locks[] =  {
-    [0] = MUTEX_INIT,
-    [1] = MUTEX_INIT,
+    [I2C_0] = MUTEX_INIT,
+    [I2C_1] = MUTEX_INIT,
 };
 
 int i2c_init_master(i2c_t dev, i2c_speed_t speed)

@@ -22,6 +22,7 @@
 #define PERIPH_CPU_H_
 
 #include "cpu.h"
+#include "mutex.h"
 
 #ifdef __cplusplus
 extern "C" {

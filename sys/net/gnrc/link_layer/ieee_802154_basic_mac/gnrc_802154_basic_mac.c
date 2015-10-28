@@ -167,4 +167,3 @@ kernel_pid_t gnrc_802154_basic_mac_init(char *stack,
 
     return res;
 }
-

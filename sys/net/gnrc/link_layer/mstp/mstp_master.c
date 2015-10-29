@@ -82,8 +82,8 @@ static int _get(gnrc_mstp_t *ctx, netopt_t opt, void *val, size_t max_len)
 }
 
 static void _send_reply_pfm(gnrc_mstp_t *ctx) {
-    gpio_set(GPIO(PA, 22));
-    gpio_set(GPIO(PB, 3));
+    gpio_set(GPIO_PIN(PA, 16));
+    gpio_set(GPIO_PIN(PB, 3));
     /* mstp header */
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
@@ -110,13 +110,13 @@ static void _send_reply_pfm(gnrc_mstp_t *ctx) {
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.header_crc);
     xtimer_usleep(120);
-    gpio_clear(GPIO(PB, 3));
-    gpio_clear(GPIO(PA, 22));
+    gpio_clear(GPIO_PIN(PB, 3));
+    gpio_clear(GPIO_PIN(PA, 16));
 }
 
 static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
 {
-    gpio_set(GPIO(PA, 22));
+    // gpio_set(GPIO_PIN(PA, 16));
     if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
         puts("Sorry, event no have!");
         return -1;
@@ -124,7 +124,7 @@ static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
     // printf("EV: %02x FT: %02x\n", ev, ctx->frame.type);
 
     if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
-        puts("PFM");
+        // puts("PFM");
         ctx->frame.dst_addr = ctx->frame.src_addr;
         ctx->frame.src_addr = ctx->ll_addr;
         ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
@@ -139,10 +139,10 @@ static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
         }
     }
     else {
-        puts("unhandled");
+        // puts("unhandled");
         // printf("t: %02x\n", ctx->frame.type);
     }
-    gpio_clear(GPIO(PA, 22));
+    // gpio_clear(GPIO_PIN(PA, 16));
     return 0;
 }
 
@@ -244,7 +244,7 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
         gnrc_pktbuf_release(pkt);
         return -EOVERFLOW;
     }
-    gpio_set(GPIO(PB, 3));
+    gpio_set(GPIO_PIN(PB, 3));
     /* mstp header */
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
@@ -285,7 +285,7 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
 
     ctx->frame.header_crc = 0xff;
     ctx->frame.data_crc = 0xffff;
-    gpio_clear(GPIO(PB, 3));
+    gpio_clear(GPIO_PIN(PB, 3));
     return 0;
 }
 
@@ -382,8 +382,8 @@ int gnrc_mstp_init(gnrc_mstp_t *ctx, const gnrc_mstp_params_t *p)
     ctx->uart = p->uart;
 
     uart_init(ctx->uart, p->baudrate, mstp_receive_frame, NULL, (void *)ctx);
-    gpio_init(GPIO(PB, 3), GPIO_DIR_OUT, GPIO_NOPULL);
-    gpio_init(GPIO(PA, 22), GPIO_DIR_OUT, GPIO_NOPULL);
+    gpio_init(GPIO_PIN(PB, 3), GPIO_DIR_OUT, GPIO_NOPULL);
+    gpio_init(GPIO_PIN(PA, 16), GPIO_DIR_OUT, GPIO_NOPULL);
     ctx->msg_fa.type = MSTP_EV_T_FRAME_ABORT;
 
     return 0;

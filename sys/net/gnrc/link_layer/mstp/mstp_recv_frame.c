@@ -33,7 +33,7 @@ int i;
 
 void mstp_receive_frame(void *arg, char data)
 {
-    gpio_set(GPIO(PA, 5));
+    // gpio_set(GPIO_PIN(PA, 16));
 
     gnrc_mstp_t *ctx = (gnrc_mstp_t *)arg;
 
@@ -225,7 +225,7 @@ void mstp_receive_frame(void *arg, char data)
             }
     }
     DEBUG("St: %02x Rx: %02x\n", ctx->state, data);
-    gpio_clear(GPIO(PA, 5));
+    // gpio_clear(GPIO_PIN(PA, 16));
     // printf("Rx: %02x i: %02x\n", data, i++);
 
 }

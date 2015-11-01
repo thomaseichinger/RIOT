@@ -22,6 +22,7 @@
 #define PERIPH_CPU_H_
 
 #include "cpu.h"
+#include "mutex.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,13 +113,14 @@ typedef struct {
  * @brief   I2C device configuration
  */
 typedef struct {
-    I2C_TypeDef *dev;       /**< pointer to the used I2C device */
-    gpio_t scl_pin;         /**< pin used for SCL */
-    gpio_t sda_pin;         /**< pin used for SDA */
+    I2C_TypeDef *dev;       /**< Pointer to the used I2C device */
+    gpio_t scl_pin;         /**< Pin used for SCL */
+    gpio_t sda_pin;         /**< Pin used for SDA */
     uint8_t af_scl_sda;     /**< SCL or SDA AF */
     uint8_t ev_irqn;        /**< I2C device Event Interrupt */
     uint8_t er_irqn;        /**< I2C device Error Interrupt */
     uint32_t clk_en;        /**< Clock enable register */
+    mutex_t mutex;          /**< Device mutex */
 } i2c_conf_t;
 
 #ifdef __cplusplus

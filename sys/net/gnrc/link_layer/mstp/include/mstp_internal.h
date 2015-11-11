@@ -36,8 +36,8 @@ extern "C" {
 #define MSTP_FRAME_TYPE_DATA_EXP_REPLY              (0x05)
 #define MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY          (0x06)
 #define MSTP_FRAME_TYPE_REPLY_POSTPONED             (0x07)
-#define MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY          (0x20)
-#define MSTP_FRAME_TYPE_EXT_DATA_EXP_NO_REPLY       (0x21)
+#define MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY          (0x22)
+#define MSTP_FRAME_TYPE_EXT_DATA_EXP_NO_REPLY       (0x23)
 
 #define MSTP_BROADCAST_ADDR     (0xff)
 
@@ -72,6 +72,8 @@ extern "C" {
 #define MSTP_T_FRAME_ABORT      (100000)  /**< max interval between rx bytes befor frame abort */
 #define MSTP_T_SEND_WAIT        (1000)   /**< interval to wait between bytes sent in us*/
 
+#define LOBAC_IID_BASE          (0x030000feff000000)
+
 
 
 typedef struct
@@ -99,7 +101,9 @@ void mstp_receive_frame(void *arg, char data);
 
 uint8_t mstp_crc_header_update(uint8_t data, uint8_t crc_in);
 
-uint16_t mstp_crc_data_update(uint8_t data, uint16_t crc_in);
+uint32_t mstp_crc_enc_data_update(uint8_t data, uint32_t crc_in);
+
+void mstp_cobs_stuff_data(const uint8_t *src, size_t length, uint8_t *dst);
 
 #ifdef __cplusplus
 }

@@ -32,7 +32,7 @@
  * @brief   Define stack parameters for the MAC layer thread
  * @{
  */
-#define GNRC_MSTP_MAC_STACKSIZE     (THREAD_STACKSIZE_DEFAULT)
+#define GNRC_MSTP_MAC_STACKSIZE     (THREAD_STACKSIZE_DEFAULT*2)
 #define GNRC_MSTP_MAC_PRIO          (THREAD_PRIORITY_MAIN - 1)
 
 #define GNRC_MSTP_NUM (sizeof(gnrc_mstp_params)/sizeof(gnrc_mstp_params[0]))

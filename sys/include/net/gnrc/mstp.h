@@ -25,6 +25,7 @@
 #include "kernel.h"
 #include "msg.h"
 #include "xtimer.h"
+#include "net/gnrc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,8 +48,9 @@ typedef struct
     uint16_t length;
     uint8_t encoded;
     uint8_t header_crc;
+    uint8_t recv_crc;
     uint8_t data[1500];
-    uint16_t data_crc;
+    uint32_t data_crc;
 } mstp_frame_t;
 
 typedef struct
@@ -63,6 +65,12 @@ typedef struct
     xtimer_t timer_fa;
     msg_t msg_fa;
     msg_t msg_frame;
+    uint8_t awaiting_reply;
+    uint8_t will_reply;
+    uint8_t token;
+    uint8_t ns;
+    uint8_t n_poll;
+    gnrc_pktsnip_t *to_send;
 } gnrc_mstp_t;
 
 /**

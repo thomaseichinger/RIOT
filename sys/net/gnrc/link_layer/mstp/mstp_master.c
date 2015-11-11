@@ -39,6 +39,10 @@
 
 msg_t mstp_master_msg;
 
+uint8_t buffer[1500];
+
+static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt);
+
 static void mstp_master_intialize(gnrc_mstp_t *ctx)
 {
     return;
@@ -76,12 +80,55 @@ static int _get(gnrc_mstp_t *ctx, netopt_t opt, void *val, size_t max_len)
             }
             *((uint8_t *)val) = ctx->ll_addr;
             return sizeof(uint8_t);
+        case NETOPT_IPV6_IID:
+            if (max_len < sizeof(eui64_t)) {
+                return -EOVERFLOW;
+            }
+            *(uint64_t *) val = LOBAC_IID_BASE;
+            // ieee802154_get_iid(val, (uint8_t *)&addr, 8);
+            return sizeof(eui64_t);
+        case NETOPT_MAX_PACKET_SIZE:
+            if (max_len < sizeof(int16_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint16_t *)val) = 1500;
+            return sizeof(uint16_t);
+        case NETOPT_IS_WIRED:
+            if (max_len < sizeof(uint8_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint8_t *)val) = 0x01;
+            return sizeof(uint8_t);
+        case NETOPT_STATE:
+            if (max_len < sizeof(netopt_state_t)) {
+                return -EOVERFLOW;
+            }
+            *((netopt_state_t*)val) = NETOPT_STATE_IDLE;
+            return sizeof(netopt_state_t);
+        case NETOPT_ADDR_LEN:
+            if (max_len < sizeof(uint16_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint16_t *)val) = 1;
+            return sizeof(uint16_t);
+        case NETOPT_SRC_LEN:
+            if (max_len < sizeof(uint16_t)) {
+                return -EOVERFLOW;
+            }
+            *((uint16_t *)val) = 1;
+            return sizeof(uint16_t);
+        case NETOPT_PROTO:
+            if (max_len < sizeof(gnrc_nettype_t)) {
+                return -EOVERFLOW;
+            }
+            *((gnrc_nettype_t *)val) = GNRC_NETTYPE_SIXLOWPAN;
+            return sizeof(gnrc_nettype_t);
         default:
             return -ENOTSUP;
     }
 }
 
-static void _send_reply_pfm(gnrc_mstp_t *ctx) {
+static void _send_reply(gnrc_mstp_t *ctx) {
     gpio_set(GPIO_PIN(PA, 16));
     gpio_set(GPIO_PIN(PB, 3));
     /* mstp header */
@@ -108,32 +155,81 @@ static void _send_reply_pfm(gnrc_mstp_t *ctx) {
     ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length&0xff),
                                                    ctx->frame.header_crc);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
-    uart_write_blocking(ctx->uart, ctx->frame.header_crc);
-    xtimer_usleep(120);
+    uart_write_blocking(ctx->uart, (~(ctx->frame.header_crc))&0xff);
+    xtimer_usleep(220);
     gpio_clear(GPIO_PIN(PB, 3));
     gpio_clear(GPIO_PIN(PA, 16));
+    // puts("RPFM");
 }
 
 static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
 {
     // gpio_set(GPIO_PIN(PA, 16));
-    if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
-        puts("Sorry, event no have!");
-        return -1;
+    // if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
+    //     puts("Sorry, event no have!");
+    //     return -1;
+    // }
+
+    /* handle event here to send data and replies */
+    if (ev == MSTP_EV_SEND_FRAME) {
+        if (ctx->will_reply) {
+            ctx->frame.type = MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY;
+            ctx->frame.src_addr = ctx->ll_addr;
+        }
     }
     // printf("EV: %02x FT: %02x\n", ev, ctx->frame.type);
-
-    if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
+    if (ctx->frame.type == MSTP_FRAME_TYPE_TOKEN) {
+        ctx->token = 1;
+        ctx->n_poll++;
+        if (ctx->to_send) {
+            ctx->frame.type = MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY;
+            mstp_send_frame(ctx, ctx->to_send);
+            ctx->awaiting_reply = 1;
+            ctx->to_send = NULL;
+        }
+        if (!(ctx->n_poll<50)) {
+            ctx->n_poll = 0;
+            for (int i = ctx->ll_addr; i<9; i++) {
+                ctx->frame.type = MSTP_FRAME_TYPE_POLL_FOR_MASTER;
+                ctx->frame.dst_addr = i;
+                ctx->frame.src_addr = ctx->ll_addr;
+                _send_reply(ctx);
+                xtimer_usleep(2000);
+                if (ctx->frame.type == MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER) {
+                    ctx->ns = ctx->frame.src_addr;
+                    ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
+                    ctx->frame.dst_addr = ctx->ns;
+                    ctx->frame.src_addr = ctx->ll_addr;
+                    _send_reply(ctx);
+                }
+            }
+        }
+        else {
+            ctx->frame.dst_addr = ctx->ns;//ctx->frame.src_addr;
+            ctx->frame.src_addr = ctx->ll_addr;
+            ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
+            // puts("token");
+            _send_reply(ctx);
+        }
+    }
+    else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY) {
+        if (ctx->awaiting_reply) {
+            /* parse and handle received reply here */
+            puts("rx reply");
+        }
+    }
+    else if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
         // puts("PFM");
         ctx->frame.dst_addr = ctx->frame.src_addr;
         ctx->frame.src_addr = ctx->ll_addr;
         ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
-        _send_reply_pfm(ctx);
+        _send_reply(ctx);
         return 0;
     }
     else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
         DEBUG("MSTP: f_t: d e r\n");
         if (ctx->frame.valid) {
+            ctx->will_reply = 1;
             mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
             msg_send(&mstp_master_msg, ctx->mac_pid);
         }
@@ -164,7 +260,7 @@ static size_t _make_data_frame_hdr(gnrc_mstp_t *ctx, gnrc_netif_hdr_t *hdr)
     // pos = 3;
     // buf[pos++] = (uint8_t)((dev->pan) & 0xff);
     // buf[pos++] = (uint8_t)((dev->pan) >> 8);
-    ctx->frame.type = MSTP_FRAME_TYPE_DATA_EXP_REPLY;
+    // ctx->frame.type = MSTP_FRAME_TYPE_DATA_EXP_REPLY;
 
     /* fill in destination address */
     if (hdr->flags &
@@ -207,7 +303,7 @@ static size_t _make_data_frame_hdr(gnrc_mstp_t *ctx, gnrc_netif_hdr_t *hdr)
         ctx->frame.src_addr = ctx->ll_addr;
     }
 
-    ctx->frame.header_crc = 0x55;
+    // ctx->frame.header_crc = 0x55;
 
     /* set sequence number */
     // buf[2] = dev->seq_nr++;
@@ -251,36 +347,51 @@ static int mstp_send_frame(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
     uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.type);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.type, 0xff);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.dst_addr,
+                                                   ctx->frame.header_crc);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, ctx->frame.src_addr);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.src_addr,
+                                                   ctx->frame.header_crc);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
+    ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length>>8),
+                                                   ctx->frame.header_crc);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
     uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
+    ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length&0xff),
+                                                   ctx->frame.header_crc);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
-    uart_write_blocking(ctx->uart, ctx->frame.header_crc);
+    uart_write_blocking(ctx->uart, (~(ctx->frame.header_crc))&0xff);
     // xtimer_usleep(MSTP_T_SEND_WAIT);
 
     /* load packet data into FIFO */
+    uint16_t offset = 0;
     while (snip) {
-        for (uint16_t i = 0; i < snip->size; i++) {
-            ctx->frame.data_crc = mstp_crc_data_update(((uint8_t *)snip->data)[i],
-                                                      ctx->frame.data_crc);
-            uart_write_blocking(ctx->uart, ((char *)snip->data)[i]);
-            // xtimer_usleep(MSTP_T_SEND_WAIT*4);
-        }
+        mstp_cobs_stuff_data(snip->data, snip->size, buffer+offset);
+        offset += snip->size;
         snip = snip->next;
     }
-    uart_write_blocking(ctx->uart, 0xf0);
-    uart_write_blocking(ctx->uart, 0xb8);
+    ctx->frame.data_crc = 0xffffffff;
+    for (int i = 0; i<offset; i++) {
+        uart_write_blocking(ctx->uart, (char)buffer[i]);
+        ctx->frame.data_crc = mstp_crc_enc_data_update(buffer[i],
+                                                       ctx->frame.data_crc);
+    }
+
+    uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>24)&0xff);
+    uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>16)&0xff);
+    uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8)&0xff);
+    uart_write_blocking(ctx->uart, ctx->frame.data_crc&0xff);
     /* release packet */
     gnrc_pktbuf_release(pkt);
 
     // uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
 
-    xtimer_usleep(120);
+    xtimer_usleep(220);
     // uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
 
     ctx->frame.header_crc = 0xff;
@@ -320,7 +431,8 @@ static void *_mstp_master_thread(void *args)
             case GNRC_NETAPI_MSG_TYPE_SND:
                 DEBUG("mstp master: GNRC_NETAPI_MSG_TYPE_SND received.\n");
                 // dev->driver->send_data(dev, (gnrc_pktsnip_t *)msg.content.ptr);
-                mstp_send_frame(ctx, (gnrc_pktsnip_t *)msg.content.ptr);
+                ctx->to_send = (gnrc_pktsnip_t *)msg.content.ptr;
+                // mstp_send_frame(ctx, (gnrc_pktsnip_t *)msg.content.ptr);
                 break;
             case GNRC_NETAPI_MSG_TYPE_SET:
                 /* TODO: filter out MAC layer options -> for now forward
@@ -347,7 +459,8 @@ static void *_mstp_master_thread(void *args)
                 DEBUG("mstp master: response of netdev->get: %i\n", res);
                 /* send reply to calling thread */
                 reply.type = GNRC_NETAPI_MSG_TYPE_ACK;
-                reply.content.value = (uint32_t)res;
+                uint32_t tmp = res;
+                reply.content.value = tmp;
                 msg_reply(&msg, &reply);
                 break;
             case MSTP_EV_RECEIVED_VALID_FRAME:
@@ -385,6 +498,7 @@ int gnrc_mstp_init(gnrc_mstp_t *ctx, const gnrc_mstp_params_t *p)
     gpio_init(GPIO_PIN(PB, 3), GPIO_DIR_OUT, GPIO_NOPULL);
     gpio_init(GPIO_PIN(PA, 16), GPIO_DIR_OUT, GPIO_NOPULL);
     ctx->msg_fa.type = MSTP_EV_T_FRAME_ABORT;
+    ctx->ll_addr = 0x03;
 
     return 0;
 }

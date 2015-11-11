@@ -34,7 +34,7 @@ int i;
 void mstp_receive_frame(void *arg, char data)
 {
     // gpio_set(GPIO_PIN(PA, 16));
-
+// puts(">");
     gnrc_mstp_t *ctx = (gnrc_mstp_t *)arg;
 
     switch (ctx->state) {
@@ -112,7 +112,9 @@ void mstp_receive_frame(void *arg, char data)
             else if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_HDR_CRC) {
                 ctx->state = MSTP_STATE_VALIDATE_HEADER;
                 ctx->frame.hdr_index = 0;
-                ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
+                ctx->frame.recv_crc = data;
+                ctx->frame.header_crc = ~(ctx->frame.header_crc);
+                // ctx->frame.header_crc = mstp_crc_header_update(data, ctx->frame.header_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
             }
@@ -124,9 +126,10 @@ void mstp_receive_frame(void *arg, char data)
                 break;
             }
         case MSTP_STATE_VALIDATE_HEADER:
-            DEBUG("calc hdr_crc: %02x\n", ctx->frame.header_crc);
-            if (ctx->frame.header_crc != 0x55) {
-                puts("!HCRC");
+            // printf("calc hdr_crc: %02x recv: %02x\n", ~(ctx->frame.header_crc), ctx->frame.recv_crc);
+            if (ctx->frame.header_crc != ctx->frame.recv_crc) {
+                // puts("!HCRC");
+                printf("calc: %02x recv: %02x\n", ~(ctx->frame.header_crc), ctx->frame.recv_crc);
                 /* Bad CRC */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;
@@ -168,12 +171,13 @@ void mstp_receive_frame(void *arg, char data)
             if (mstp_recv_frame_data_index < ctx->frame.length) {
                 /* receive n=length bytes */
                 ctx->frame.data[mstp_recv_frame_data_index++] = (uint8_t) data;
-                ctx->frame.data_crc = mstp_crc_data_update(data, ctx->frame.data_crc);
+                ctx->frame.data_crc = mstp_crc_enc_data_update(data, ctx->frame.data_crc);
                 xtimer_set_msg(&(ctx->timer_fa), MSTP_T_FRAME_ABORT,
                                &(ctx->msg_fa), ctx->mac_pid);
                 break;
             }
-            else if (mstp_recv_frame_data_index == ctx->frame.length) {
+            else if ((mstp_recv_frame_data_index >= ctx->frame.length)
+                     &&(mstp_recv_frame_data_index < ctx->frame.length+4)) {
                 /* receive first crc octet */
                 mstp_recv_frame_data_index++;
                 ctx->frame.data_crc = (data<<8);
@@ -225,6 +229,7 @@ void mstp_receive_frame(void *arg, char data)
             }
     }
     DEBUG("St: %02x Rx: %02x\n", ctx->state, data);
+    // puts("<");
     // gpio_clear(GPIO_PIN(PA, 16));
     // printf("Rx: %02x i: %02x\n", data, i++);
 

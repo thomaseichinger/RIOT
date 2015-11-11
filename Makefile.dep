@@ -99,6 +99,16 @@ ifneq (,$(filter gnrc_tftp,$(USEMODULE)))
   USEMODULE += xtimer
 endif
 
+ifneq (,$(filter mstp,$(USEMODULE)))
+  USEMODULE += ieee802154
+  USEMODULE += xtimer
+endif
+
+ifneq (,$(filter gnrc_zep,$(USEMODULE)))
+  USEMODULE += hashes
+  USEMODULE += ieee802154
+endif
+
 ifneq (,$(filter gnrc_rpl_p2p,$(USEMODULE)))
   USEMODULE += gnrc_rpl
 endif

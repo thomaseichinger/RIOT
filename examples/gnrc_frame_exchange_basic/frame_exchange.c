@@ -38,7 +38,7 @@ extern at86rf2xx_t at86rf2xx_dev;
 static gnrc_netreg_entry_t server = { /* set by gnrc_netreg_register() */
                                       NULL,
                                       /* there's no "speciality" like port
-                                         number or whatever at the MAC level */  
+                                         number or whatever at the MAC level */
                                       GNRC_NETREG_DEMUX_CTX_ALL,
                                       /* set by start_server() function below */
                                       KERNEL_PID_UNDEF };
@@ -153,4 +153,3 @@ void start_frame_rx_server(void)
     printf("Success: started frame RX server (thread #%" PRIkernel_pid ")\n",
            server.pid);
 }
-

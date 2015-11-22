@@ -33,12 +33,12 @@ extern "C" {
 
 
 /**
- * @brief Default Minimal CSMA/CA Backoff Exponent 
+ * @brief Default Minimal CSMA/CA Backoff Exponent
  */
 #define MAC_MIN_BE_DEFAULT               (3U)
 
 /**
- * @brief Default Maximal CSMA/CA Backoff Exponent 
+ * @brief Default Maximal CSMA/CA Backoff Exponent
  */
 #define MAC_MAX_BE_DEFAULT               (5U)
 
@@ -134,4 +134,3 @@ int cca_send(gnrc_netdev_t *dev, gnrc_pktsnip_t *pkt);
 #endif /* GNRC_CSMA_SENDER_H_ */
 
 /** @} */
-

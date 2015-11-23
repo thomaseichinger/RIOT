@@ -128,9 +128,6 @@ int basic_send_cmd(int argc, char **argv)
         return 1;
     }
 
-    /* release slot from packet buffers */
-    gnrc_pktbuf_release(pkt);
-
     /* if we arrive here, the packet has been sent */
     return 0;
 }

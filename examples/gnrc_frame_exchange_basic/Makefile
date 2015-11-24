@@ -14,6 +14,13 @@ RIOTBASE ?= $(CURDIR)/../..
 # Include the 'gnrc_802154_basic_mac' layer
 USEMODULE += gnrc_802154_basic_mac
 USEMODULE += gnrc_netif_default
+USEMODULE += auto_init_gnrc_netif
+# Specify the mandatory networking modules for IPv6 and UDP
+USEMODULE += gnrc_ipv6_router_default
+# Add a routing protocol
+USEMODULE += gnrc_rpl
+# Additional networking modules that can be dropped if not needed
+USEMODULE += gnrc_icmpv6_echo
 # This application dumps received packets to STDIO using the pktdump module
 USEMODULE += gnrc_pktdump
 # Use the shell as user interface, with some basic shell commands
@@ -21,9 +28,9 @@ USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += ps
 # Remove the 'nomac' module that may have been imported
-ifneq (,$(filter gnrc_nomac,$(USEMODULE)))
-  USEMODULE -= gnrc_nomac
-endif
+#ifneq (,$(filter gnrc_nomac,$(USEMODULE)))
+#  USEMODULE -= gnrc_nomac
+#endif
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the

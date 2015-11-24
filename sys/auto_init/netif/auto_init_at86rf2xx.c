@@ -20,7 +20,11 @@
 #ifdef MODULE_AT86RF2XX
 
 #include "board.h"
+#ifdef MODULE_GNRC_802154_BASIC_MAC
+#include "net/gnrc/ieee_802154_basic_mac.h"
+#else
 #include "net/gnrc/nomac.h"
+#endif
 #include "net/gnrc.h"
 
 #include "at86rf2xx.h"
@@ -58,9 +62,16 @@ void auto_init_at86rf2xx(void)
             DEBUG("Error initializing AT86RF2xx radio device!\n");
         }
         else {
+#ifdef MODULE_GNRC_802154_BASIC_MAC
+            /* start the 'gnrc_802154_basic_mac' module */
+            gnrc_802154_basic_mac_init(_nomac_stacks[i],
+                            AT86RF2XX_MAC_STACKSIZE, AT86RF2XX_MAC_PRIO,
+                            "at86rfxx", (gnrc_netdev_t *)&at86rf2xx_devs[i]);
+#else
             gnrc_nomac_init(_nomac_stacks[i],
                             AT86RF2XX_MAC_STACKSIZE, AT86RF2XX_MAC_PRIO,
                             "at86rfxx", (gnrc_netdev_t *)&at86rf2xx_devs[i]);
+#endif
         }
     }
 }

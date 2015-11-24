@@ -84,6 +84,7 @@ extern "C" {
  * @brief   Flags for device internal states (see datasheet)
  * @{
  */
+#define AT86RF2XX_STATE_RX_ON        (0x06)     /**< used for software CCA measurements */
 #define AT86RF2XX_STATE_TRX_OFF      (0x08)     /**< idle */
 #define AT86RF2XX_STATE_PLL_ON       (0x09)     /**< ready to transmit */
 #define AT86RF2XX_STATE_SLEEP        (0x0f)     /**< sleep mode */

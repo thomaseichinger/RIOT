@@ -179,10 +179,20 @@ bool at86rf2xx_cca(at86rf2xx_t *dev)
 {
     uint8_t tmp;
     uint8_t status;
+    uint8_t return_state;
 
     at86rf2xx_assert_awake(dev);
 
-    /* trigger CCA measurment */
+    /* trigger CCA measurment 
+     * Register description of PHY_CC_CCA (37.6.6.2):
+     * "If a CCA request is initiated in states others than RX_ON or RX_BUSY the PHY 
+     * generates an IRQ_4 (CCA_ED_DONE) and sets the register bit CCA_DONE, however 
+     * no CCA was carried out.""
+     */
+    /* switch to RX_ON mode for measurment */
+    return_state = at86rf2xx_get_status(dev);
+    at86rf2xx_set_state(dev, AT86RF2XX_STATE_RX_ON);
+    /* trigger measurment */
     tmp = at86rf2xx_reg_read(dev, AT86RF2XX_REG__PHY_CC_CCA);
     tmp &= AT86RF2XX_PHY_CC_CCA_MASK__CCA_REQUEST;
     at86rf2xx_reg_write(dev, AT86RF2XX_REG__PHY_CC_CCA, tmp);
@@ -190,6 +200,8 @@ bool at86rf2xx_cca(at86rf2xx_t *dev)
     do {
         status = at86rf2xx_reg_read(dev, AT86RF2XX_REG__TRX_STATUS);
     } while (!(status & AT86RF2XX_TRX_STATUS_MASK__CCA_DONE));
+    /* switch back to old state */
+    at86rf2xx_set_state(dev, return_state);
     /* return according to measurement */
     if (status & AT86RF2XX_TRX_STATUS_MASK__CCA_STATUS) {
         return true;

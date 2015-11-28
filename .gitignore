@@ -37,3 +37,6 @@ _sketches.cpp
 
 # local override files
 Makefile.local
+
+# Vagrant
+.vagrant

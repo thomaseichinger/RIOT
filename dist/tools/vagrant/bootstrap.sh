@@ -28,6 +28,12 @@ if ! hash openocd 2>/dev/null; then
     make && make install && cd .. && rm -rf openocd-0.9.0
 fi
 
+if ! hash st-util 2>/dev/null; then
+    git clone --depth 1 https://github.com/texane/stlink stlink.git && cd stlink.git
+    ./autogen.sh && ./configure && make && make install
+    cd .. && rm -rf stlink.git
+fi
+
 # install cli-tools
 if ! hash experiment-cli 2>/dev/null; then
     wget -qO - https://github.com/iot-lab/cli-tools/archive/1.6.0.tar.gz | tar xz

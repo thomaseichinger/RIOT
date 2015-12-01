@@ -60,6 +60,8 @@ Vagrant.configure(2) do |config|
                   '--vendorid', '0x16c0', '--productid',  '0x05dc']
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'iotlab-m3',
                   '--vendorid', '0x0403', '--productid',  '0x6010']
+    vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'samr21-xpro',
+                  '--vendorid', '0x03eb', '--productid',  '0x2111']
   end
 
   config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"

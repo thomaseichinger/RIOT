@@ -61,16 +61,8 @@ Vagrant.configure(2) do |config|
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'iotlab-m3',
                   '--vendorid', '0x0403', '--productid',  '0x6010']
   end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
 
-  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
-  # such as FTP and Heroku are also available. See the documentation at
-  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
-  # config.push.define "atlas" do |push|
-  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
-  # end
+  config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
 
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the

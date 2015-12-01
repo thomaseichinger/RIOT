@@ -47,6 +47,9 @@ Vagrant.configure(2) do |config|
   #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #
+  #   # Set name of the VM
+    vb.name = "RIOT-OS VM"
+  #
   #   # Customize the amount of memory on the VM:
   #   vb.memory = "1024"
     # enable usb passthrough

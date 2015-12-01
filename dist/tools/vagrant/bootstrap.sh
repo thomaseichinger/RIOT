@@ -6,11 +6,13 @@ apt-get install -y pcregrep libpcre3 python3 git gcc-arm-none-eabi gcc-msp430 un
     qemu-system-x86 g++-multilib gcc-multilib build-essential gcc-avr binutils-avr avr-libc \
     doxygen cppcheck python-setuptools libusb-1.0-0 libusb-1.0-0-dev libftdi1 libftdi-dev \
     libftdipp-dev libftdipp1 libhidapi-dev libhidapi-hidraw0 libhidapi-libusb0 \
-    make cmake autotools-dev autoconf pkg-config jimsh
+    make cmake autotools-dev autoconf pkg-config jimsh libtool valgrind
 
 # This package contains usbserial kernel drivers
 # see http://ubuntu.5.x6.nabble.com/PATCH-0-2-linux-image-extra-support-td365008.html
 apt-get -y install linux-image-extra-virtual
+
+apt-get -y upgrade
 
 # give permissions for serial ports
 adduser vagrant dialout

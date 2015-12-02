@@ -59,41 +59,6 @@ To create a bridge and two (or count at your option) tap interfaces:
 
     ./dist/tools/tapsetup/tapsetup [-c [<count>]]
 
-## USING A VM
-This repository includes a Vagrantfile to create a Linux virtual machine based on Ubuntu Trusty
-and contains all necessary toolchains and dependencies to build and flash compatible devices
-with RIOT-OS. The RIOT-OS directory in the HOME directory of the virtual machine is synchronized
-with the host system. Thus, all changes made in that directory will be mirrored between the
-host and guest system and you can use your favorite editor on your host system to develop for RIOT-OS.
-
-### Requirements
-Make sure you have the latest version of the following dependencies:
-* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-* [VirtualBox Exntension Pack](https://www.virtualbox.org/wiki/Downloads)
-* [Vagrant](https://www.vagrantup.com/downloads.html)
-
-### Usage
-The following commands must be run from the RIOT-OS root directory on the host system.
-```
-vagrant up
-```
-This will start up the virtual machine and download the Ubuntu image as well as all necessary toolchains.
-If multiple network devices are available on the host system, then you will be prompted to choose
-one of them that should be used for bridging on the guest system (i.e. internet connectivity from within the VM).
-```
-vagrant ssh
-```
-This will logs you in to the VM as the vagrant user.
-```
-vagrant halt
-```
-This will shut down the VM gracefully.
-```
-vagrant destroy
-```
-This will reset your VM to the default state. All modifications made to the VM by the
-[provisioning script](https://github.com/RIOT-OS/RIOT/tree/master/dist/tools/vagrant/bootstrap.sh) and by you will be removed.
-
 ## CONTRIBUTE
 
 To contribute something to RIOT, please refer to the [development procedures](https://github.com/RIOT-OS/RIOT/wiki/Development-procedures) and read all notes for best practice.

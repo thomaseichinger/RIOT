@@ -42,10 +42,6 @@ if ! hash experiment-cli 2>/dev/null; then
     cd cli-tools-1.6.0 && python setup.py install && cd .. && rm -rf cli-tools-1.6.0
 fi
 
-# configure git
-git config --global user.email "riot-os_vagrant@example.com"
-git config --global user.name "RIOT-OS Vagrant"
-
 # create a symbolic link to the RIOT-OS directory
 if ! [ -L /home/vagrant/RIOT-OS ]; then
     ln -fs /vagrant /home/vagrant/RIOT-OS

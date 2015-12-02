@@ -23,6 +23,7 @@ Vagrant.configure(2) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 3333, host: 3333
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -31,7 +32,7 @@ Vagrant.configure(2) do |config|
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
-  config.vm.network "public_network"
+  config.vm.network "private_network", type: "dhcp"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -63,6 +64,7 @@ Vagrant.configure(2) do |config|
                   '--vendorid', '0x16c0', '--productid',  '0x05dc']
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'iotlab-m3',
                   '--vendorid', '0x0403', '--productid',  '0x6010']
+<<<<<<< HEAD
   end
   #
   # View the documentation for the provider you are using for more
@@ -74,6 +76,13 @@ Vagrant.configure(2) do |config|
   # config.push.define "atlas" do |push|
   #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
   # end
+=======
+    vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'samr21-xpro',
+                  '--vendorid', '0x03eb', '--productid',  '0x2111']
+  end
+
+  config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+>>>>>>> 3bfda2d42b13eafe9a4b0fe26684cf85d0d2230d
 
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the

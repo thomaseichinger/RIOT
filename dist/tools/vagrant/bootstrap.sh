@@ -6,12 +6,21 @@ apt-get install -y pcregrep libpcre3 python3 git gcc-arm-none-eabi gcc-msp430 un
     qemu-system-x86 g++-multilib gcc-multilib build-essential gcc-avr binutils-avr avr-libc \
     doxygen cppcheck python-setuptools libusb-1.0-0 libusb-1.0-0-dev libftdi1 libftdi-dev \
     libftdipp-dev libftdipp1 libhidapi-dev libhidapi-hidraw0 libhidapi-libusb0 \
+<<<<<<< HEAD
     make autotools-dev autoconf pkg-config jimsh
+=======
+    make cmake autotools-dev autoconf pkg-config jimsh libtool valgrind
+>>>>>>> 3bfda2d42b13eafe9a4b0fe26684cf85d0d2230d
 
 # This package contains usbserial kernel drivers
 # see http://ubuntu.5.x6.nabble.com/PATCH-0-2-linux-image-extra-support-td365008.html
 apt-get -y install linux-image-extra-virtual
 
+<<<<<<< HEAD
+=======
+apt-get -y upgrade
+
+>>>>>>> 3bfda2d42b13eafe9a4b0fe26684cf85d0d2230d
 # give permissions for serial ports
 adduser vagrant dialout
 
@@ -28,16 +37,28 @@ if ! hash openocd 2>/dev/null; then
     make && make install && cd .. && rm -rf openocd-0.9.0
 fi
 
+<<<<<<< HEAD
+=======
+if ! hash st-util 2>/dev/null; then
+    git clone --depth 1 https://github.com/texane/stlink stlink.git && cd stlink.git
+    ./autogen.sh && ./configure && make && make install
+    cd .. && rm -rf stlink.git
+fi
+
+>>>>>>> 3bfda2d42b13eafe9a4b0fe26684cf85d0d2230d
 # install cli-tools
 if ! hash experiment-cli 2>/dev/null; then
     wget -qO - https://github.com/iot-lab/cli-tools/archive/1.6.0.tar.gz | tar xz
     cd cli-tools-1.6.0 && python setup.py install && cd .. && rm -rf cli-tools-1.6.0
 fi
 
+<<<<<<< HEAD
 # configure git
 git config --global user.email "riot-os_vagrant@example.com"
 git config --global user.name "RIOT-OS Vagrant"
 
+=======
+>>>>>>> 3bfda2d42b13eafe9a4b0fe26684cf85d0d2230d
 # create a symbolic link to the RIOT-OS directory
 if ! [ -L /home/vagrant/RIOT-OS ]; then
     ln -fs /vagrant /home/vagrant/RIOT-OS

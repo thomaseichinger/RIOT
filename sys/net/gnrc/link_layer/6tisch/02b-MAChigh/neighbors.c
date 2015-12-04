@@ -444,6 +444,7 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    // neighbors_vars.dio = (icmpv6rpl_dio_ht*)(msg->payload);
    // retrieve rank
    temp_8b            = *(msg->payload+2);
+   (void) temp_8b;
    // neighbors_vars.dio->rank = (temp_8b << 8) + *(msg->payload+3);
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
@@ -476,7 +477,7 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
 void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t index){
    switch(addr_type) {
       case ADDR_64B:
-         memcpy(&(address->addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
+         memcpy(&(address->addr.addr_64b),&(neighbors_vars.neighbors[index].addr_64b),LENGTH_ADDR64b);
          address->type=ADDR_64B;
          break;
       default:
@@ -593,6 +594,7 @@ bool debugPrint_neighbors(void) {
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
    temp.row=neighbors_vars.debugRow;
    temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
+   (void) temp;
    // openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
    return TRUE;
 }

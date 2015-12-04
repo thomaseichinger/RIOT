@@ -621,6 +621,7 @@ bool debugPrint_myDAGrank(void) {
    output = 0;
 
    output = neighbors_getMyDAGrank();
+   (void) output;
    // openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
    return TRUE;
 }
@@ -637,6 +638,7 @@ bool debugPrint_kaPeriod(void) {
    uint16_t output;
 
    output = sixtop_vars.kaPeriod;
+   (void) output;
 
    // openserial_printStatus(
    //     STATUS_KAPERIOD,
@@ -696,10 +698,13 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 
 void sixtop_maintenance_timer_cb(opentimer_id_t id) {
+   (void) id;
    // scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
 void sixtop_timeout_timer_cb(opentimer_id_t id) {
+   (void) id;
+   // scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
    // scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
@@ -802,8 +807,8 @@ port_INLINE void sixtop_sendEB(void) {
    // some l2 information about this packet
    eb->l2_frameType                     = IEEE154_TYPE_BEACON;
    eb->l2_nextORpreviousHop.type        = ADDR_16B;
-   eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+   eb->l2_nextORpreviousHop.addr.addr_16b[0] = 0xff;
+   eb->l2_nextORpreviousHop.addr.addr_16b[1] = 0xff;
 
    //I has an IE in my payload
    eb->l2_payloadIEpresent = TRUE;
@@ -1359,6 +1364,8 @@ void sixtop_addCellsByState(
       open_addr_t* previousHop,
       uint8_t      state
    ){
+   (void) slotframeID;
+   // scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
    uint8_t     i;
    uint8_t     j;
    open_addr_t temp_neighbor;
@@ -1412,6 +1419,7 @@ void sixtop_removeCellsByState(
       cellInfo_ht* cellList,
       open_addr_t* previousHop
    ){
+   (void) slotframeID;
    uint8_t i;
 
    for(i=0;i<numOfLink;i++){
@@ -1430,6 +1438,7 @@ bool sixtop_areAvailableCellsToBeScheduled(
       cellInfo_ht* cellList,
       uint8_t      bandwidth
    ){
+   (void) frameID;
    uint8_t i;
    uint8_t bw;
    bool    available;

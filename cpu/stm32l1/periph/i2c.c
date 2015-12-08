@@ -36,8 +36,8 @@
 
 /* static function definitions */
 static void _i2c_init(I2C_TypeDef *i2c, int ccr);
-static void _toggle_pins(GPIO_TypeDef *port, int pin_scl, int pin_sda);
-static void _pin_config(i2c_t dev, GPIO_TypeDef *port, int pin_scl, int pin_sda);
+static void _toggle_pins(gpio_t pin_scl, gpio_t pin_sda);
+static void _pin_config(i2c_t dev, gpio_t pin_scl, gpio_t pin_sda);
 static void _start(I2C_TypeDef *dev, uint8_t address, uint8_t rw_flag);
 static inline void _clear_addr(I2C_TypeDef *dev);
 static inline void _write(I2C_TypeDef *dev, char *data, int length);
@@ -60,6 +60,33 @@ static mutex_t locks[] =  {
     [I2C_3] = MUTEX_INIT,
 #endif
 };
+
+/**
+ * @brief   Extract the port base address from the given pin identifier
+ */
+static inline GPIO_TypeDef *_port(gpio_t pin)
+{
+    return (GPIO_TypeDef *)(pin & ~(0x0f));
+}
+
+/**
+ * @brief   Extract the port number form the given identifier
+ *
+ * The port number is extracted by looking at bits 10, 11, 12, 13 of the base
+ * register addresses.
+ */
+static inline int _port_num(gpio_t pin)
+{
+    return ((pin >> 10) & 0x0f);
+}
+
+/**
+ * @brief   Extract the pin number from the last 4 bit of the pin identifier
+ */
+static inline int _pin_num(gpio_t pin)
+{
+    return (pin & 0x0f);
+}
 
 int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 {
@@ -89,7 +116,7 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
     NVIC_EnableIRQ(i2c_cfg[dev].er_irqn);
 
     /* configure pins */
-    _pin_config(dev, GPIOB, i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
+    _pin_config(dev, i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
 
     /* configure device */
     _i2c_init(i2c, ccr);
@@ -100,9 +127,9 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
         /* disable peripheral */
         i2c->CR1 &= ~I2C_CR1_PE;
         /* toggle both pins to reset analog filter */
-        _toggle_pins(GPIOB, i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
+        _toggle_pins(i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
         /* reset pins for alternate function */
-        _pin_config(dev, GPIOB, i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
+        _pin_config(dev, i2c_cfg[dev].scl_pin, i2c_cfg[dev].sda_pin);
         /* make peripheral soft reset */
         i2c->CR1 |= I2C_CR1_SWRST;
         i2c->CR1 &= ~I2C_CR1_SWRST;
@@ -126,8 +153,12 @@ static void _i2c_init(I2C_TypeDef *i2c, int ccr)
     i2c->CR1 |= I2C_CR1_PE;
 }
 
-static void _pin_config(i2c_t dev, GPIO_TypeDef *port, int pin_scl, int pin_sda)
+static void _pin_config(i2c_t dev, gpio_t pin_scl_, gpio_t pin_sda_)
 {
+    uint8_t pin_scl = _pin_num(pin_scl_);
+    uint8_t pin_sda = _pin_num(pin_sda_);
+    GPIO_TypeDef *port = _port(pin_scl_);
+
     /* Set GPIOs to AF mode */
     port->MODER &= ~(3 << (2 * pin_scl));
     port->MODER |= (2 << (2 * pin_scl));
@@ -168,8 +199,12 @@ static void _pin_config(i2c_t dev, GPIO_TypeDef *port, int pin_scl, int pin_sda)
     }
 }
 
-static void _toggle_pins(GPIO_TypeDef *port, int pin_scl, int pin_sda)
+static void _toggle_pins(gpio_t pin_scl_, gpio_t pin_sda_)
 {
+    uint8_t pin_scl = _pin_num(pin_scl_);
+    uint8_t pin_sda = _pin_num(pin_sda_);
+    GPIO_TypeDef *port = _port(pin_scl_);
+
     /* Set GPIOs to General purpose output mode mode */
     port->MODER &= ~(3 << (2 * pin_scl));
     port->MODER |= (1 << (2 * pin_scl));

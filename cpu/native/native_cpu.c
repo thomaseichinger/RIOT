@@ -57,6 +57,8 @@
 extern netdev2_tap_t netdev2_tap;
 #endif
 
+#include "tty_uart.h"
+
 #include "native_internal.h"
 
 #define ENABLE_DEBUG (0)

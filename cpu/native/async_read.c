@@ -146,8 +146,8 @@ static void _sigio_child(int index)
             err(EXIT_FAILURE, "osx_sigio_child: select");
         }
 
-        // If SIGCONT is sent before calling suspend(), the process stops
-        // forever, so using sigwait instead.
+        /* If SIGCONT is sent before calling suspend(), the process stops
+         * forever, so using sigwait instead. */
 
         int sig;
 

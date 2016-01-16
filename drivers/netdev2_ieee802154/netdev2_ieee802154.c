@@ -57,21 +57,21 @@ int netdev2_eth_get(netdev2_t *dev, netopt_t opt, void *value, size_t max_len)
 
     switch (opt) {
         case NETOPT_DEVICE_TYPE:
-            {
-                uint16_t *tgt = (uint16_t *)value;
-                *tgt = NETDEV2_TYPE_IEEE802154;
-                res = 2;
-                break;
-            }
+        {
+            uint16_t *tgt = (uint16_t *)value;
+            *tgt = NETDEV2_TYPE_IEEE802154;
+            res = 2;
+            break;
+        }
         case NETOPT_IPV6_IID:
-            {
-                return _get_iid(dev, value, max_len);
-            }
+        {
+            return _get_iid(dev, value, max_len);
+        }
         default:
-            {
-                res = -ENOTSUP;
-                break;
-            }
+        {
+            res = -ENOTSUP;
+            break;
+        }
     }
 
     return res;

@@ -8,7 +8,7 @@
 
 /**
  * @defgroup    drivers_at86rf2xx AT86RF2xx based drivers
- * @ingroup     drivers_netdev
+ * @ingroup     drivers_netdev_netdev2
  *
  * This module contains drivers for radio devices in Atmel's AT86RF2xx series.
  * The driver is aimed to work with all devices of this series.
@@ -34,7 +34,8 @@
 #include "board.h"
 #include "periph/spi.h"
 #include "periph/gpio.h"
-#include "net/gnrc/netdev.h"
+#include "net/netdev2.h"
+#include "net/gnrc/nettype.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,9 +55,9 @@ extern "C" {
 /** @} */
 
 /**
-  * @brief   Channel configuration
-  * @{
-  */
+ * @brief   Channel configuration
+ * @{
+ */
 #ifdef MODULE_AT86RF212B
 /* the AT86RF212B has a sub-1GHz radio */
 #define AT86RF2XX_MIN_CHANNEL           (0)
@@ -129,22 +130,25 @@ extern "C" {
  * @brief   Device descriptor for AT86RF2XX radio devices
  */
 typedef struct {
-    /* netdev fields */
-    const gnrc_netdev_driver_t *driver; /**< pointer to the devices interface */
-    gnrc_netdev_event_cb_t event_cb;    /**< netdev event callback */
-    kernel_pid_t mac_pid;               /**< the driver's thread's PID */
+    /* netdev2 fields */
+    const struct netdev2_driver *driver;    /**< ptr to that driver's interface. */
+    netdev2_event_cb_t event_callback;      /**< callback for device events */
+    void *isr_arg;                          /**< argument to pass on isr event */
     /* device specific fields */
-    spi_t spi;                          /**< used SPI device */
-    gpio_t cs_pin;                      /**< chip select pin */
-    gpio_t sleep_pin;                   /**< sleep pin */
-    gpio_t reset_pin;                   /**< reset pin */
-    gpio_t int_pin;                     /**< external interrupt pin */
-    gnrc_nettype_t proto;               /**< protocol the radio expects */
-    uint8_t state;                      /**< current state of the radio */
-    uint8_t seq_nr;                     /**< sequence number to use next */
-    uint8_t frame_len;                  /**< length of the current TX frame */
-    uint16_t pan;                       /**< currently used PAN ID */
-    uint8_t chan;                       /**< currently used channel number */
+    spi_t spi;                              /**< used SPI device */
+    gpio_t cs_pin;                          /**< chip select pin */
+    gpio_t sleep_pin;                       /**< sleep pin */
+    gpio_t reset_pin;                       /**< reset pin */
+    gpio_t int_pin;                         /**< external interrupt pin */
+#ifdef MODULE_GNRC
+    gnrc_nettype_t proto;                   /**< protocol the radio expects */
+#endif
+    uint8_t state;                          /**< current state of the radio */
+    uint8_t seq_nr;                         /**< sequence number to use next */
+    uint8_t rx_frame_len;                   /**< length of the current RX frame */
+    uint8_t tx_frame_len;                   /**< length of the current TX frame */
+    uint16_t pan;                           /**< currently used PAN ID */
+    uint8_t chan;                           /**< currently used channel number */
 #ifdef MODULE_AT86RF212B
     /* Only AT86RF212B supports multiple pages (PHY modes) */
     uint8_t page;                       /**< currently used channel page */
@@ -168,7 +172,7 @@ typedef struct at86rf2xx_params {
 } at86rf2xx_params_t;
 
 /**
- * @brief   Initialize a given AT86RF2xx device
+ * @brief   Setup an AT86RF2xx based device state
  *
  * @param[out] dev          device descriptor
  * @param[in] spi           SPI bus the device is connected to
@@ -177,13 +181,10 @@ typedef struct at86rf2xx_params {
  * @param[in] int_pin       GPIO pin connected to the interrupt pin
  * @param[in] sleep_pin     GPIO pin connected to the sleep pin
  * @param[in] reset_pin     GPIO pin connected to the reset pin
- *
- * @return                  0 on success
- * @return                  <0 on error
  */
-int at86rf2xx_init(at86rf2xx_t *dev, spi_t spi, spi_speed_t spi_speed,
-                   gpio_t cs_pin, gpio_t int_pin,
-                   gpio_t sleep_pin, gpio_t reset_pin);
+void at86rf2xx_setup(at86rf2xx_t *dev, spi_t spi, spi_speed_t spi_speed,
+                     gpio_t cs_pin, gpio_t int_pin, gpio_t sleep_pin,
+                     gpio_t reset_pin);
 
 /**
  * @brief   Trigger a hardware reset and configure radio with default values

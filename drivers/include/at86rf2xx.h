@@ -35,6 +35,7 @@
 #include "periph/spi.h"
 #include "periph/gpio.h"
 #include "net/netdev2.h"
+#include "net/gnrc/nettype.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -139,7 +140,9 @@ typedef struct {
     gpio_t sleep_pin;                       /**< sleep pin */
     gpio_t reset_pin;                       /**< reset pin */
     gpio_t int_pin;                         /**< external interrupt pin */
+#ifdef MODULE_GNRC
     gnrc_nettype_t proto;                   /**< protocol the radio expects */
+#endif
     uint8_t state;                          /**< current state of the radio */
     uint8_t seq_nr;                         /**< sequence number to use next */
     uint8_t rx_frame_len;                   /**< length of the current RX frame */

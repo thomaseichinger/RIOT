@@ -94,6 +94,7 @@ typedef enum {
                                  *   retransmissions. */
     NETOPT_PROTO,               /**< get/set the protocol for the layer
                                  *   as type gnrc_nettype_t. */
+    NETOPT_NO_COMP,             /**< en/disable usage of full header vs. compression (default) */
     NETOPT_STATE,               /**< get/set the state of network devices as
                                  *   type netopt_state_t */
     NETOPT_RAWMODE,             /**< en/disable the pre-processing of data

@@ -39,6 +39,8 @@
  *                      CC110x spi access
  **********************************************************************/
 
+#if RIOT_CPU != CPU_CC430
+
 void cc110x_cs(cc110x_t *dev)
 {
     volatile int retry_count = 0;
@@ -177,3 +179,5 @@ uint8_t cc110x_strobe(cc110x_t *dev, uint8_t c)
     spi_release(dev->params.spi);
     return (uint8_t) result;
 }
+
+#endif /* RIOT_CPU != CPU_CC430 */

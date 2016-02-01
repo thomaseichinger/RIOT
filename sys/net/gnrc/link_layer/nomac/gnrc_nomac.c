@@ -44,9 +44,25 @@ static void _event_cb(gnrc_netdev_event_t event, void *data)
     /* NOMAC only understands the RX_COMPLETE event... */
     if (event == NETDEV_EVENT_RX_COMPLETE) {
         gnrc_pktsnip_t *pkt;
+        gnrc_pktsnip_t *ack;
+        uint8_t temp[8];
+        le_uint16_t src_pan;
+        uint16_t dst_pan;
+
 
         /* get pointer to the received packet */
         pkt = (gnrc_pktsnip_t *)data;
+
+        /* assemble ACK packet */
+        ack = gnrc_pktbuf_add(NULL, NULL, 3, NETTYPE_UNDEF);
+        src_pan = 
+        ieee802154_get_src(pkt->data, &temp, &dst_pan);
+        ieee802154_set_frame_hdr(ack->data, NULL, 0, NULL, 0,
+                                src_pan, dst_pan,
+                                uint8_t flags, uint8_t seq);
+
+        dev->driver->send_data(dev, (gnrc_pktsnip_t *)msg.content.ptr);
+
         /* send the packet to everyone interested in it's type */
         if (!gnrc_netapi_dispatch_receive(pkt->type, GNRC_NETREG_DEMUX_CTX_ALL, pkt)) {
             DEBUG("nomac: unable to forward packet of type %i\n", pkt->type);

@@ -20,6 +20,7 @@
 
 #include "native_internal.h"
 #include "netdev2_tap.h"
+#include "tty_uart.h"
 
 void reboot(void)
 {

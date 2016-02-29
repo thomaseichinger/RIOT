@@ -44,7 +44,7 @@ static gnrc_pktsnip_t *_recv(gnrc_netdev2_t *gnrc_netdev2)
             DEBUG("_recv_ethernet_packet: cannot allocate pktsnip.\n");
 
             /* drop the packet */
-            dev->driver->recv(dev, NULL, bytes_expected);
+            dev->driver->recv(dev, NULL, bytes_expected, NULL);
 
             goto out;
         }

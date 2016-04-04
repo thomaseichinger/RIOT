@@ -188,7 +188,7 @@ static int _set_state(at86rf2xx_t *dev, netopt_state_t state)
             at86rf2xx_set_state(dev, AT86RF2XX_STATE_SLEEP);
             break;
         case NETOPT_STATE_IDLE:
-            at86rf2xx_set_state(dev, AT86RF2XX_STATE_RX_AACK_ON);
+            at86rf2xx_set_state(dev, AT86RF2XX_STATE_RX_ON);
             break;
         case NETOPT_STATE_TX:
             if (dev->netdev.flags & AT86RF2XX_OPT_PRELOADING) {
@@ -209,12 +209,12 @@ netopt_state_t _get_state(at86rf2xx_t *dev)
     switch (at86rf2xx_get_status(dev)) {
         case AT86RF2XX_STATE_SLEEP:
             return NETOPT_STATE_SLEEP;
-        case AT86RF2XX_STATE_BUSY_RX_AACK:
+        case AT86RF2XX_STATE_BUSY_RX:
             return NETOPT_STATE_RX;
-        case AT86RF2XX_STATE_BUSY_TX_ARET:
-        case AT86RF2XX_STATE_TX_ARET_ON:
+        case AT86RF2XX_STATE_BUSY_TX:
+        case AT86RF2XX_STATE_PLL_ON:
             return NETOPT_STATE_TX;
-        case AT86RF2XX_STATE_RX_AACK_ON:
+        case AT86RF2XX_STATE_RX_ON:
         default:
             return NETOPT_STATE_IDLE;
     }
@@ -592,7 +592,6 @@ static void _isr(netdev2_t *netdev)
     at86rf2xx_t *dev = (at86rf2xx_t *) netdev;
     uint8_t irq_mask;
     uint8_t state;
-    uint8_t trac_status;
 
     /* If transceiver is sleeping register access is impossible and frames are
      * lost anyway, so return immediately.
@@ -605,48 +604,29 @@ static void _isr(netdev2_t *netdev)
     /* read (consume) device status */
     irq_mask = at86rf2xx_reg_read(dev, AT86RF2XX_REG__IRQ_STATUS);
 
-    trac_status = at86rf2xx_reg_read(dev, AT86RF2XX_REG__TRX_STATE) &
-                  AT86RF2XX_TRX_STATE_MASK__TRAC;
-
     if (irq_mask & AT86RF2XX_IRQ_STATUS_MASK__RX_START) {
         netdev->event_callback(netdev, NETDEV2_EVENT_RX_STARTED, NULL);
         DEBUG("[at86rf2xx] EVT - RX_START\n");
     }
 
     if (irq_mask & AT86RF2XX_IRQ_STATUS_MASK__TRX_END) {
-        if (state == AT86RF2XX_STATE_RX_AACK_ON ||
-            state == AT86RF2XX_STATE_BUSY_RX_AACK) {
+        if (state == AT86RF2XX_STATE_RX_ON ||
+            state == AT86RF2XX_STATE_BUSY_RX) {
             DEBUG("[at86rf2xx] EVT - RX_END\n");
             if (!(dev->netdev.flags & AT86RF2XX_OPT_TELL_RX_END)) {
                 return;
             }
             netdev->event_callback(netdev, NETDEV2_EVENT_RX_COMPLETE, NULL);
         }
-        else if (state == AT86RF2XX_STATE_TX_ARET_ON ||
-                 state == AT86RF2XX_STATE_BUSY_TX_ARET) {
+        else if (state == AT86RF2XX_STATE_PLL_ON ||
+                 state == AT86RF2XX_STATE_BUSY_TX) {
             at86rf2xx_set_state(dev, dev->idle_state);
             DEBUG("[at86rf2xx] EVT - TX_END\n");
             DEBUG("[at86rf2xx] return to state 0x%x\n", dev->idle_state);
 
             if (netdev->event_callback && (dev->netdev.flags & AT86RF2XX_OPT_TELL_TX_END)) {
-                switch (trac_status) {
-                    case AT86RF2XX_TRX_STATE__TRAC_SUCCESS:
-                    case AT86RF2XX_TRX_STATE__TRAC_SUCCESS_DATA_PENDING:
-                        netdev->event_callback(netdev, NETDEV2_EVENT_TX_COMPLETE, NULL);
-                        DEBUG("[at86rf2xx] TX SUCCESS\n");
-                        break;
-                    case AT86RF2XX_TRX_STATE__TRAC_NO_ACK:
-                        netdev->event_callback(netdev, NETDEV2_EVENT_TX_NOACK, NULL);
-                        DEBUG("[at86rf2xx] TX NO_ACK\n");
-                        break;
-                    case AT86RF2XX_TRX_STATE__TRAC_CHANNEL_ACCESS_FAILURE:
-                        netdev->event_callback(netdev, NETDEV2_EVENT_TX_MEDIUM_BUSY, NULL);
-                        DEBUG("[at86rf2xx] TX_CHANNEL_ACCESS_FAILURE\n");
-                        break;
-                    default:
-                        DEBUG("[at86rf2xx] Unhandled TRAC_STATUS: %d\n",
-                              trac_status >> 5);
-                }
+                netdev->event_callback(netdev, NETDEV2_EVENT_TX_COMPLETE, NULL);
+                DEBUG("[at86rf2xx] TX SUCCESS\n");
             }
         }
     }

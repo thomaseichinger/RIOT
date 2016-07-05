@@ -306,4 +306,3 @@ static int _set(netdev2_t *netdev, netopt_t opt, void *val, size_t val_len)
 
     return 0;
 }
-

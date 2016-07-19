@@ -238,6 +238,10 @@ static int read_command(pn532_t *dev, char *buff, unsigned len, int expected_cmd
         return -r;
     }
 
+    if (lp <= 0) {
+        return -r;
+    }
+
     if (chksum(&buff[fi], lp) != buff[fi + lp]) {
         return -r;
     }

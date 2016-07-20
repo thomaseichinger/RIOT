@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "assert.h"
 #include "xtimer.h"
 #include "mutex.h"
 #include "pn532.h"
@@ -58,6 +59,11 @@
 #define RAPDU_MAX_DATA_LEN            (PN532_BUFFER_LEN - BUFF_DATA_START - 5)
 #define CAPDU_MAX_DATA_LEN            (PN532_BUFFER_LEN - BUFF_DATA_START - 1)
 
+/* Constants and magic numbers */
+#define MIFARE_CLASSIC_BLOCK_SIZE     (16)
+#define RESET_TOGGLE_SLEEP            (400000)
+#define RESET_BACKOFF                 (10000)
+
 /* Length for passive listings */
 #define LIST_PASSIVE_LEN_14443(num)   (num * 20)
 
@@ -82,15 +88,19 @@ static void _nfc_event(void *dev)
 
 void pn532_reset(pn532_t *dev)
 {
+    assert(dev != NULL);
+
     DEBUG("pn532: reset\n");
     gpio_clear(dev->conf->reset);
-    xtimer_usleep(400000);
+    xtimer_usleep(RESET_TOGGLE_SLEEP);
     gpio_set(dev->conf->reset);
-    xtimer_usleep(10000);
+    xtimer_usleep(RESET_BACKOFF);
 }
 
 int pn532_init(pn532_t *dev, const pn532_params_t *params)
 {
+    assert(dev != NULL);
+
     int ret;
 
     dev->conf = params;
@@ -150,21 +160,6 @@ static int _read(pn532_t *dev, char *buff, unsigned len)
 
 static int send_cmd(pn532_t *dev, char *buff, unsigned len)
 {
-/*
- * PN532 information frame format
- *
- * 0  1  2  3  4  5  6            M
- * +--+--+--+--+--+--+--+--+---+--+--+--+
- * |00|00|FF|LP|LC|FI|D0|D1|...|Dn|CS|00|
- * +--+--+--+--+--+--+--+--+---+--+--+--+
- * 00: 0x00
- * FF: 0xFF
- * LP: packet length (including FI)
- * LC: packet length checksum [LEN + LCS] = 0x00
- * FI: frame identifier (D4: host -> controller, D5: controller -> host)
- * Dx: data
- * CS: checksum [FI+D0+D1+...+Dn+CS] = 0x00
- */
     unsigned pos, checksum;
 
     buff[0] = 0x00;
@@ -202,7 +197,7 @@ static void wait_ready(pn532_t *dev)
     mutex_lock(&dev->trap);
 }
 
-/* Returns >0 payload len (or <0 received len but not as expected */
+/* Returns >0 payload len (or <0 received len but not as expected) */
 static int read_command(pn532_t *dev, char *buff, unsigned len, int expected_cmd)
 {
     int r;
@@ -220,8 +215,8 @@ static int read_command(pn532_t *dev, char *buff, unsigned len, int expected_cmd
      *
      * Note that all offsets are shifted by one since the first byte is always
      * 0x01. */
-    if (r < len || buff[1] != 0x00 || buff[2] != 0x00 || buff[3] != 0xFF
-        || buff[r - 1] != 0x00) {
+    if ((r < len) || (buff[1] != 0x00) || (buff[2] != 0x00) || (buff[3] != 0xFF)
+        || (buff[r - 1] != 0x00)) {
         return -r;
     }
 
@@ -240,6 +235,10 @@ static int read_command(pn532_t *dev, char *buff, unsigned len, int expected_cmd
     }
 
     if (lc != 0 || lp >= 265 || buff[fi] != 0xD5) {
+        return -r;
+    }
+
+    if (lp <= 0) {
         return -r;
     }
 
@@ -288,6 +287,8 @@ static int send_check_ack(pn532_t *dev, char *buff, unsigned len)
 /* sendl: send length, recvl: receive payload length */
 static int send_rcv(pn532_t *dev, char *buff, unsigned sendl, unsigned recvl)
 {
+    assert(dev != NULL);
+
     int expected_cmd = buff[BUFF_CMD_START] + 1;
 
     if (send_check_ack(dev, buff, sendl + 1)) {
@@ -303,7 +304,7 @@ int pn532_fw_version(pn532_t *dev, uint32_t *fw_ver)
     unsigned ret = -1;
     char buff[PN532_BUFFER_LEN];
 
-    buff[BUFF_CMD_START     ] = CMD_FIRMWARE_VERSION;
+    buff[BUFF_CMD_START] = CMD_FIRMWARE_VERSION;
 
     if (send_rcv(dev, buff, 0, 4) == 4) {
         *fw_ver = (buff[0] << 24);  /* ic version */
@@ -335,7 +336,6 @@ int pn532_read_reg(pn532_t *dev, char *out, unsigned addr)
 
 int pn532_write_reg(pn532_t *dev, unsigned addr, char val)
 {
-    int ret = -1;
     char buff[PN532_BUFFER_LEN];
 
     buff[BUFF_CMD_START     ] = CMD_WRITE_REG;
@@ -343,9 +343,7 @@ int pn532_write_reg(pn532_t *dev, unsigned addr, char val)
     buff[BUFF_DATA_START + 1] = addr & 0xff;
     buff[BUFF_DATA_START + 2] = val;
 
-    ret = send_rcv(dev, buff, 3, 0);
-
-    return ret;
+    return send_rcv(dev, buff, 3, 0);
 }
 
 static int _rf_configure(pn532_t *dev, char *buff, unsigned cfg_item, char *config,
@@ -369,7 +367,6 @@ static int _set_act_retries(pn532_t *dev, char *buff, unsigned max_retries)
 
 int pn532_sam_configuration(pn532_t *dev, pn532_sam_conf_mode_t mode, unsigned timeout)
 {
-    int ret = -1;
     char buff[PN532_BUFFER_LEN];
 
     buff[BUFF_CMD_START     ] = CMD_SAM_CONFIG;
@@ -377,9 +374,7 @@ int pn532_sam_configuration(pn532_t *dev, pn532_sam_conf_mode_t mode, unsigned t
     buff[BUFF_DATA_START + 1] = (char)(timeout / 50);
     buff[BUFF_DATA_START + 2] = 0x01;
 
-    ret = send_rcv(dev, buff, 3, 0);
-
-    return ret;
+    return send_rcv(dev, buff, 3, 0);
 }
 
 static int _list_passive_targets(pn532_t *dev, char *buff, pn532_target_t target,
@@ -418,7 +413,6 @@ int pn532_get_passive_iso14443a(pn532_t *dev, nfc_iso14443a_t *out,
         /* try to find out the type */
         if (out->id_len == 4) {
             out->type = ISO14443A_MIFARE;
-
         }
         else if (out->id_len == 7) {
             /* In the case of type 4, the first byte of RATS is the length
@@ -427,9 +421,7 @@ int pn532_get_passive_iso14443a(pn532_t *dev, nfc_iso14443a_t *out,
                 out->type = ISO14443A_TYPE4;
             }
         }
-
         ret = 0;
-
     }
     else {
         ret = -1;
@@ -442,22 +434,20 @@ void pn532_deselect_passive(pn532_t *dev, unsigned target_id)
 {
     char buff[PN532_BUFFER_LEN];
 
-    buff[BUFF_CMD_START     ] = CMD_DESELECT;
-    buff[BUFF_DATA_START    ] = target_id;
+    buff[BUFF_CMD_START ] = CMD_DESELECT;
+    buff[BUFF_DATA_START] = target_id;
 
     send_rcv(dev, buff, 1, 1);
-
 }
 
 void pn532_release_passive(pn532_t *dev, unsigned target_id)
 {
     char buff[PN532_BUFFER_LEN];
 
-    buff[BUFF_CMD_START     ] = CMD_RELEASE;
-    buff[BUFF_DATA_START    ] = target_id;
+    buff[BUFF_CMD_START ] = CMD_RELEASE;
+    buff[BUFF_DATA_START] = target_id;
 
     send_rcv(dev, buff, 1, 1);
-
 }
 
 int pn532_mifareclassic_authenticate(pn532_t *dev, nfc_iso14443a_t *card,
@@ -471,12 +461,14 @@ int pn532_mifareclassic_authenticate(pn532_t *dev, nfc_iso14443a_t *card,
     buff[BUFF_DATA_START + 1] = keyid;
     buff[BUFF_DATA_START + 2] = block; /* current block */
 
-    /* key */
+    /*
+     * The card ID directly follows the key in the buffer
+     * The key consists of 6 bytes and starts at offset 3
+     */
     for (int i = 0; i < 6; i++) {
         buff[BUFF_DATA_START + 3 + i] = key[i];
     }
 
-    /* id */
     for (int i = 0; i < card->id_len; i++) {
         buff[BUFF_DATA_START + 9 + i] = card->id[i];
     }
@@ -502,7 +494,7 @@ int pn532_mifareclassic_write(pn532_t *dev, char *idata, nfc_iso14443a_t *card,
         buff[BUFF_DATA_START    ] = card->target;
         buff[BUFF_DATA_START + 1] = MIFARE_CMD_WRITE;
         buff[BUFF_DATA_START + 2] = block; /* current block */
-        memcpy(&buff[BUFF_DATA_START - 1 + 4], idata, 16);
+        memcpy(&buff[BUFF_DATA_START + 3], idata, MIFARE_CLASSIC_BLOCK_SIZE);
 
         if (send_rcv(dev, buff, 19, 1) == 1) {
             ret = buff[0];
@@ -535,7 +527,7 @@ int pn532_mifareclassic_read(pn532_t *dev, char *odata, nfc_iso14443a_t *card,
                              unsigned block)
 {
     if (card->auth) {
-        return pn532_mifare_read(dev, odata, card, block, 16);
+        return pn532_mifare_read(dev, odata, card, block, MIFARE_CLASSIC_BLOCK_SIZE);
     }
     else {
         return -1;

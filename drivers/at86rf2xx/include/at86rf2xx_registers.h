@@ -116,6 +116,11 @@ extern "C" {
 #define AT86RF2XX_REG__CSMA_SEED_1                              (0x2E)
 #define AT86RF2XX_REG__CSMA_BE                                  (0x2F)
 #define AT86RF2XX_REG__TST_CTRL_DIGI                            (0x36)
+#define AT86RF2XX_REG__AES_STATUS                               (0x82)
+#define AT86RF2XX_REG__AES_CTRL                                 (0x83)
+#define AT86RF2XX_REG__AES_KEY_FIRST                            (0x84)
+#define AT86RF2XX_REG__AES_STATE_FIRST                          (0x84)
+#define AT86RF2XX_REG__AES_CTRL_MIRROR                          (0x94)
 /** @} */
 
 /**
@@ -342,6 +347,31 @@ extern "C" {
 #define AT86RF2XX_RF_CTRL_0_GC_TX_OFFS__1DB                     (0x02)
 #define AT86RF2XX_RF_CTRL_0_GC_TX_OFFS__2DB                     (0x03)
 #endif
+/** @} */
+
+/**
+ * @brief   Bitfield definitions for the AES_STATUS register
+ * @{
+ */
+#define AT86RF2XX_AES_STATUS_MASK__AES_ER                       (0x80)
+#define AT86RF2XX_AES_STATUS_MASK__AES_DONE                     (0x01)
+/** @} */
+
+/**
+ * @brief   Bitfield definitions for the AES_CTRL register
+ * @{
+ */
+#define AT86RF2XX_AES_CTRL_MASK__AES_REQUEST                    (0x80)
+#define AT86RF2XX_AES_CTRL_MASK__AES_MODE                       (0x70)
+#define AT86RF2XX_AES_CTRL_MASK__AES_DIR                        (0x08)
+
+#define AT86RF2XX_AES_CTRL__AES_REQUEST                         (0x80)
+#define AT86RF2XX_AES_CTRL__AES_MODE_ECB                        (0x00)
+#define AT86RF2XX_AES_CTRL__AES_MODE_KEY                        (0x10)
+#define AT86RF2XX_AES_CTRL__AES_MODE_CBC                        (0x20)
+
+#define AT86RF2XX_AES_CTRL__AES_DIR_ENC                         (0x00)
+#define AT86RF2XX_AES_CTRL__AES_DIR_DEC                         (0x08)
 /** @} */
 
 #ifdef __cplusplus

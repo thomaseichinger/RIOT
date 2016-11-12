@@ -132,6 +132,9 @@ static int _recv(netdev2_t *netdev, void *buf, size_t len, void *info)
     at86rf2xx_t *dev = (at86rf2xx_t *)netdev;
     uint8_t phr;
     size_t pkt_len;
+#ifdef USE_LLSEC
+    uint8_t tmp_buf[len];
+#endif
 
     /* frame buffer protection will be unlocked as soon as at86rf2xx_fb_stop()
      * is called*/
@@ -153,12 +156,20 @@ static int _recv(netdev2_t *netdev, void *buf, size_t len, void *info)
         at86rf2xx_fb_stop(dev);
         return -ENOBUFS;
     }
-    #ifdef MODULE_NETSTATS_L2
-        netdev->stats.rx_count++;
-        netdev->stats.rx_bytes += pkt_len;
-    #endif
+#ifdef MODULE_NETSTATS_L2
+    netdev->stats.rx_count++;
+    netdev->stats.rx_bytes += pkt_len;
+#endif
+#ifndef USE_LLSEC
     /* copy payload */
     at86rf2xx_fb_read(dev, (uint8_t *)buf, pkt_len);
+#else
+    if (pkt_len%AT86RF2XX_LLSEC_BLOCK_SIZE) {
+        DEBUG("Something is wrong, pkt_len not \%16!\n");
+    }
+    at86rf2xx_fb_read(dev, tmp_buf, pkt_len);
+    at86rf2xx_decrytp_cbc(dev, tmp_buf, (uint8_t *)buf, pkt_len);
+#endif
 
     /* Ignore FCS but advance fb read */
     at86rf2xx_fb_read(dev, NULL, 2);
@@ -294,7 +305,11 @@ static int _get(netdev2_t *netdev, netopt_t opt, void *val, size_t max_len)
             *((netopt_enable_t *)val) =
                 !!(dev->netdev.flags & AT86RF2XX_OPT_CSMA);
             return sizeof(netopt_enable_t);
-
+#ifdef USE_LLSEC
+        case NETOPT_ENCRYPTION:
+            *((netopt_enable_t *)val) = NETOPT_ENABLE;
+            return sizeof(netopt_enable_t);
+#endif
         default:
             /* Can still be handled in second switch */
             break;
@@ -565,6 +580,17 @@ static int _set(netdev2_t *netdev, netopt_t opt, void *val, size_t len)
                 res = sizeof(int8_t);
             }
             break;
+#ifdef USE_LLSEC
+        case NETOPT_ENCRYPTION_KEY:
+            if (len != AT86RF2XX_LLSEC_BLOCK_SIZE) {
+                res = -EOVERFLOW;
+            }
+            else {
+                at86rf2xx_set_encryption_key(dev, (const uint8_t *)val);
+                res = AT86RF2XX_LLSEC_BLOCK_SIZE;
+            }
+            break;
+#endif
 
         default:
             break;

@@ -182,6 +182,19 @@ void at86rf2xx_configure_phy(at86rf2xx_t *dev);
 void at86rf2xx_get_random(at86rf2xx_t *dev, uint8_t *data, const size_t len);
 #endif
 
+#define AT86RF2XX_LLSEC_BLOCK_SIZE      (0x10)
+
+void at86rf2xx_fast_sram_access(const at86rf2xx_t *dev,
+                                const uint8_t *aes_ctrl,
+                                const uint8_t *data_w,
+                                uint8_t *data_r);
+
+void at86rf2xx_set_encryption_key(const at86rf2xx_t *dev, const uint8_t *key);
+
+void at86rf2xx_encrypt_cbc(const at86rf2xx_t *dev, uint8_t *plaintext, uint8_t *cipher, size_t len);
+
+void at86rf2xx_decrypt_cbc(const at86rf2xx_t *dev, uint8_t *cipher, uint8_t *plaintext, size_t len);
+
 #ifdef __cplusplus
 }
 #endif

@@ -201,9 +201,21 @@ void at86rf2xx_tx_prepare(at86rf2xx_t *dev)
 size_t at86rf2xx_tx_load(at86rf2xx_t *dev, uint8_t *data,
                          size_t len, size_t offset)
 {
+#ifdef USE_LLC
+    uint8_t padded_len = len+(AT86RF2XX_LLSEC_BLOCK_SIZE-(len%AT86RF2XX_LLSEC_BLOCK_SIZE));
+    uint8_t in_buf[padded_len];
+    uint8_t out_buf[padded_len];
+    memcpy(in_buf, data, len);
+    memset(in_buf+len, 0, padded_len-len);
+    at86rf2xx_encrypt_cbc(dev, in_buf, out_buf, padded_len);
+    dev->tx_frame_len +=padded_len;
+    at86rf2xx_sram_write(dev, offset + 1, out_buf, padded_len);
+    return offset + padded_len;
+#else
     dev->tx_frame_len += (uint8_t)len;
     at86rf2xx_sram_write(dev, offset + 1, data, len);
     return offset + len;
+#endif
 }
 
 void at86rf2xx_tx_exec(at86rf2xx_t *dev)

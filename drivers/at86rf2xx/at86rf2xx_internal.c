@@ -27,6 +27,7 @@
 #include "xtimer.h"
 #include "at86rf2xx_internal.h"
 #include "at86rf2xx_registers.h"
+#include "assert.h"
 
 void at86rf2xx_reg_write(const at86rf2xx_t *dev,
                          const uint8_t addr,
@@ -237,3 +238,66 @@ void at86rf2xx_force_trx_off(const at86rf2xx_t *dev)
                         AT86RF2XX_TRX_STATE__FORCE_TRX_OFF);
     while (at86rf2xx_get_status(dev) != AT86RF2XX_STATE_TRX_OFF);
 }
+
+#ifdef USE_LLSEC
+
+void at86rf2xx_fast_sram_access(const at86rf2xx_t *dev,
+                                const uint8_t *aes_ctrl,
+                                const uint8_t *data_w,
+                                uint8_t *data_r)
+{
+    spi_acquire(dev->params.spi);
+    gpio_clear(dev->params.cs_pin);
+
+    spi_transfer_byte(dev->params.spi, AT86RF2XX_ACCESS_SRAM | AT86RF2XX_ACCESS_WRITE, NULL);
+    spi_transfer_byte(dev->params.spi, AT86RF2XX_REG__AES_CTRL, NULL);
+
+    spi_transfer_byte(dev->params.spi, *((char *)aes_ctrl), NULL);
+    spi_transfer_byte(dev->params.spi, *((char *)(data_w)), NULL);
+    spi_transfer_bytes(dev->params.spi,
+                       (char *)(data_w+1),
+                       (char *)data_r,
+                       AT86RF2XX_LLSEC_BLOCK_SIZE-1);
+    spi_transfer_byte(dev->params.spi, 
+                      (*aes_ctrl) | AT86RF2XX_AES_CTRL__AES_REQUEST, 
+                      (char *)(data_r+(AT86RF2XX_LLSEC_BLOCK_SIZE-1)));
+
+    gpio_set(dev->params.cs_pin);
+    spi_release(dev->params.spi);
+}
+
+void at86rf2xx_set_encryption_key(const at86rf2xx_t *dev, const uint8_t *key)
+{
+    uint8_t aes_ctrl = AT86RF2XX_AES_CTRL__AES_MODE_KEY;
+    at86rf2xx_fast_sram_access(dev, &aes_ctrl, key, NULL);
+}
+
+void at86rf2xx_encrypt_cbc(const at86rf2xx_t *dev, uint8_t *plaintext, uint8_t *cipher, size_t len)
+{
+    assert((len%AT86RF2XX_LLSEC_BLOCK_SIZE)==0);
+    uint8_t aes_ctrl = (AT86RF2XX_AES_CTRL__AES_MODE_CBC | AT86RF2XX_AES_CTRL__AES_DIR_ENC);
+
+    at86rf2xx_fast_sram_access(dev, &aes_ctrl, plaintext, NULL);
+    for (unsigned int i = AT86RF2XX_LLSEC_BLOCK_SIZE; i<len; i+=AT86RF2XX_LLSEC_BLOCK_SIZE) {
+        at86rf2xx_fast_sram_access(dev, &aes_ctrl, (plaintext+i), (cipher+i-AT86RF2XX_LLSEC_BLOCK_SIZE));
+    }
+    at86rf2xx_fast_sram_access(dev, &aes_ctrl, NULL, (cipher+len-AT86RF2XX_LLSEC_BLOCK_SIZE));
+}
+
+void at86rf2xx_decrypt_cbc(const at86rf2xx_t *dev, uint8_t *cipher, uint8_t *plaintext, size_t len)
+{
+    assert((len%AT86RF2XX_LLSEC_BLOCK_SIZE)==0);
+    uint8_t aes_ctrl = (AT86RF2XX_AES_CTRL__AES_MODE_CBC | AT86RF2XX_AES_CTRL__AES_DIR_DEC);
+
+    at86rf2xx_fast_sram_access(dev, &aes_ctrl, cipher, NULL);
+    for (unsigned int i = AT86RF2XX_LLSEC_BLOCK_SIZE; i<len; i+=AT86RF2XX_LLSEC_BLOCK_SIZE) {
+        at86rf2xx_fast_sram_access(dev, &aes_ctrl, (cipher+i), (plaintext+i-AT86RF2XX_LLSEC_BLOCK_SIZE));
+    }
+    at86rf2xx_fast_sram_access(dev, &aes_ctrl, NULL, (plaintext+len-AT86RF2XX_LLSEC_BLOCK_SIZE));
+
+    for (int i = AT86RF2XX_LLSEC_BLOCK_SIZE; i<len; i++) {
+        plaintext[i] ^= cipher[i-AT86RF2XX_LLSEC_BLOCK_SIZE];
+    }
+}
+
+#endif /* USE_LLSEC */

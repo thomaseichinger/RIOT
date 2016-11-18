@@ -42,10 +42,22 @@ extern "C" {
  */
 
 /**
+ * @brief IEEE802.15.4 maximum header length
+ * @{
+ */
+#ifndef USE_LLSEC
+#define IEEE802154_MAX_HDR_LEN              (23U)
+#else
+#define IEEE802154_MAX_HDR_LEN              (37U)
+#endif
+/**
+ * @}
+ */
+
+/**
  * @brief IEEE802.15.4 FCF field definitions
  * @{
  */
-#define IEEE802154_MAX_HDR_LEN              (23U)
 #define IEEE802154_FCF_LEN                  (2U)
 #define IEEE802154_FCS_LEN                  (2U)
 
@@ -76,6 +88,19 @@ extern "C" {
 #define IEEE802154_FCF_SRC_ADDR_SHORT       (0x80)  /**< source address length is 2 */
 #define IEEE802154_FCF_SRC_ADDR_LONG        (0xc0)  /**< source address length is 8 */
 /** @} */
+
+/**
+ * @brief IEEE802.15.4 Auxiliary security header
+ * @{
+ */
+#define IEEE802154_AUX_SEC_HDR_MAX_LEN              (14U)
+#define IEEE802154_AUX_SEC_CTRL_LEVEL_MASK          (0x07)
+#define IEEE802154_AUX_SEC_CTRL_KEY_ID_MODE_MASK    (0x18)
+#define IEEE802154_AUX_SEC_CTRL_F_CTR_SUPPR         (0x20)
+#define IEEE802154_AUX_SEC_CTRL_ASN_NONCE_MASK      (0x40)
+/**
+ * @}
+ */
 
 /**
  * @brief   Channel ranges

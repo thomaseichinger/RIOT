@@ -44,8 +44,8 @@ static const mpu9150_status_t DEFAULT_STATUS = {
 };
 
 /* Internal function prototypes */
-static int compass_init(mpu9150_t *dev);
-static void conf_bypass(mpu9150_t *dev, uint8_t bypass_enable);
+// static int compass_init(mpu9150_t *dev);
+// static void conf_bypass(mpu9150_t *dev, uint8_t bypass_enable);
 static void conf_lpf(mpu9150_t *dev, uint16_t rate);
 
 /*---------------------------------------------------------------------------*
@@ -89,10 +89,10 @@ int mpu9150_init(mpu9150_t *dev, i2c_t i2c, mpu9150_hw_addr_t hw_addr,
     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_INT_ENABLE_REG, REG_RESET);
 
     /* Initialize magnetometer */
-    if (compass_init(dev)) {
-        i2c_release(dev->i2c_dev);
-        return -2;
-    }
+    // if (compass_init(dev)) {
+    //     i2c_release(dev->i2c_dev);
+    //     return -2;
+    // }
     /* Release the bus, it is acquired again inside each function */
     i2c_release(dev->i2c_dev);
     mpu9150_set_compass_sample_rate(dev, 10);
@@ -498,93 +498,93 @@ int mpu9150_set_compass_sample_rate(mpu9150_t *dev, uint8_t rate)
  * Caution: This internal function does not acquire exclusive access to the I2C bus.
  *          Acquisation and release is supposed to be handled by the calling function.
  */
-static int compass_init(mpu9150_t *dev)
-{
-    uint8_t data[3];
+// static int compass_init(mpu9150_t *dev)
+// {
+//     uint8_t data[3];
 
-    /* Enable Bypass Mode to speak to compass directly */
-    conf_bypass(dev, 1);
+//     /* Enable Bypass Mode to speak to compass directly */
+//     conf_bypass(dev, 1);
 
-    /* Check whether compass answers correctly */
-    i2c_read_reg(dev->i2c_dev, dev->comp_addr, COMPASS_WHOAMI_REG, data);
-    if (data[0] != MPU9150_COMP_WHOAMI_ANSWER) {
-        DEBUG("[Error] Wrong answer from compass\n");
-        return -1;
-    }
+//     /* Check whether compass answers correctly */
+//     i2c_read_reg(dev->i2c_dev, dev->comp_addr, COMPASS_WHOAMI_REG, data);
+//     if (data[0] != MPU9150_COMP_WHOAMI_ANSWER) {
+//         DEBUG("[Error] Wrong answer from compass\n");
+//         return -1;
+//     }
 
-    /* Configure Power Down mode */
-    i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_POWER_DOWN);
-    xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
-    /* Configure Fuse ROM access */
-    i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_FUSE_ROM);
-    xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
-    /* Read sensitivity adjustment values from Fuse ROM */
-    i2c_read_regs(dev->i2c_dev, dev->comp_addr, COMPASS_ASAX_REG, data, 3);
-    dev->conf.compass_x_adj = data[0];
-    dev->conf.compass_y_adj = data[1];
-    dev->conf.compass_z_adj = data[2];
-    /* Configure Power Down mode again */
-    i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_POWER_DOWN);
-    xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
+//     /* Configure Power Down mode */
+//     i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_POWER_DOWN);
+//     xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
+//     /* Configure Fuse ROM access */
+//     i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_FUSE_ROM);
+//     xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
+//     /* Read sensitivity adjustment values from Fuse ROM */
+//     i2c_read_regs(dev->i2c_dev, dev->comp_addr, COMPASS_ASAX_REG, data, 3);
+//     dev->conf.compass_x_adj = data[0];
+//     dev->conf.compass_y_adj = data[1];
+//     dev->conf.compass_z_adj = data[2];
+//     /* Configure Power Down mode again */
+//     i2c_write_reg(dev->i2c_dev, dev->comp_addr, COMPASS_CNTL_REG, MPU9150_COMP_POWER_DOWN);
+//     xtimer_usleep(MPU9150_COMP_MODE_SLEEP_US);
 
-    /* Disable Bypass Mode to configure MPU as master to the compass */
-    conf_bypass(dev, 0);
+//     /* Disable Bypass Mode to configure MPU as master to the compass */
+//     conf_bypass(dev, 0);
 
-    /* Configure MPU9150 for single master mode */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_I2C_MST_REG, BIT_WAIT_FOR_ES);
+//     /* Configure MPU9150 for single master mode */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_I2C_MST_REG, BIT_WAIT_FOR_ES);
 
-    /* Set up slave line 0 */
-    /* Slave line 0 reads the compass data */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr,
-            MPU9150_SLAVE0_ADDR_REG, (BIT_SLAVE_RW | dev->comp_addr));
-    /* Slave line 0 read starts at compass data register */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE0_REG_REG, COMPASS_DATA_START_REG);
-    /* Enable slave line 0 and configure read length to 6 consecutive registers */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE0_CTRL_REG, (BIT_SLAVE_EN | 0x06));
+//     /* Set up slave line 0 */
+//     /* Slave line 0 reads the compass data */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr,
+//             MPU9150_SLAVE0_ADDR_REG, (BIT_SLAVE_RW | dev->comp_addr));
+//     /* Slave line 0 read starts at compass data register */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE0_REG_REG, COMPASS_DATA_START_REG);
+//     /* Enable slave line 0 and configure read length to 6 consecutive registers */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE0_CTRL_REG, (BIT_SLAVE_EN | 0x06));
 
-    /* Set up slave line 1 */
-    /* Slave line 1 writes to the compass */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_ADDR_REG, dev->comp_addr);
-    /* Slave line 1 write starts at compass control register */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_REG_REG, COMPASS_CNTL_REG);
-    /* Enable slave line 1 and configure write length to 1 register */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_CTRL_REG, (BIT_SLAVE_EN | 0x01));
-    /* Configure data which is written by slave line 1 to compass control */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr,
-            MPU9150_SLAVE1_DATA_OUT_REG, MPU9150_COMP_SINGLE_MEASURE);
+//     /* Set up slave line 1 */
+//     /* Slave line 1 writes to the compass */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_ADDR_REG, dev->comp_addr);
+//     /* Slave line 1 write starts at compass control register */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_REG_REG, COMPASS_CNTL_REG);
+//     /* Enable slave line 1 and configure write length to 1 register */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_SLAVE1_CTRL_REG, (BIT_SLAVE_EN | 0x01));
+//     /* Configure data which is written by slave line 1 to compass control */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr,
+//             MPU9150_SLAVE1_DATA_OUT_REG, MPU9150_COMP_SINGLE_MEASURE);
 
-    /* Slave line 0 and 1 operate at each sample */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr,
-            MPU9150_I2C_DELAY_CTRL_REG, (BIT_SLV0_DELAY_EN | BIT_SLV1_DELAY_EN));
-    /* Set I2C bus to VDD */
-    i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_YG_OFFS_TC_REG, BIT_I2C_MST_VDDIO);
+//     /* Slave line 0 and 1 operate at each sample */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr,
+//             MPU9150_I2C_DELAY_CTRL_REG, (BIT_SLV0_DELAY_EN | BIT_SLV1_DELAY_EN));
+//     /* Set I2C bus to VDD */
+//     i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_YG_OFFS_TC_REG, BIT_I2C_MST_VDDIO);
 
-    return 0;
-}
+//     return 0;
+// }
 
 /**
  * Configure bypass mode
  * Caution: This internal function does not acquire exclusive access to the I2C bus.
  *          Acquisation and release is supposed to be handled by the calling function.
  */
-static void conf_bypass(mpu9150_t *dev, uint8_t bypass_enable)
-{
-   uint8_t data;
-   i2c_read_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, &data);
+// static void conf_bypass(mpu9150_t *dev, uint8_t bypass_enable)
+// {
+//    uint8_t data;
+//    i2c_read_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, &data);
 
-   if (bypass_enable) {
-       data &= ~(BIT_I2C_MST_EN);
-       i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, data);
-       xtimer_usleep(MPU9150_BYPASS_SLEEP_US);
-       i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_INT_PIN_CFG_REG, BIT_I2C_BYPASS_EN);
-   }
-   else {
-       data |= BIT_I2C_MST_EN;
-       i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, data);
-       xtimer_usleep(MPU9150_BYPASS_SLEEP_US);
-       i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_INT_PIN_CFG_REG, REG_RESET);
-   }
-}
+//    if (bypass_enable) {
+//        data &= ~(BIT_I2C_MST_EN);
+//        i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, data);
+//        xtimer_usleep(MPU9150_BYPASS_SLEEP_US);
+//        i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_INT_PIN_CFG_REG, BIT_I2C_BYPASS_EN);
+//    }
+//    else {
+//        data |= BIT_I2C_MST_EN;
+//        i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_USER_CTRL_REG, data);
+//        xtimer_usleep(MPU9150_BYPASS_SLEEP_US);
+//        i2c_write_reg(dev->i2c_dev, dev->hw_addr, MPU9150_INT_PIN_CFG_REG, REG_RESET);
+//    }
+// }
 
 /**
  * Configure low pass filter

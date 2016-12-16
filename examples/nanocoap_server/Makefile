@@ -32,7 +32,7 @@ USEMODULE += gnrc_sock_udp
 
 USEPKG += nanocoap
 # optionally enable nanocoap's debug output
-#CFLAGS += -DNANOCOAP_DEBUG
+CFLAGS += -DNANOCOAP_DEBUG
 
 # include this for printing IP addresses
 USEMODULE += shell_commands

@@ -16,7 +16,7 @@ endif
 # set default device parameters in case they are undefined
 TEST_I2C       ?= I2C_0
 TEST_HW_ADDR   ?= MPU9150_HW_ADDR_HEX_68
-TEST_COMP_ADDR ?= MPU9150_COMP_ADDR_HEX_0C
+TEST_COMP_ADDR ?= MPU9150_COMP_ADDR_HEX_0D
 
 # export parameters
 CFLAGS += -DTEST_I2C=$(TEST_I2C)

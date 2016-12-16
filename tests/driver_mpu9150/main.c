@@ -72,12 +72,12 @@ int main(void)
     printf("Initialization successful\n\n");
     printf("+------------Configuration------------+\n");
     printf("Sample rate: %"PRIu16" Hz\n", dev.conf.sample_rate);
-    printf("Compass sample rate: %"PRIu8" Hz\n", dev.conf.compass_sample_rate);
+    // printf("Compass sample rate: %"PRIu8" Hz\n", dev.conf.compass_sample_rate);
     printf("Gyro full-scale range: 2000 DPS\n");
     printf("Accel full-scale range: 2 G\n");
-    printf("Compass X axis factory adjustment: %"PRIu8"\n", dev.conf.compass_x_adj);
-    printf("Compass Y axis factory adjustment: %"PRIu8"\n", dev.conf.compass_y_adj);
-    printf("Compass Z axis factory adjustment: %"PRIu8"\n", dev.conf.compass_z_adj);
+    // printf("Compass X axis factory adjustment: %"PRIu8"\n", dev.conf.compass_x_adj);
+    // printf("Compass Y axis factory adjustment: %"PRIu8"\n", dev.conf.compass_y_adj);
+    // printf("Compass Z axis factory adjustment: %"PRIu8"\n", dev.conf.compass_z_adj);
 
     printf("\n+--------Starting Measurements--------+\n");
     while (1) {
@@ -90,9 +90,9 @@ int main(void)
         printf("Gyro data [dps] - X: %"PRId16"   Y: %"PRId16"   Z: %"PRId16"\n",
                 measurement.x_axis, measurement.y_axis, measurement.z_axis);
         /* Get compass data in mikro Tesla */
-        mpu9150_read_compass(&dev, &measurement);
-        printf("Compass data [mikro T] - X: %"PRId16"   Y: %"PRId16"   Z: %"PRId16"\n",
-                measurement.x_axis, measurement.y_axis, measurement.z_axis);
+        // mpu9150_read_compass(&dev, &measurement);
+        // printf("Compass data [mikro T] - X: %"PRId16"   Y: %"PRId16"   Z: %"PRId16"\n",
+        //         measurement.x_axis, measurement.y_axis, measurement.z_axis);
         /* Get temperature in milli degrees celsius */
         mpu9150_read_temperature(&dev, &temperature);
         printf("Temperature [milli deg] : %"PRId32"\n", temperature);

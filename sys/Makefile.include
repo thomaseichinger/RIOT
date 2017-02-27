@@ -75,4 +75,8 @@ ifneq (,$(filter printf_float,$(USEMODULE)))
     endif
 endif
 
+ifneq (,$(filter dns,$(USEMODULE)))
+    USEMODULE_INCLUDES += $(RIOTBASE)/sys/net/gnrc/sock/include
+endif
+
 INCLUDES += -I$(RIOTBASE)/sys/libc/include

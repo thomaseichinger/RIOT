@@ -178,7 +178,7 @@ static void pci_setup_ios(struct x86_known_pci_device *dev)
             else {
                 io->type = PCI_IO_MEM;
                 io->addr.ptr = (char *) ptr + (old_bar & ~0xfff & ~((1 << PCI_BAR_ADDR_OFFS_MEM) - 1));
-                printf("    BAR %u: memory, physical = 0x%08x-0x%08x, virtual = 0x%08x-0x%08x\n",
+                printf("    BAR %u: memory, physical = 0x%08x-0x%08x, virtual = 0x%08x-0x%08lx\n",
                        bar_num,
                        physical_start, physical_start + length - 1,
                        (unsigned) ptr, (uintptr_t) ptr + length - 1);

@@ -237,6 +237,20 @@ static inline uint8_t ieee802154_get_seq(const uint8_t *mhr)
 }
 
 /**
+ * @brief   Gets frame type from MAC header
+ * 
+ * @pre @p mhr != NULL
+ * 
+ * @param[in] mhr MAC header
+ * 
+ * @return The MAC frame type in @p mhr
+ */
+static inline uint8_t ieee802154_get_frame_type(const uint8_t *mhr)
+{
+    return mhr[0] & IEEE802154_FCF_TYPE_MASK;
+}
+
+/**
  * @brief   Generates an IPv6 interface identifier from an IEEE 802.15.4 address.
  *
  * @pre (@p eui64 != NULL) && (@p addr != NULL)

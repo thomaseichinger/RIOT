@@ -92,43 +92,51 @@ static gnrc_pktsnip_t *_recv(gnrc_netdev2_t *gnrc_netdev2)
             char src_str[GNRC_NETIF_HDR_L2ADDR_PRINT_LEN];
 #endif
             size_t mhr_len = ieee802154_get_frame_hdr_len(pkt->data);
+            uint8_t frame_type;
 
             if (mhr_len == 0) {
                 DEBUG("_recv_ieee802154: illegally formatted frame received\n");
                 gnrc_pktbuf_release(pkt);
                 return NULL;
             }
-            nread -= mhr_len;
-            /* mark IEEE 802.15.4 header */
-            ieee802154_hdr = gnrc_pktbuf_mark(pkt, mhr_len, GNRC_NETTYPE_UNDEF);
-            if (ieee802154_hdr == NULL) {
-                DEBUG("_recv_ieee802154: no space left in packet buffer\n");
-                gnrc_pktbuf_release(pkt);
-                return NULL;
+
+            frame_type = ieee802154_get_frame_type(pkt->data);
+            if (frame_type == IEEE802154_FCF_TYPE_MACCMD) {
+                /* do smthng */
             }
-            netif_hdr = _make_netif_hdr(ieee802154_hdr->data);
-            if (netif_hdr == NULL) {
-                DEBUG("_recv_ieee802154: no space left in packet buffer\n");
-                gnrc_pktbuf_release(pkt);
-                return NULL;
-            }
-            hdr = netif_hdr->data;
-            hdr->lqi = rx_info.lqi;
-            hdr->rssi = rx_info.rssi;
-            hdr->if_pid = thread_getpid();
-            pkt->type = state->proto;
+            else {
+                nread -= mhr_len;
+                /* mark IEEE 802.15.4 header */
+                ieee802154_hdr = gnrc_pktbuf_mark(pkt, mhr_len, GNRC_NETTYPE_UNDEF);
+                if (ieee802154_hdr == NULL) {
+                    DEBUG("_recv_ieee802154: no space left in packet buffer\n");
+                    gnrc_pktbuf_release(pkt);
+                    return NULL;
+                }
+                netif_hdr = _make_netif_hdr(ieee802154_hdr->data);
+                if (netif_hdr == NULL) {
+                    DEBUG("_recv_ieee802154: no space left in packet buffer\n");
+                    gnrc_pktbuf_release(pkt);
+                    return NULL;
+                }
+                hdr = netif_hdr->data;
+                hdr->lqi = rx_info.lqi;
+                hdr->rssi = rx_info.rssi;
+                hdr->if_pid = thread_getpid();
+                pkt->type = state->proto;
 #if ENABLE_DEBUG
-            DEBUG("_recv_ieee802154: received packet from %s of length %u\n",
-                  gnrc_netif_addr_to_str(src_str, sizeof(src_str),
-                                         gnrc_netif_hdr_get_src_addr(hdr),
-                                         hdr->src_l2addr_len),
-                  nread);
+                DEBUG("_recv_ieee802154: received packet from %s of length %u\n",
+                      gnrc_netif_addr_to_str(src_str, sizeof(src_str),
+                                             gnrc_netif_hdr_get_src_addr(hdr),
+                                             hdr->src_l2addr_len),
+                      nread);
 #if defined(MODULE_OD)
-            od_hex_dump(pkt->data, nread, OD_WIDTH_DEFAULT);
+                od_hex_dump(pkt->data, nread, OD_WIDTH_DEFAULT);
 #endif
 #endif
-            gnrc_pktbuf_remove_snip(pkt, ieee802154_hdr);
-            LL_APPEND(pkt, netif_hdr);
+                gnrc_pktbuf_remove_snip(pkt, ieee802154_hdr);
+                LL_APPEND(pkt, netif_hdr);
+            }
         }
 
         DEBUG("_recv_ieee802154: reallocating.\n");

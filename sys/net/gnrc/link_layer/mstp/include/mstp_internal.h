@@ -97,7 +97,7 @@ typedef struct
 
 int mstp_snipify_pkt(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt);
 
-void mstp_receive_frame(void *arg, char data);
+void mstp_receive_frame(void *arg, unsigned char data);
 
 uint8_t mstp_crc_header_update(uint8_t data, uint8_t crc_in);
 

@@ -54,8 +54,10 @@ extern "C" {
  * @name Define UART device and baudrate for MSTP
  * @{
  */
-#define GNRC_MSTP_UART      UART_1
+#ifdef MODULE_MSTP
+#define GNRC_MSTP_UART      1
 #define GNRC_MSTP_BAUDRATE  (115200U)
+#endif
 /** @} */
 
 /**

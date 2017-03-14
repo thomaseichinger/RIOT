@@ -61,21 +61,46 @@ int mstp_slave_frame_unwanted(mstp_slave_t *ctx)
 int mstp_send_frame(mstp_slave_t *ctx)
 {
     /* mstp header */
-    uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
-    uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
-    uart_write_blocking(ctx->uart, ctx->frame.type);
-    uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
-    uart_write_blocking(ctx->uart, ctx->frame.src_addr);
-    uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
-    uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
-    uart_write_blocking(ctx->uart, ctx->frame.header_crc);
+    // uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_1);
+    // uart_write_blocking(ctx->uart, MSTP_DATA_PREAMBLE_2);
+    // uart_write_blocking(ctx->uart, ctx->frame.type);
+    // uart_write_blocking(ctx->uart, ctx->frame.dst_addr);
+    // uart_write_blocking(ctx->uart, ctx->frame.src_addr);
+    // uart_write_blocking(ctx->uart, (ctx->frame.length>>8));
+    // uart_write_blocking(ctx->uart, (ctx->frame.length&0xff));
+    // uart_write_blocking(ctx->uart, ctx->frame.header_crc);
+
+    const uint8_t buffer[] = {MSTP_DATA_PREAMBLE_1, MSTP_DATA_PREAMBLE_2, ctx->frame.type,
+                                ctx->frame.dst_addr, ctx->frame.src_addr,
+                                (ctx->frame.length>>8), (ctx->frame.length&0xff)};
+
+    uart_write(ctx->uart, &(buffer[0]), 3);
+    ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.type, 0xff);
+
+    for (unsigned int i = 3; i < sizeof(buffer); i++) {
+        uart_write(ctx->uart, &(buffer[i]), 1);
+        ctx->frame.header_crc = mstp_crc_header_update(buffer[i],
+                                                       ctx->frame.header_crc);
+    }
+
+    uint8_t tmp = ((~(ctx->frame.header_crc))&0xff);
+    uart_write(ctx->uart, &tmp, 1);
 
     /* mstp data */
+    // for (uint16_t i = 0; i < ctx->frame.length; i++) {
+    //     uart_write_blocking(ctx->uart, ctx->frame.data[i]);
+    // }
+    // uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
+    // uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
+
     for (uint16_t i = 0; i < ctx->frame.length; i++) {
-        uart_write_blocking(ctx->uart, ctx->frame.data[i]);
+        uart_write(ctx->uart, &(ctx->frame.data[i]), 1);
     }
-    uart_write_blocking(ctx->uart, (ctx->frame.data_crc>>8));
-    uart_write_blocking(ctx->uart, (ctx->frame.data_crc&0xff));
+
+    tmp = (ctx->frame.data_crc>>8);
+    uart_write(ctx->uart, &tmp, 1);
+    tmp = (ctx->frame.data_crc&0xff);
+    uart_write(ctx->uart, &tmp, 1);
     return 0;
 }
 
@@ -232,7 +257,7 @@ kernel_pid_t gnrc_mstp_slave_init(char *stack, int stacksize, char priority,
         return -ENODEV;
     }
     /* create new NOMAC thread */
-    res = thread_create(stack, stacksize, priority, CREATE_STACKTEST,
+    res = thread_create(stack, stacksize, priority, THREAD_CREATE_STACKTEST,
                         _mstp_slave_thread, (void *)ctx, name);
     if (res <= 0) {
         return -EINVAL;

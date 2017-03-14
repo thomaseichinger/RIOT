@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "kernel.h"
+// #include "kernel.h"
 #include "net/gnrc.h"
 #include "net/gnrc/ipv6.h"
 #include "net/gnrc/udp.h"

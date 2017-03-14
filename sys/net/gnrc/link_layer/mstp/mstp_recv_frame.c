@@ -31,7 +31,7 @@ msg_t mstp_recv_frame_msg;
 uint16_t mstp_recv_frame_data_index;
 int i;
 
-void mstp_receive_frame(void *arg, char data)
+void mstp_receive_frame(void *arg, unsigned char data)
 {
     // gpio_set(GPIO_PIN(PA, 16));
 // puts(">");

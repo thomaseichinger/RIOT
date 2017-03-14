@@ -22,7 +22,7 @@
 #define GNRC_MSTP_H_
 
 #include "periph/uart.h"
-#include "kernel.h"
+// #include "kernel.h"
 #include "msg.h"
 #include "xtimer.h"
 #include "net/gnrc.h"

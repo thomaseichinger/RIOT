@@ -77,6 +77,7 @@ ifneq (,$(filter printf_float,$(USEMODULE)))
     ifeq (1,$(USE_NANO_SPECS))
         export LINKFLAGS += -u _printf_float
     endif
+endif
 
 ifneq (,$(filter mstp,$(USEMODULE)))
 	USEMODULE_INCLUDES += $(RIOTBASE)/sys/net/gnrc/link_layer/mstp/include

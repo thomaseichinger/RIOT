@@ -132,6 +132,11 @@ extern int _vfs_handler(int argc, char **argv);
 extern int _ls_handler(int argc, char **argv);
 #endif
 
+#ifdef MODULE_OPENTHREAD
+extern int _openthread_state(int argc, char **argv);
+extern int _openthread_ipaddr(int argc, char **argv);
+#endif
+
 const shell_command_t _shell_command_list[] = {
     {"reboot", "Reboot the node", _reboot_handler},
 #ifdef MODULE_CONFIG
@@ -220,6 +225,10 @@ const shell_command_t _shell_command_list[] = {
 #ifdef MODULE_VFS
     {"vfs", "virtual file system operations", _vfs_handler},
     {"ls", "list files", _ls_handler},
+#endif
+#ifdef MODULE_OPENTHREAD
+    { "ot_ipaddr", "shows OpenThread IP addresses", _openthread_ipaddr },
+    { "ot_state", "shows state of current Thread node", _openthread_state },
 #endif
     {NULL, NULL, NULL}
 };

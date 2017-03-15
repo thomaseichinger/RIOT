@@ -76,6 +76,10 @@
 #include "lwip.h"
 #endif
 
+#ifdef MODULE_OPENTHREAD
+#include "ot.h"
+#endif
+
 #ifdef MODULE_FIB
 #include "net/fib.h"
 #endif
@@ -156,6 +160,10 @@ void auto_init(void)
     DEBUG("Mounting /dev\n");
     extern void auto_init_devfs(void);
     auto_init_devfs();
+#endif
+#ifdef MODULE_OPENTHREAD
+    extern void openthread_bootstrap(void);
+    openthread_bootstrap();
 #endif
 
 /* initialize network devices */

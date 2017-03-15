@@ -64,6 +64,9 @@ endif
 ifneq (,$(filter vfs,$(USEMODULE)))
   SRC += sc_vfs.c
 endif
+ifneq (,$(filter openthread,$(USEMODULE)))
+  SRC += sc_openthread.c
+endif
 
 # TODO
 # Conditional building not possible at the moment due to

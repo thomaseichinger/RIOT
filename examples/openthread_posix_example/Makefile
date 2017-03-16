@@ -42,7 +42,7 @@ USEMODULE += cpp11-compat
 
 # Needed by posix_sockets example
 USEMODULE += posix_sockets
-USEMODULE += conn_udp
+
 USEMODULE += gnrc_ipv6
 USEMODULE += gnrc_sock
 

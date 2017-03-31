@@ -29,7 +29,8 @@
 
 msg_t mstp_recv_frame_msg;
 uint16_t mstp_recv_frame_data_index;
-int i;
+// static int i;
+// static uint8_t _data[8];
 
 void mstp_receive_frame(void *arg, unsigned char data)
 {
@@ -58,7 +59,7 @@ void mstp_receive_frame(void *arg, unsigned char data)
             }
             break;
         case MSTP_STATE_HEADER:
-            DEBUG("hdri: %d\n", ctx->frame.hdr_index);
+            // printf("hdri: %d\n", ctx->frame.hdr_index);
             if (ctx->frame.hdr_index == MSTP_FRAME_INDEX_FRAME_TYPE) {
                 ctx->state = MSTP_STATE_HEADER;
                 ctx->frame.type = data;
@@ -128,8 +129,8 @@ void mstp_receive_frame(void *arg, unsigned char data)
         case MSTP_STATE_VALIDATE_HEADER:
             // printf("calc hdr_crc: %02x recv: %02x\n", ~(ctx->frame.header_crc), ctx->frame.recv_crc);
             if (ctx->frame.header_crc != ctx->frame.recv_crc) {
-                // puts("!HCRC");
-                printf("calc: %02x recv: %02x\n", ~(ctx->frame.header_crc), ctx->frame.recv_crc);
+                puts("!HCRC");
+                // printf("calc: %02x recv: %02x\n", (ctx->frame.header_crc), ctx->frame.recv_crc);
                 /* Bad CRC */
                 ctx->state = MSTP_STATE_IDLE;
                 ctx->frame.hdr_index = 0;

@@ -46,9 +46,9 @@ typedef struct
     uint8_t dst_addr;
     uint8_t src_addr;
     uint16_t length;
-    uint8_t encoded;
     uint8_t header_crc;
     uint8_t recv_crc;
+    uint8_t encoded;
     uint8_t data[1500];
     uint32_t data_crc;
 } mstp_frame_t;

@@ -152,112 +152,172 @@ static void _send_reply(gnrc_mstp_t *ctx) {
     // uart_write(ctx->uart, buffer, 1);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
     // uart_write(ctx->uart, &(buffer[1]), 1);
+    // // ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.type, 0xff);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
     // uart_write(ctx->uart, &(buffer[2]), 1);
     // ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.type, 0xff);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
-    // uart_write(ctx->uart, ctx->frame.dst_addr);
+    // uart_write(ctx->uart, &(ctx->frame.dst_addr), 1);
     // ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.dst_addr,
     //                                                ctx->frame.header_crc);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
-    // uart_write(ctx->uart, ctx->frame.src_addr);
+    // uart_write(ctx->uart, &(ctx->frame.src_addr), 1);
     // ctx->frame.header_crc = mstp_crc_header_update(ctx->frame.src_addr,
     //                                                ctx->frame.header_crc);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
-    // uart_write(ctx->uart, (ctx->frame.length>>8));
+    // uart_write(ctx->uart, (uint8_t*)&(ctx->frame.length), 2);
     // ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length>>8),
     //                                                ctx->frame.header_crc);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
-    // uart_write(ctx->uart, (ctx->frame.length&0xff));
+    // // uart_write(ctx->uart, (ctx->frame.length&0xff));
     // ctx->frame.header_crc = mstp_crc_header_update((ctx->frame.length&0xff),
     //                                                ctx->frame.header_crc);
     // // xtimer_usleep(MSTP_T_SEND_WAIT);
-    // uart_write(ctx->uart, (~(ctx->frame.header_crc))&0xff);
+    // uint8_t tmp = (~(ctx->frame.header_crc))&0xff;
+    // // uint8_t tmp = ctx->frame.header_crc;
+    // uart_write(ctx->uart, &tmp, 1);
     xtimer_usleep(220);
     gpio_clear(GPIO_PIN(PB, 3));
     gpio_clear(GPIO_PIN(PA, 16));
-    // puts("RPFM");
+
+    for (int i = 0; i < sizeof(buffer); i++) {
+        printf("%02x ", buffer[i]);
+    }
+    printf("%02x ", tmp);
+    puts("RPFM");
 }
 
-static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
+static void mstp_master_fsm(gnrc_mstp_t *ctx, uint8_t ev)
 {
-    // gpio_set(GPIO_PIN(PA, 16));
-    // if (ev != MSTP_EV_RECEIVED_VALID_FRAME) {
-    //     puts("Sorry, event no have!");
-    //     return -1;
-    // }
-
-    /* handle event here to send data and replies */
-    if (ev == MSTP_EV_SEND_FRAME) {
-        if (ctx->will_reply) {
-            ctx->frame.type = MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY;
-            ctx->frame.src_addr = ctx->ll_addr;
-        }
-    }
-    // printf("EV: %02x FT: %02x\n", ev, ctx->frame.type);
-    if (ctx->frame.type == MSTP_FRAME_TYPE_TOKEN) {
-        ctx->token = 1;
-        ctx->n_poll++;
-        if (ctx->to_send) {
-            ctx->frame.type = MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY;
-            mstp_send_frame(ctx, ctx->to_send);
-            ctx->awaiting_reply = 1;
-            ctx->to_send = NULL;
-        }
-        if (!(ctx->n_poll<50)) {
-            ctx->n_poll = 0;
-            for (int i = ctx->ll_addr; i<9; i++) {
-                ctx->frame.type = MSTP_FRAME_TYPE_POLL_FOR_MASTER;
-                ctx->frame.dst_addr = i;
-                ctx->frame.src_addr = ctx->ll_addr;
-                _send_reply(ctx);
-                xtimer_usleep(2000);
-                if (ctx->frame.type == MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER) {
-                    ctx->ns = ctx->frame.src_addr;
-                    ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
-                    ctx->frame.dst_addr = ctx->ns;
-                    ctx->frame.src_addr = ctx->ll_addr;
-                    _send_reply(ctx);
+    if (ev == MSTP_EV_RECEIVED_VALID_FRAME) {
+        switch (ctx->state) {
+            case MSTP_MASTER_IDLE:
+                /* we received a valid frame */
+                switch (ctx->frame.type) {
+                    case MSTP_FRAME_TYPE_TOKEN:
+                        ctx->state = MSTP_MASTER_USE_TOKEN;
+                        break;
+                    case MSTP_FRAME_TYPE_POLL_FOR_MASTER:
+                        ctx->frame.dst_addr = ctx->frame.src_addr;
+                        ctx->frame.src_addr = ctx->ll_addr;
+                        ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
+                        _send_reply(ctx);
+                        break;
+                    case MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY:
+                        ctx->will_reply = 1;
+                        ctx->state = MSTP_MASTER_ANSWER_DATA_REQ;
+                        mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
+                        msg_send(&mstp_master_msg, ctx->mac_pid);
+                        break;
                 }
-            }
-        }
-        else {
-            ctx->frame.dst_addr = ctx->ns;//ctx->frame.src_addr;
-            ctx->frame.src_addr = ctx->ll_addr;
-            ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
-            // puts("token");
-            _send_reply(ctx);
-        }
-    }
-    else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY) {
-        if (ctx->awaiting_reply) {
-            /* parse and handle received reply here */
-            puts("rx reply");
+
+            case MSTP_MASTER_WAIT_FOR_REPLY:
+                switch (ctx->frame.type) {
+                    case MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY:
+                    case MSTP_FRAME_TYPE_EXT_DATA_EXP_NO_REPLY:
+                        break;
+                }
         }
     }
-    else if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
-        // puts("PFM");
-        ctx->frame.dst_addr = ctx->frame.src_addr;
-        ctx->frame.src_addr = ctx->ll_addr;
-        ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
-        _send_reply(ctx);
-        return 0;
-    }
-    else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
-        DEBUG("MSTP: f_t: d e r\n");
-        if (ctx->frame.valid) {
-            ctx->will_reply = 1;
-            mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
-            msg_send(&mstp_master_msg, ctx->mac_pid);
+    else if (ev == MSTP_EV_SEND_FRAME) {
+        switch (ctx->state) {
+            case MSTP_MASTER_ANSWER_DATA_REQ:
+            case MSTP_MASTER_USE_TOKEN:
+                if (ctx->to_send) {
+                    ctx->frame.type = MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY;
+                    mstp_send_frame(ctx, ctx->to_send);
+                    ctx->awaiting_reply = 1;
+                    ctx->state = MSTP_MASTER_WAIT_FOR_REPLY;
+                }
+            case MSTP_MASTER_DONE_WITH_TOKEN:
+                ctx->to_send = NULL;
+
+            case MSTP_MASTER_PASS_TOKEN:
+                ctx->frame.dst_addr = ctx->ns;
+                ctx->frame.src_addr = ctx->ll_addr;
+                ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
+                _send_reply(ctx);
+                break;
+            case MSTP_MASTER_POLL_FOR_MASTER:
+            case MSTP_MASTER_NO_TOKEN:
+                break;
         }
     }
-    else {
-        // puts("unhandled");
-        // printf("t: %02x\n", ctx->frame.type);
-    }
-    // gpio_clear(GPIO_PIN(PA, 16));
-    return 0;
 }
+
+// static int mstp_master_handle_ev(gnrc_mstp_t *ctx, uint8_t ev)
+// {
+
+//     /* handle event here to send data and replies */
+//     if (ev == MSTP_EV_SEND_FRAME) {
+//         if (ctx->will_reply) {
+//             ctx->frame.type = MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY;
+//             ctx->frame.src_addr = ctx->ll_addr;
+//         }
+//     }
+//     printf("EV: %02x FT: %02x len: %04x\n", ev, ctx->frame.type, ctx->frame.length);
+//     if (ctx->frame.type == MSTP_FRAME_TYPE_TOKEN) {
+//         ctx->token = 1;
+//         ctx->n_poll++;
+//         if (ctx->to_send) {
+//             ctx->frame.type = MSTP_FRAME_TYPE_EXT_DATA_EXP_REPLY;
+//             mstp_send_frame(ctx, ctx->to_send);
+//             ctx->awaiting_reply = 1;
+//             ctx->to_send = NULL;
+//         }
+//         if (!(ctx->n_poll<50)) {
+//             ctx->n_poll = 0;
+//             for (int i = ctx->ll_addr; i<9; i++) {
+//                 ctx->frame.type = MSTP_FRAME_TYPE_POLL_FOR_MASTER;
+//                 ctx->frame.dst_addr = i;
+//                 ctx->frame.src_addr = ctx->ll_addr;
+//                 _send_reply(ctx);
+//                 xtimer_usleep(2000);
+//                 if (ctx->frame.type == MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER) {
+//                     ctx->ns = ctx->frame.src_addr;
+//                     ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
+//                     ctx->frame.dst_addr = ctx->ns;
+//                     ctx->frame.src_addr = ctx->ll_addr;
+//                     _send_reply(ctx);
+//                 }
+//             }
+//         }
+//         else {
+//             ctx->frame.dst_addr = ctx->ns;//ctx->frame.src_addr;
+//             ctx->frame.src_addr = ctx->ll_addr;
+//             ctx->frame.type = MSTP_FRAME_TYPE_TOKEN;
+//             // puts("token");
+//             _send_reply(ctx);
+//         }
+//     }
+//     else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_NOT_EXP_REPLY) {
+//         if (ctx->awaiting_reply) {
+//             /* parse and handle received reply here */
+//             puts("rx reply");
+//         }
+//     }
+//     else if (ctx->frame.type == MSTP_FRAME_TYPE_POLL_FOR_MASTER) {
+//         puts("PFM");
+//         ctx->frame.dst_addr = ctx->frame.src_addr;
+//         ctx->frame.src_addr = ctx->ll_addr;
+//         ctx->frame.type = MSTP_FRAME_TYPE_REPLY_POLL_FOR_MASTER;
+//         _send_reply(ctx);
+//         return 0;
+//     }
+//     else if (ctx->frame.type == MSTP_FRAME_TYPE_DATA_EXP_REPLY) {
+//         DEBUG("MSTP: f_t: d e r\n");
+//         if (ctx->frame.valid) {
+//             ctx->will_reply = 1;
+//             mstp_master_msg.type = MSTP_EV_SUCCESSFULL_RECEPTION;
+//             msg_send(&mstp_master_msg, ctx->mac_pid);
+//         }
+//     }
+//     else {
+//         // puts("unhandled");
+//         // printf("t: %02x\n", ctx->frame.type);
+//     }
+//     return 0;
+// }
 
 int mstp_snipify_pkt(gnrc_mstp_t *ctx, gnrc_pktsnip_t *pkt)
 {
@@ -506,7 +566,7 @@ static void *_mstp_master_thread(void *args)
                 break;
             case MSTP_EV_RECEIVED_VALID_FRAME:
                 DEBUG("mstp master: MSTP_EV_RECEIVED_VALID_FRAME received\n");
-                mstp_master_handle_ev(ctx, MSTP_EV_RECEIVED_VALID_FRAME);
+                mstp_master_fsm(ctx, MSTP_EV_RECEIVED_VALID_FRAME);
                 break;
             case MSTP_EV_SUCCESSFULL_RECEPTION:
                 DEBUG("mstp master: MSTP_EV_SUCCESSFULL_RECEPTION received\n");
@@ -536,8 +596,16 @@ int gnrc_mstp_init(gnrc_mstp_t *ctx, const gnrc_mstp_params_t *p)
     ctx->uart = p->uart;
 
     uart_init(ctx->uart, p->baudrate, mstp_receive_frame, (void *)ctx);
-    gpio_init(GPIO_PIN(PB, 3), GPIO_OD);
-    gpio_init(GPIO_PIN(PA, 16), GPIO_OD);
+    int err = gpio_init(GPIO_PIN(PB, 3), GPIO_OUT);
+    if (err < 0) {
+        puts("error!!!");
+        xtimer_usleep(1000000);
+    }
+    err = gpio_init(GPIO_PIN(PA, 16), GPIO_OUT);
+    if (err < 0) {
+        puts("error!!!");
+        xtimer_usleep(1000000);
+    }
     ctx->msg_fa.type = MSTP_EV_T_FRAME_ABORT;
     ctx->ll_addr = 0x03;
 

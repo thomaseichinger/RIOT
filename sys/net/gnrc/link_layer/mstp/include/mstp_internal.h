@@ -63,6 +63,15 @@ extern "C" {
 #define MSTP_SLAVE_IDLE (0x00)
 #define MSTP_SLAVE_ANSWER_DATA (0x01)
 
+#define MSTP_MASTER_IDLE                (0x00)
+#define MSTP_MASTER_WAIT_FOR_REPLY      (0x01)
+#define MSTP_MASTER_ANSWER_DATA_REQ     (0x02)
+#define MSTP_MASTER_USE_TOKEN           (0x03)
+#define MSTP_MASTER_DONE_WITH_TOKEN     (0x04)
+#define MSTP_MASTER_PASS_TOKEN          (0x05)
+#define MSTP_MASTER_POLL_FOR_MASTER     (0x06)
+#define MSTP_MASTER_NO_TOKEN            (0x07)
+
 #define MSTP_EV_RECEIVED_VALID_FRAME            (0xa0)
 #define MSTP_EV_SUCCESSFULL_RECEPTION           (0xa1)
 #define MSTP_EV_SEND_FRAME                      (0xa2)

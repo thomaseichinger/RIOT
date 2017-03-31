@@ -58,11 +58,11 @@ static at86rf2xx_t at86rf2xx_dev;
 static kw2xrf_t kw2xrf_dev;
 #endif
 
-#define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
+#define OPENTHREAD_NETDEV_BUFLEN (512)
 
 static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
-static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
+static char ot_thread_stack[2 * THREAD_STACKSIZE_DEFAULT];
 
 
 static mutex_t mtx = MUTEX_INIT;

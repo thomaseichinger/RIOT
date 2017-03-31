@@ -41,7 +41,10 @@ CXXEXFLAGS += -fno-rtti
 USEMODULE += cpp11-compat
 
 # Needed by posix_sockets example
+USEMODULE += gnrc_ipv6_default
+USEMODULE += gnrc_udp
+USEMODULE += gnrc_sock_udp
 USEMODULE += posix_sockets
-USEMODULE += conn_udp
+# USEMODULE += conn_udp
 
 include $(RIOTBASE)/Makefile.include

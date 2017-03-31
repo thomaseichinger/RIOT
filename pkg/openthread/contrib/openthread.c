@@ -58,10 +58,10 @@ static at86rf2xx_t at86rf2xx_dev;
 static kw2xrf_t kw2xrf_dev;
 #endif
 
-#define OPENTHREAD_NETDEV2_BUFLEN (ETHERNET_MAX_LEN)
+#define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
 
-static uint8_t rx_buf[OPENTHREAD_NETDEV2_BUFLEN];
-static uint8_t tx_buf[OPENTHREAD_NETDEV2_BUFLEN];
+static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
+static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
 
 
@@ -105,16 +105,16 @@ void openthread_bootstrap(void)
     /* setup netdev modules */
 #ifdef MODULE_AT86RF2XX
     at86rf2xx_setup(&at86rf2xx_dev, &at86rf2xx_params[0]);
-    netdev2_t *netdev = (netdev2_t *) &at86rf2xx_dev;
+    netdev_t *netdev = (netdev_t *) &at86rf2xx_dev;
 #endif
 
 #ifdef MODULE_KW2XRF
     kw2xrf_setup(&kw2xrf_dev, &kw2xrf_params[0]);
-    netdev2_t *netdev = (netdev2_t *) &kw2xrf_dev;
+    netdev_t *netdev = (netdev_t *) &kw2xrf_dev;
 #endif
 
     openthread_radio_init(netdev, tx_buf, rx_buf);
-    openthread_netdev2_init(ot_thread_stack, sizeof(ot_thread_stack), THREAD_PRIORITY_MAIN - 1, "ot_thread", netdev);
+    openthread_netdev_init(ot_thread_stack, sizeof(ot_thread_stack), THREAD_PRIORITY_MAIN - 1, "ot_thread", netdev);
 }
 
 /** @} */

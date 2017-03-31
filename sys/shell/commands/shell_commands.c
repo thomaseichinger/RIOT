@@ -185,6 +185,7 @@ const shell_command_t _shell_command_list[] = {
 #endif
 #ifdef MODULE_GNRC_NETIF
     {"ifconfig", "Configure network interfaces", _netif_config},
+#endif
 #ifdef MODULE_GNRC_TXTSND
     {"txtsnd", "Sends a custom string as is over the link layer", _netif_send },
 #endif

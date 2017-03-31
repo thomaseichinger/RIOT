@@ -70,18 +70,18 @@ enum {
  *          upper layer
  */
 typedef enum {
-    NETDEV2_EVENT_ISR,              /**< driver needs it's ISR handled */
-    NETDEV2_EVENT_RX_STARTED,       /**< started to receive a packet */
-    NETDEV2_EVENT_RX_COMPLETE,      /**< finished receiving a packet */
-    NETDEV2_EVENT_TX_STARTED,       /**< started to transfer a packet */
-    NETDEV2_EVENT_TX_COMPLETE,      /**< finished transferring packet */
+    NETDEV_EVENT_ISR,              /**< driver needs it's ISR handled */
+    NETDEV_EVENT_RX_STARTED,       /**< started to receive a packet */
+    NETDEV_EVENT_RX_COMPLETE,      /**< finished receiving a packet */
+    NETDEV_EVENT_TX_STARTED,       /**< started to transfer a packet */
+    NETDEV_EVENT_TX_COMPLETE,      /**< finished transferring packet */
 #ifdef MODULE_OPENTHREAD
-    NETDEV2_EVENT_TX_COMPLETE_DATA_PENDING, /**< finished transferring packet and has data pending flag **/
+    NETDEV_EVENT_TX_COMPLETE_DATA_PENDING, /**< finished transferring packet and has data pending flag **/
 #endif
-    NETDEV2_EVENT_TX_NOACK,         /**< ACK requested but not received */
-    NETDEV2_EVENT_TX_MEDIUM_BUSY,   /**< couldn't transfer packet */
-    NETDEV2_EVENT_LINK_UP,          /**< link established */
-    NETDEV2_EVENT_LINK_DOWN,        /**< link gone */
+    NETDEV_EVENT_TX_NOACK,         /**< ACK requested but not received */
+    NETDEV_EVENT_TX_MEDIUM_BUSY,   /**< couldn't transfer packet */
+    NETDEV_EVENT_LINK_UP,          /**< link established */
+    NETDEV_EVENT_LINK_DOWN,        /**< link gone */
     /* expand this list if needed */
 } netdev_event_t;
 

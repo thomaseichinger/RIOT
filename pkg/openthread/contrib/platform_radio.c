@@ -32,7 +32,7 @@
 static RadioPacket sTransmitFrame;
 static RadioPacket sReceiveFrame;
 
-static netdev2_t *_dev;
+static netdev_t *_dev;
 
 /* asks the driver the current 15.4 channel */
 uint16_t get_channel(void)
@@ -165,7 +165,7 @@ void disable_rx(void)
 }
 
 /* init framebuffers and initial state */
-void openthread_radio_init(netdev2_t *dev, uint8_t *tb, uint8_t *rb)
+void openthread_radio_init(netdev_t *dev, uint8_t *tb, uint8_t *rb)
 {
     sTransmitFrame.mPsdu = tb;
     sTransmitFrame.mLength = 0;
@@ -174,8 +174,8 @@ void openthread_radio_init(netdev2_t *dev, uint8_t *tb, uint8_t *rb)
     _dev = dev;
 }
 
-/* Called upon NETDEV2_EVENT_RX_COMPLETE event */
-void recv_pkt(netdev2_t *dev)
+/* Called upon NETDEV_EVENT_RX_COMPLETE event */
+void recv_pkt(netdev_t *dev)
 {
     /* Read frame length from driver */
     int len = dev->driver->recv(dev, NULL, 0, NULL);
@@ -203,24 +203,24 @@ void recv_pkt(netdev2_t *dev)
 }
 
 /* Called upon TX event */
-void send_pkt(netdev2_t *dev, netdev2_event_t event)
+void send_pkt(netdev_t *dev, netdev_event_t event)
 {
-    /* Tell OpenThread transmission is done depending on the NETDEV2 event */
+    /* Tell OpenThread transmission is done depending on the NETDEV event */
     switch (event) {
-        case NETDEV2_EVENT_TX_COMPLETE:
-            DEBUG("openthread: NETDEV2_EVENT_TX_COMPLETE\n");
+        case NETDEV_EVENT_TX_COMPLETE:
+            DEBUG("openthread: NETDEV_EVENT_TX_COMPLETE\n");
             otPlatRadioTransmitDone(false, kThreadError_None);
             break;
-        case NETDEV2_EVENT_TX_COMPLETE_DATA_PENDING:
-            DEBUG("openthread: NETDEV2_EVENT_TX_COMPLETE_DATA_PENDING\n");
+        case NETDEV_EVENT_TX_COMPLETE_DATA_PENDING:
+            DEBUG("openthread: NETDEV_EVENT_TX_COMPLETE_DATA_PENDING\n");
             otPlatRadioTransmitDone(true, kThreadError_None);
             break;
-        case NETDEV2_EVENT_TX_NOACK:
-            DEBUG("openthread: NETDEV2_EVENT_TX_NOACK\n");
+        case NETDEV_EVENT_TX_NOACK:
+            DEBUG("openthread: NETDEV_EVENT_TX_NOACK\n");
             otPlatRadioTransmitDone(false, kThreadError_NoAck);
             break;
-        case NETDEV2_EVENT_TX_MEDIUM_BUSY:
-            DEBUG("openthread: NETDEV2_EVENT_TX_MEDIUM_BUSY\n");
+        case NETDEV_EVENT_TX_MEDIUM_BUSY:
+            DEBUG("openthread: NETDEV_EVENT_TX_MEDIUM_BUSY\n");
             otPlatRadioTransmitDone(false, kThreadError_ChannelAccessFailure);
             break;
         default:
@@ -363,7 +363,7 @@ ThreadError otPlatRadioTransmit(void)
     set_channel(sTransmitFrame.mChannel);
     set_power(sTransmitFrame.mPower);
 
-    /* send packet though netdev2 */
+    /* send packet though netdev */
     _dev->driver->send(_dev, &pkt, 1);
 
     /* need for waiting ACK */
@@ -384,7 +384,7 @@ int8_t otPlatRadioGetNoiseFloor(void)
 otRadioCaps otPlatRadioGetCaps(void)
 {
     DEBUG("openthread: otPlatRadioGetCaps\n");
-    /* all drivers should handle ACK, including call of NETDEV2_EVENT_TX_NOACK */
+    /* all drivers should handle ACK, including call of NETDEV_EVENT_TX_NOACK */
     return kRadioCapsAckTimeout;
 }
 

@@ -52,7 +52,7 @@ void otPlatAlarmStop(void)
 /* OpenThread will call this for getting running time in millisecs */
 uint32_t otPlatAlarmGetNow(void)
 {
-    uint32_t now = xtimer_now() / 1000;
+    uint32_t now = xtimer_now().ticks32 / 1000;
 
     DEBUG("openthread: otPlatAlarmGetNow: %i\n", (int) now);
     return now;

@@ -14,6 +14,9 @@
 #include "periph_conf.h"
 #include "mutex.h"
 
+/* Only if we actually have any ADCs */
+#if ADC_NUMOF
+
 /* Prototypes */
 static bool _adc_syncing(void);
 static void _adc_powerOff(void);
@@ -138,3 +141,5 @@ int adc_sample(adc_t line, adc_res_t res)
     _done();
     return result;
 }
+
+#endif /* #if ADC_NUMOF */

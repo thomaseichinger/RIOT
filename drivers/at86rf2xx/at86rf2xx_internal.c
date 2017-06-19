@@ -147,7 +147,7 @@ void at86rf2xx_hardware_reset(at86rf2xx_t *dev)
 
 void at86rf2xx_configure_phy(at86rf2xx_t *dev)
 {
-    uint8_t state = at86rf2xx_get_status(dev);
+    uint8_t state;
 
     /* we must be in TRX_OFF before changing the PHY configuration */
     state = at86rf2xx_set_state(dev, AT86RF2XX_STATE_TRX_OFF);

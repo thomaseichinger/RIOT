@@ -47,6 +47,8 @@
 #endif
 /** @} */
 
+#define TRANSCEIVER_BUFFER_SIZE (10)
+
 
 #endif /* __CPU_CONF_H */
 /** @} */

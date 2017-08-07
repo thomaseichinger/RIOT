@@ -91,18 +91,6 @@
 #define UART_1_PINS
 /** @} */
 
-/* Transceiver config */
-#define AT86RFX_SPI                  SERCOM4
-#define AT86RFX_RST_PIN              PIN_PB15
-#define AT86RFX_IRQ_PIN              PIN_PB00
-#define AT86RFX_SLP_PIN              PIN_PA20
-#define AT86RFX_SPI_CS               PIN_PB31
-#define AT86RFX_SPI_MOSI             PIN_PB30
-#define AT86RFX_SPI_MISO             PIN_PC19
-#define AT86RFX_SPI_SCK              PIN_PC18
-#define PIN_RFCTRL1                  PIN_PA09
-#define PIN_RFCTRL2                  PIN_PA12
-#define RFCTRL_CFG_ANT_DIV           4
 /**
  * @brief SPI configuration
  */
@@ -113,13 +101,10 @@
 /* SPI0 */
 #define SPI_0_DEV       SERCOM4->SPI
 #define SPI_IRQ_0       SERCOM4_IRQn
-#define SPI_0_DOPO			1 //1 MOSI = pad2, SCLK=pad3
+#define SPI_0_DOPO			1
 #define SPI_0_DIPO			0
-//#define SPI_0_DIPO			0 //used for loopback mode
+//#define SPI_0_DIPO			2 //used for loopback mode
 #define SPI_0_F_REF         F_REF
-#define SPI_0_PORT0			PORT->Group[2]
-#define SPI_0_PORT1			PORT->Group[1]
-
 
 #define SPI_0_SCLK_DEV		PORT->Group[2]
 #define SPI_0_SCLK_PIN      PIN_PC18
@@ -136,6 +121,7 @@
 #define SPI_0_CS_GPIO		GPIO_4
 #define SPI_0_CS_DEV        PORT->Group[1]
 #define SPI_0_CS_PIN        PIN_PB31
+//#define SPI_0_CS_PAD		1
 
 #define SPI_0_IRQ0_GPIO		GPIO_5
 #define SPI_0_IRQ0_DEV      PORT->Group[1]
@@ -149,12 +135,11 @@
 #define SPI_0_SLEEP_DEV     PORT->Group[0]
 #define SPI_0_SLEEP_PIN     PIN_PA20
 
-
 /* SPI1 */
 #define SPI_1_DEV       SERCOM5->SPI
 #define SPI_IRQ_1       SERCOM5_IRQn
 #define SPI_1_DOPO			1
-#define SPI_1_DIPO			2
+#define SPI_1_DIPO			0
 #define SPI_1_F_REF         F_REF
 
 #define SPI_1_SCLK_DEV		PORT->Group[1]
@@ -172,6 +157,7 @@
 #define SPI_1_CS_GPIO		GPIO_8
 #define SPI_1_CS_DEV        PORT->Group[0]
 #define SPI_1_CS_PIN        PIN_PA27
+//#define SPI_1_CS_PAD		1
 
 
 /**

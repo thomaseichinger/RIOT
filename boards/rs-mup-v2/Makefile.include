@@ -1,0 +1,5 @@
+# define the cpu used by Rocket Scream Mini Ultra Pro v2 board
+export CPU = samd21
+export CPU_MODEL = samd21g18a
+
+include $(RIOTMAKE)/boards/sam0.inc.mk

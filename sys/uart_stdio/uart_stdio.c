@@ -85,10 +85,10 @@ static ssize_t uart_stdio_vfs_write(vfs_file_t *filp, const void *src, size_t nb
 
 void uart_stdio_init(void)
 {
-#ifndef USE_ETHOS_FOR_STDIO
-    uart_init(UART_STDIO_DEV, UART_STDIO_BAUDRATE, (uart_rx_cb_t) isrpipe_write_one, &uart_stdio_isrpipe);
-#else
+#if defined(USE_ETHOS_FOR_STDIO)
     uart_init(ETHOS_UART, ETHOS_BAUDRATE, (uart_rx_cb_t) isrpipe_write_one, &uart_stdio_isrpipe);
+#elif defined(UART_NUMOF)
+    uart_init(UART_STDIO_DEV, UART_STDIO_BAUDRATE, (uart_rx_cb_t) isrpipe_write_one, &uart_stdio_isrpipe);
 #endif
 #if MODULE_VFS
     int fd;
@@ -114,10 +114,10 @@ int uart_stdio_read(char* buffer, int count)
 
 int uart_stdio_write(const char* buffer, int len)
 {
-#ifndef USE_ETHOS_FOR_STDIO
-    uart_write(UART_STDIO_DEV, (const uint8_t *)buffer, (size_t)len);
-#else
+#if defined(USE_ETHOS_FOR_STDIO)
     ethos_send_frame(&ethos, (const uint8_t *)buffer, len, ETHOS_FRAME_TYPE_TEXT);
+#elif defined(UART_NUMOF)
+    uart_write(UART_STDIO_DEV, (const uint8_t *)buffer, (size_t)len);
 #endif
     return len;
 }
